@@ -16,17 +16,17 @@ body{
     overflow-x:hidden;
 }
 
-/* CENTER CONTAINER */
+/* CONTAINER (FIX GAP PROBLEM) */
 .container{
     width:100%;
     display:flex;
     flex-direction:column;
     align-items:center;
     padding:20px;
-    gap:20px;
+    gap:15px;
 }
 
-/* CARD (FIX RESPONSIVE WIDTH) */
+/* CARD */
 .card{
     width: min(900px, 95vw);
     height: 220px;
@@ -41,24 +41,23 @@ body{
     position:relative;
 }
 
-/* LEFT VIDEO */
+/* LEFT (THUMBNAIL ONLY) */
 .left{
     width:35%;
     height:100%;
     position:relative;
 }
 
-.left iframe{
+.left img{
     width:100%;
     height:100%;
-    border:none;
+    object-fit:cover;
 }
 
 /* RIGHT IMAGE */
 .right{
     width:65%;
     height:100%;
-    position:relative;
 }
 
 .right img{
@@ -67,7 +66,7 @@ body{
     object-fit:cover;
 }
 
-/* INFO TEXT */
+/* INFO */
 .info{
     position:absolute;
     top:10px;
@@ -82,6 +81,7 @@ body{
 .sub{
     font-size:12px;
     opacity:0.8;
+    line-height:1.2;
 }
 
 /* CHANCE */
@@ -109,23 +109,27 @@ body{
     color:white;
 }
 
-/* ========================= */
-/* 📱 RESPONSIVE SCALING FIX */
-/* ========================= */
-
-/* tablet */
+/* 📱 MOBILE FIX — karty NIE mogą się oddalać */
 @media (max-width: 768px){
+
+    .container{
+        gap:10px; /* ważne */
+    }
+
     .card{
-        transform: scale(0.9);
-        transform-origin: top center;
+        height:200px;
+        transform:none; /* usuwa “rozjeżdżanie” */
     }
 }
 
-/* phone */
 @media (max-width: 480px){
+
     .card{
-        transform: scale(0.8);
-        transform-origin: top center;
+        height:180px;
+    }
+
+    .title{
+        font-size:16px;
     }
 }
 
@@ -151,15 +155,16 @@ fetch("levels.json")
         const card = document.createElement("div");
         card.className = "card";
 
+        /* LEFT = YOUTUBE THUMBNAIL (bez tekstu yt) */
         const left = document.createElement("div");
         left.className = "left";
 
-        const iframe = document.createElement("iframe");
-        iframe.src = `https://www.youtube.com/embed/${l.youtube}`;
-        iframe.allowFullscreen = true;
+        const thumb = document.createElement("img");
+        thumb.src = `https://img.youtube.com/vi/${l.youtube}/hqdefault.jpg`;
 
-        left.appendChild(iframe);
+        left.appendChild(thumb);
 
+        /* RIGHT IMAGE */
         const right = document.createElement("div");
         right.className = "right";
 
@@ -169,17 +174,24 @@ fetch("levels.json")
 
         right.appendChild(img);
 
+        /* INFO */
         const info = document.createElement("div");
         info.className = "info";
+
         info.innerHTML = `
             <div class="title">#${l.place} ${l.name}</div>
-            <div class="sub">by ${l.author} • id:${l.id}</div>
+            <div class="sub">
+                by ${l.author}<br>
+                id: ${l.id}
+            </div>
         `;
 
+        /* CHANCE */
         const chance = document.createElement("div");
         chance.className = "chance";
         chance.textContent = l.chance;
 
+        /* WR */
         const wr = document.createElement("a");
         wr.className = "wr";
         wr.href = l.wrLink;
