@@ -4,123 +4,188 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;600;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;600;700;800&display=swap" rel="stylesheet">
 
 <style>
+*{box-sizing:border-box;}
 
-body{
+html,body{
     margin:0;
-    font-family:'Rubik', sans-serif;
-    background:black;
-    color:white;
-}
-
-/* CONTAINER */
-.list{
+    padding:0;
     width:100%;
-    padding:20px;
-    display:flex;
-    flex-direction:column;
-    gap:10px;
+    height:100%;
+    background:black;
+    font-family:'Rubik', sans-serif;
+    overflow:hidden;
 }
 
-/* LEVEL BOX */
-.level{
-    display:flex;
-    align-items:center;
-    gap:15px;
+/* LEFT LIST */
+.list{
+    position:absolute;
+    left:0;
+    top:0;
+    bottom:0;
+    width:25%;
+    overflow-y:auto;
+    border-right:2px solid white;
+    background:black;
+}
 
-    background:rgba(255,255,255,0.05);
-    border:1px solid rgba(255,255,255,0.2);
-    border-radius:12px;
-
+.item{
     padding:10px;
-
+    color:white;
+    border-bottom:1px solid rgba(255,255,255,0.1);
     cursor:pointer;
-    transition:0.2s;
-
-    height:70px;
 }
 
-.level:hover{
-    transform:scale(1.02);
+.item:hover{
     background:rgba(255,255,255,0.1);
 }
 
-/* IMAGE */
-.level img{
-    width:120px;
-    height:60px;
-    object-fit:cover;
-    border-radius:8px;
-}
-
-/* TEXT */
-.info{
+/* RIGHT YOUR DESIGN */
+.box{
+    position:absolute;
+    left:25%;
+    width:75%;
+    height:100%;
     display:flex;
-    flex-direction:column;
 }
 
-.name{
-    font-size:18px;
-    font-weight:800;
+.left{
+    width:33.33%;
+    height:100%;
 }
 
-.sub{
-    font-size:12px;
-    opacity:0.7;
+.left iframe{
+    width:100%;
+    height:100%;
+    border:none;
 }
 
-.place{
-    margin-left:auto;
-    font-size:20px;
-    font-weight:800;
-    opacity:0.8;
+.right{
+    width:66.66%;
+    position:relative;
 }
 
+.right img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+
+.hud{
+    position:absolute;
+    top:12px;
+    left:12px;
+    right:12px;
+    display:flex;
+    justify-content:space-between;
+    color:white;
+}
+
+.label{font-size:24px;font-weight:800;}
+.sub{font-size:14px;}
+.id{font-size:12px;color:gray;}
+.fps{font-size:18px;font-weight:800;}
+
+.wr-bottom{
+    position:absolute;
+    bottom:12px;
+    right:12px;
+    padding:6px 10px;
+    background:rgba(255,255,255,0.2);
+    color:white;
+    text-decoration:none;
+    border-radius:10px;
+}
 </style>
 </head>
 
 <body>
 
+<!-- LISTA LEVELI -->
 <div class="list" id="list"></div>
 
-<script>
-fetch("levels.json")
-.then(r => r.json())
-.then(data => {
+<!-- TWOJ UI -->
+<div class="box">
 
-    // sortowanie po place
-    data.sort((a,b)=>a.place-b.place);
+    <div class="left">
+        <iframe id="yt"></iframe>
+    </div>
+
+    <div class="right">
+
+        <div class="hud">
+            <div>
+                <div class="label" id="title"></div>
+                <div class="sub">
+                    by <span id="author"></span><br>
+                    <span class="id" id="id"></span>
+                </div>
+            </div>
+
+            <div class="fps" id="chance"></div>
+        </div>
+
+        <img id="gif">
+
+        <a class="wr-bottom" id="wr" target="_blank"></a>
+
+    </div>
+
+</div>
+
+<script>
+
+let levels = [];
+let current = 0;
+
+fetch("levels.json")
+.then(r=>r.json())
+.then(data=>{
+
+    levels = data.sort((a,b)=>a.place-b.place);
 
     const list = document.getElementById("list");
 
-    data.forEach(level => {
+    levels.forEach((l,i)=>{
 
         const div = document.createElement("div");
-        div.className = "level";
+        div.className = "item";
+        div.textContent = "#" + l.place + " " + l.name;
 
-        div.innerHTML = `
-            <img src="${level.gif}">
-            
-            <div class="info">
-                <div class="name">${level.name}</div>
-                <div class="sub">by ${level.author} • ${level.chance}</div>
-            </div>
-
-            <div class="place">#${level.place}</div>
-        `;
-
-        // klik = YouTube level (możesz zmienić na stronę levela)
-        div.onclick = () => {
-            window.location.href = "https://www.youtube.com/watch?v=" + level.youtube;
-        };
+        div.onclick = ()=>loadLevel(i);
 
         list.appendChild(div);
 
     });
 
+    loadLevel(0);
+
 });
+
+function loadLevel(i){
+
+    const l = levels[i];
+    current = i;
+
+    document.getElementById("title").textContent =
+        "#" + l.place + " " + l.name;
+
+    document.getElementById("author").textContent = l.author;
+    document.getElementById("id").textContent = "id:" + l.id;
+    document.getElementById("chance").textContent = l.chance;
+
+    document.getElementById("yt").src =
+        "https://www.youtube.com/embed/" + l.youtube;
+
+    document.getElementById("gif").src = l.gif;
+
+    document.getElementById("wr").textContent = l.wrName;
+    document.getElementById("wr").href = l.wrLink;
+
+}
+
 </script>
 
 </body>
