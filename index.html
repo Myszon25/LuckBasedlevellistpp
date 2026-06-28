@@ -4,79 +4,101 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;900&display=swap" rel="stylesheet">
 
 <style>
+    :root {
+        --bg-color: #030305;
+        --card-bg: rgba(15, 15, 20, 0.6);
+        --accent-1: #9b7bff;
+        --accent-2: #00d4ff;
+        --discord: #5865F2;
+        --glass-border: rgba(255, 255, 255, 0.08);
+    }
+
+    /* CUSTOM SCROLLBAR */
+    ::-webkit-scrollbar { width: 10px; }
+    ::-webkit-scrollbar-track { background: var(--bg-color); }
+    ::-webkit-scrollbar-thumb { background: #2a2a35; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--accent-1); }
+
     body {
         margin: 0;
-        background: #050505; /* slightly darker for better contrast with glows */
+        background: var(--bg-color);
         font-family: 'Rubik', sans-serif;
         color: white;
         overflow-x: hidden;
-        padding-top: 100px; /* Space for the new floating navbar */
+        padding-top: 120px;
+        min-height: 100vh;
+    }
+
+    /* AMBIENT ANIMATED BACKGROUND */
+    .ambient-bg {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        z-index: -1;
+        background: 
+            radial-gradient(circle at 15% 50%, rgba(155, 123, 255, 0.08) 0%, transparent 50%),
+            radial-gradient(circle at 85% 30%, rgba(0, 212, 255, 0.08) 0%, transparent 50%);
+        animation: pulseBg 15s ease-in-out infinite alternate;
+    }
+
+    @keyframes pulseBg {
+        0% { transform: scale(1); opacity: 0.8; }
+        100% { transform: scale(1.2); opacity: 1; }
     }
 
     /* ===================== */
-    /* 1000X COOLER NAVBAR*/
+    /* ULTRA NAVBAR          */
     /* ===================== */
 
     .navbar {
         position: fixed;
-        top: 20px;
+        top: 25px;
         left: 50%;
         transform: translateX(-50%);
         z-index: 999;
         
-        width: 95%;
+        width: 90%;
         max-width: 1200px;
+        height: 70px;
         
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 12px 24px;
-        border-radius: 24px; /* Pill shape */
+        padding: 0 24px;
+        border-radius: 100px;
 
-        /* Premium Glassmorphism */
-        background: rgba(15, 15, 20, 0.4);
-        backdrop-filter: blur(25px);
-        -webkit-backdrop-filter: blur(25px);
+        background: rgba(10, 10, 15, 0.5);
+        backdrop-filter: blur(30px);
+        -webkit-backdrop-filter: blur(30px);
         
-        /* Glowing borders & shadow */
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), 
-                    inset 0 0 0 1px rgba(255, 255, 255, 0.05),
-                    0 0 30px rgba(155, 123, 255, 0.15);
+        border: 1px solid var(--glass-border);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 
+                    inset 0 1px 0 rgba(255, 255, 255, 0.1);
         
         transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
     .navbar:hover {
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 
-                    inset 0 0 0 1px rgba(255, 255, 255, 0.1),
-                    0 0 40px rgba(155, 123, 255, 0.3);
-        transform: translateX(-50%) translateY(-2px);
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8), 
+                    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+                    0 0 40px rgba(155, 123, 255, 0.2);
+        transform: translateX(-50%) translateY(-3px);
     }
 
-    /* logo */
     .logo {
-        font-size: 26px;
-        font-weight: 800;
-        letter-spacing: 0.5px;
+        font-size: 24px;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 1px;
         cursor: pointer;
 
-        background: linear-gradient(90deg, #fff, #9b7bff, #00d4ff, #fff);
+        background: linear-gradient(to right, #fff, var(--accent-1), var(--accent-2), #fff);
         background-size: 300%;
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        animation: move 6s linear infinite;
-        
-        /* Subtle text glow */
-        filter: drop-shadow(0 0 10px rgba(155, 123, 255, 0.4));
-    }
-
-    @keyframes move {
-        0% { background-position: 0%; }
-        100% { background-position: 300%; }
+        animation: moveGradient 5s linear infinite;
     }
 
     .right-nav {
@@ -85,103 +107,70 @@
         gap: 16px;
     }
 
-    /* search */
     #searchBar {
-        width: 240px;
-        padding: 12px 20px;
+        width: 200px;
+        height: 42px;
+        padding: 0 20px;
         border-radius: 100px;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        
-        background: rgba(0, 0, 0, 0.4);
+        border: 1px solid var(--glass-border);
+        background: rgba(0, 0, 0, 0.3);
         color: white;
-        font-family: 'Rubik', sans-serif;
+        font-family: inherit;
+        font-weight: 500;
         outline: none;
-        
-        box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3);
-        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    }
-
-    #searchBar::placeholder {
-        color: rgba(255, 255, 255, 0.5);
+        transition: all 0.4s ease;
     }
 
     #searchBar:focus {
-        width: 300px;
-        background: rgba(20, 20, 25, 0.6);
-        border-color: #00d4ff;
-        box-shadow: 0 0 20px rgba(0, 212, 255, 0.3), inset 0 2px 10px rgba(0, 0, 0, 0.5);
+        width: 280px;
+        background: rgba(0, 0, 0, 0.6);
+        border-color: var(--accent-2);
+        box-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
     }
 
-    /* DISCORD */
-    .discord {
+    /* BUTTONS */
+    .btn {
+        height: 42px;
+        padding: 0 24px;
+        border-radius: 100px;
         display: flex;
         align-items: center;
-        gap: 8px;
-        padding: 10px 18px;
-        border-radius: 100px;
-        
-        background: linear-gradient(135deg, #5865F2, #4752C4);
-        color: white;
+        justify-content: center;
         text-decoration: none;
         font-weight: 700;
-        
-        box-shadow: 0 4px 15px rgba(88, 101, 242, 0.3);
+        font-size: 14px;
         transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .discord {
+        background: var(--discord);
+        color: white;
+        box-shadow: 0 4px 15px rgba(88, 101, 242, 0.3);
     }
 
     .discord:hover {
         transform: translateY(-2px);
         box-shadow: 0 8px 25px rgba(88, 101, 242, 0.6);
+        background: #6974f3;
     }
 
-    /* NEW BUTTON */
     .theo-btn {
-        padding: 10px 18px;
-        border-radius: 100px;
-        
-        background: linear-gradient(270deg, #ff4dff, #7b5cff, #00d4ff, #ff4dff);
-        background-size: 300%;
-        animation: moveGradient 4s linear infinite;
-        
+        background: linear-gradient(135deg, #ff4dff, var(--accent-1), var(--accent-2));
+        background-size: 200%;
         color: white;
-        text-decoration: none;
-        font-weight: 800;
-        font-size: 13px;
-        
-        box-shadow: 0 4px 15px rgba(123, 92, 255, 0.4);
-        transition: all 0.3s ease;
-        white-space: nowrap;
+        box-shadow: 0 4px 15px rgba(155, 123, 255, 0.3);
     }
 
     .theo-btn:hover {
-        transform: translateY(-2px) scale(1.02);
-        box-shadow: 0 8px 30px rgba(123, 92, 255, 0.7);
-    }
-
-    @keyframes moveGradient {
-        0% { background-position: 0% 50%; }
-        100% { background-position: 100% 50%; }
-    }
-
-    /* MOBILE NAVBAR */
-    @media(max-width: 800px) {
-        .navbar {
-            flex-direction: column;
-            gap: 15px;
-            padding: 20px;
-            border-radius: 20px;
-        }
-        .right-nav {
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        #searchBar { width: 100%; }
-        #searchBar:focus { width: 100%; }
-        body { padding-top: 180px; }
+        background-position: 100%;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(155, 123, 255, 0.6);
     }
 
     /* ===================== */
-    /* REST OF PAGE          */
+    /* CARDS & CONTAINERS    */
     /* ===================== */
 
     .container {
@@ -189,162 +178,246 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        padding: 20px;
-        gap: 25px;
+        padding: 0 20px 50px 20px;
+        gap: 30px;
     }
 
     .card {
         width: min(900px, 95vw);
-        height: 220px;
+        height: 240px;
         display: flex;
-        border-radius: 20px;
+        border-radius: 24px;
         overflow: hidden;
         
-        background: #0a0a0a;
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        background: var(--card-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.4);
         
         position: relative;
-        transition: transform 0.3s, box-shadow 0.3s;
+        opacity: 0; /* For entry animation */
+        transform: translateY(30px) scale(0.95);
+    }
+
+    /* Staggered Entry Animation */
+    @keyframes cardEnter {
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
     }
 
     .card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 15px 40px rgba(0,0,0,0.8), 0 0 20px rgba(155, 123, 255, 0.2);
-        border: 1px solid rgba(255, 255, 255, 0.3);
+        transform: translateY(-5px) scale(1.01) !important;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.6), 0 0 30px rgba(155, 123, 255, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.2);
     }
 
-    /* YOUTUBE SECTION WITH PLAY OVERLAY */
+    /* MEDIA SPLIT */
     .left { 
-        width: 35%; 
+        width: 40%; 
         height: 100%; 
         position: relative;
         cursor: pointer;
         background: #000;
+        overflow: hidden;
     }
     
-    .left img { 
+    .left img, .right img { 
         width: 100%; 
         height: 100%; 
         object-fit: cover; 
-        transition: opacity 0.3s;
-    }
-    
-    .left iframe {
-        width: 100%;
-        height: 100%;
-        border: none;
+        transition: transform 0.6s cubic-bezier(0.19, 1, 0.22, 1);
     }
 
+    /* Cinematic Zoom on hover */
+    .card:hover .left img, .card:hover .right img {
+        transform: scale(1.08);
+    }
+    
+    .left iframe { width: 100%; height: 100%; border: none; }
+
+    .right { 
+        width: 60%; 
+        height: 100%; 
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Vignette overlay to make text readable */
+    .right::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to right, rgba(10,10,15,1) 0%, rgba(10,10,15,0.4) 40%, transparent 100%);
+    }
+
+    /* PLAY BUTTON OVERLAY */
     .play-overlay {
         position: absolute;
         inset: 0;
-        background: rgba(0, 0, 0, 0.3);
+        background: rgba(0, 0, 0, 0.4);
         display: flex;
         justify-content: center;
         align-items: center;
         transition: background 0.3s;
     }
 
-    .left:hover .play-overlay {
-        background: rgba(0, 0, 0, 0.1);
-    }
+    .left:hover .play-overlay { background: rgba(0, 0, 0, 0.1); }
 
     .play-btn {
-        width: 55px; 
-        height: 55px;
-        background: rgba(255, 0, 0, 0.85);
+        width: 60px; height: 60px;
+        background: rgba(255, 0, 0, 0.9);
         border-radius: 50%;
-        display: flex; 
-        justify-content: center; 
-        align-items: center;
-        box-shadow: 0 0 20px rgba(255, 0, 0, 0.6);
-        backdrop-filter: blur(4px);
-        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        display: flex; justify-content: center; align-items: center;
+        box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.5);
+        animation: pulsePlay 2s infinite;
+        transition: all 0.3s;
+    }
+
+    @keyframes pulsePlay {
+        0% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7); }
+        70% { box-shadow: 0 0 0 20px rgba(255, 0, 0, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); }
     }
 
     .play-btn::after {
         content: ''; 
-        border-top: 10px solid transparent; 
-        border-bottom: 10px solid transparent; 
-        border-left: 16px solid white; 
-        margin-left: 5px;
+        border-top: 12px solid transparent; 
+        border-bottom: 12px solid transparent; 
+        border-left: 18px solid white; 
+        margin-left: 6px;
     }
 
     .left:hover .play-btn {
-        transform: scale(1.15);
+        transform: scale(1.1);
         background: #ff0000;
+        animation: none;
         box-shadow: 0 0 30px rgba(255, 0, 0, 0.8);
     }
 
-    .right { width: 65%; height: 100%; }
-    .right img { width: 100%; height: 100%; object-fit: cover; }
-
+    /* INFO & TYPOGRAPHY */
     .info {
         position: absolute;
-        top: 15px;
-        left: 15px;
-        pointer-events: none; /* Allows clicking through text to video */
+        top: 20px; left: 42%; /* Shifted to sit over the right div cleanly */
+        z-index: 10;
+        pointer-events: none;
     }
 
-    .title { font-size: 20px; font-weight: 800; }
-    .sub { font-size: 13px; opacity: 0.9; margin-top: 4px; }
+    .title-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 8px;
+    }
+
+    .rank {
+        background: linear-gradient(135deg, #FFD700, #FFA500);
+        color: #000;
+        padding: 4px 10px;
+        border-radius: 8px;
+        font-weight: 900;
+        font-size: 16px;
+        box-shadow: 0 4px 10px rgba(255, 215, 0, 0.3);
+    }
+
+    .title { 
+        font-size: 26px; 
+        font-weight: 900; 
+        text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+    }
+    
+    .sub { 
+        font-size: 14px; 
+        color: #ccc;
+        font-weight: 500;
+        text-shadow: 0 2px 5px rgba(0,0,0,1);
+    }
     
     .chance {
         position: absolute;
-        top: 15px;
-        right: 15px;
-        font-weight: 800;
-        font-size: 18px;
+        top: 20px; right: 20px;
+        font-weight: 900;
+        font-size: 22px;
+        color: var(--accent-2);
+        text-shadow: 0 0 15px rgba(0, 212, 255, 0.5);
+        z-index: 10;
     }
 
     .wr {
         position: absolute;
-        bottom: 15px;
-        right: 15px;
-        padding: 6px 14px;
+        bottom: 20px; right: 20px;
+        padding: 8px 18px;
         border-radius: 100px;
-        background: rgba(0, 0, 0, 0.5);
+        background: rgba(255, 255, 255, 0.1);
         backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.2);
         font-size: 13px;
-        font-weight: 600;
+        font-weight: 700;
         text-decoration: none;
         color: white;
         transition: all 0.3s;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .wr::before {
+        content: '🏆';
+        font-size: 14px;
     }
 
     .wr:hover {
-        background: rgba(255, 255, 255, 0.2);
-        transform: translateY(-2px);
+        background: white;
+        color: black;
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(255, 255, 255, 0.2);
     }
 
-    /* OUTLINE FIX */
-    .title, .sub, .chance, .wr {
-        text-shadow: 
-            -1px -1px 0 #000, 1px -1px 0 #000,
-            -1px  1px 0 #000, 1px  1px 0 #000,
-             0px  2px 5px rgba(0,0,0,0.8);
+    /* MOBILE ADJUSTMENTS */
+    @media(max-width: 850px) {
+        .navbar {
+            flex-direction: column;
+            height: auto;
+            padding: 20px;
+            border-radius: 24px;
+            gap: 15px;
+            top: 15px;
+        }
+        .right-nav { flex-wrap: wrap; justify-content: center; }
+        #searchBar { width: 100%; }
+        #searchBar:focus { width: 100%; }
+        body { padding-top: 200px; }
+        
+        .card { flex-direction: column; height: auto; }
+        .left, .right { width: 100%; height: 200px; }
+        .right::after { background: linear-gradient(to top, rgba(10,10,15,1) 0%, transparent 100%); }
+        .info { top: 215px; left: 15px; }
+        .chance { top: 215px; }
+        .card { padding-bottom: 80px; } /* Room for text below */
     }
 
+    @keyframes moveGradient {
+        0% { background-position: 0% 50%; }
+        100% { background-position: 100% 50%; }
+    }
 </style>
 </head>
 
 <body>
 
+<div class="ambient-bg"></div>
+
 <div class="navbar">
-    <div class="logo">
+    <div class="logo" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
         Luck Based Level List
     </div>
 
     <div class="right-nav">
-        <input type="text" id="searchBar" placeholder="Search level...">
-        <a class="theo-btn" href="YOUR_LINK_HERE" target="_blank">
-            Theorically Possible
-        </a>
-        <a class="discord" href="YOUR_DISCORD_LINK" target="_blank">
-            Discord
-        </a>
+        <input type="text" id="searchBar" placeholder="Search level, ID or author...">
+        <a class="btn theo-btn" href="YOUR_LINK_HERE" target="_blank">Theorically Possible</a>
+        <a class="btn discord" href="YOUR_DISCORD_LINK" target="_blank">Discord</a>
     </div>
 </div>
 
@@ -355,9 +428,8 @@ let container = document.getElementById("container");
 let searchBar = document.getElementById("searchBar");
 let levelsData = [];
 
-// Function to inject YouTube Iframe when thumbnail is clicked
+// YouTube Iframe Injector
 window.playVideo = function(element, videoId) {
-    // Replace the inner HTML with an autoplaying iframe
     element.innerHTML = `
         <iframe 
             src="https://www.youtube.com/embed/${videoId}?autoplay=1" 
@@ -370,26 +442,32 @@ window.playVideo = function(element, videoId) {
 function render(data){
     container.innerHTML = "";
 
-    data.forEach(l=>{
+    data.forEach((l, index) => {
         let card = document.createElement("div");
-        card.className="card";
+        card.className = "card";
+        
+        // Staggered animation delay based on index
+        let delay = index * 0.1;
+        card.style.animation = `cardEnter 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards ${delay}s`;
 
-        // Added onclick event and play button overlay to .left div
-        card.innerHTML=`
+        card.innerHTML = `
         <div class="left" onclick="playVideo(this, '${l.youtube}')">
-            <img src="https://img.youtube.com/vi/${l.youtube}/hqdefault.jpg">
+            <img src="https://img.youtube.com/vi/${l.youtube}/hqdefault.jpg" alt="${l.name}">
             <div class="play-overlay">
                 <div class="play-btn"></div>
             </div>
         </div>
 
         <div class="right">
-            <img src="${l.gif}">
+            <img src="${l.gif}" alt="${l.name} gameplay">
         </div>
 
         <div class="info">
-            <div class="title">#${l.place} ${l.name}</div>
-            <div class="sub">by ${l.author}<br>id: ${l.id}</div>
+            <div class="title-wrapper">
+                <div class="rank">#${l.place}</div>
+                <div class="title">${l.name}</div>
+            </div>
+            <div class="sub">By ${l.author} • ID: ${l.id}</div>
         </div>
 
         <div class="chance">${l.chance}</div>
@@ -403,16 +481,27 @@ function render(data){
     });
 }
 
+// Simulate fetching JSON data
 fetch("levels.json")
-.then(r=>r.json())
-.then(data=>{
-    levelsData = data.sort((a,b)=>a.place-b.place);
+.then(r => r.json())
+.then(data => {
+    levelsData = data.sort((a,b) => a.place - b.place);
+    render(levelsData);
+})
+.catch(err => {
+    console.log("No levels.json found. You must run this on a local server!");
+    // Fallback dummy data for visual testing if json fails
+    levelsData = [
+        { place: 1, name: "VSC", author: "BoBoBo", id: "666666", chance: "0.001%", youtube: "dQw4w9WgXcQ", gif: "https://i.imgur.com/yourgif.gif", wrLink: "#", wrName: "Player1" },
+        { place: 2, name: "Tartarus", author: "Riot", id: "123456", chance: "0.05%", youtube: "dQw4w9WgXcQ", gif: "https://i.imgur.com/yourgif.gif", wrLink: "#", wrName: "Player2" }
+    ];
     render(levelsData);
 });
 
-searchBar.addEventListener("input",()=>{
+// Search functionality
+searchBar.addEventListener("input", () => {
     let v = searchBar.value.toLowerCase();
-    let filtered = levelsData.filter(l=>
+    let filtered = levelsData.filter(l =>
         l.name.toLowerCase().includes(v) ||
         l.author.toLowerCase().includes(v) ||
         String(l.id).includes(v)
