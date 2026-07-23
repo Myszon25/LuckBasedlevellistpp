@@ -3,267 +3,782 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Geometry Dash List Maker</title>
-<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;600;700;800&display=swap" rel="stylesheet">
+<title>GD Global List Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+<!-- Skrypty Bazy Danych Firebase (Compat dla czystego HTML) -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
 <style>
 :root {
-    --bg-main: #000000; --nav-bg: rgba(10, 10, 10, 0.7); --text-main: #ffffff;
-    --text-dim: #aaaaaa; --text-sub: #888888; --border-color: rgba(255, 255, 255, 0.15);
-    --border-hover: rgba(255, 255, 255, 0.4); --card-bg: #0a0a0a; --card-grad-1: #050505;
-    --card-grad-2: #111111; --input-bg: rgba(255, 255, 255, 0.05); --input-focus: rgba(255, 255, 255, 0.1);
-    --shadow-color: rgba(0, 0, 0, 0.5); --theme-btn-bg: rgba(255, 255, 255, 0.1);
-    --tab-active-bg: #ffffff; --tab-active-text: #000000; --tab-border: rgba(255, 255, 255, 0.2);
-    --accent: #ffcf40; --blob-1: rgba(255, 207, 64, 0.15); --blob-2: rgba(255, 71, 71, 0.15);
+    --bg-main: #090a0f;
+    --nav-bg: rgba(15, 17, 26, 0.85);
+    --card-bg: #111422;
+    --card-hover: #181c30;
+    --border-color: rgba(255, 255, 255, 0.1);
+    --accent: #ffb703;
+    --accent-glow: rgba(255, 183, 3, 0.3);
+    --text-main: #ffffff;
+    --text-sub: #94a3b8;
 }
 
-[data-theme="light"] {
-    --bg-main: #f4f4f5; --nav-bg: rgba(255, 255, 255, 0.85); --text-main: #18181b;
-    --text-dim: #52525b; --text-sub: #71717a; --border-color: rgba(0, 0, 0, 0.1);
-    --border-hover: rgba(0, 0, 0, 0.3); --card-bg: #ffffff; --card-grad-1: #ffffff;
-    --card-grad-2: #f4f4f5; --input-bg: rgba(0, 0, 0, 0.05); --input-focus: rgba(0, 0, 0, 0.1);
-    --shadow-color: rgba(0, 0, 0, 0.1); --theme-btn-bg: rgba(0, 0, 0, 0.05);
-    --tab-active-bg: #000000; --tab-active-text: #ffffff; --tab-border: rgba(0, 0, 0, 0.2);
-    --accent: #d9a000; --blob-1: rgba(217, 160, 0, 0.2); --blob-2: rgba(88, 101, 242, 0.15);
+body {
+    margin: 0;
+    background: var(--bg-main);
+    font-family: 'Rubik', sans-serif;
+    color: var(--text-main);
+    min-height: 100vh;
 }
 
-::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar { width: 8px; }
 ::-webkit-scrollbar-track { background: var(--bg-main); }
-::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; }
-::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
 
-body { margin: 0; background: var(--bg-main); font-family: 'Rubik', sans-serif; color: var(--text-main); overflow-x: hidden; transition: background 0.3s, color 0.3s; }
-.bg-blob { position: fixed; border-radius: 50%; filter: blur(80px); z-index: -1; animation: floatBlob 12s infinite alternate ease-in-out; pointer-events: none; }
-.blob-1 { width: 500px; height: 500px; background: var(--blob-1); top: -150px; left: -150px; }
-.blob-2 { width: 400px; height: 400px; background: var(--blob-2); bottom: -100px; right: -100px; animation-delay: -6s; animation-direction: alternate-reverse; }
+/* NAVBAR */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px max(5vw, 20px);
+    background: var(--nav-bg);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border-color);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
 
-@keyframes floatBlob { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(100px, 100px) scale(1.1); } }
+.logo {
+    font-size: 20px;
+    font-weight: 900;
+    letter-spacing: 1.5px;
+    background: linear-gradient(45deg, #ffb703, #fb8500);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    cursor: pointer;
+}
 
-.navbar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; padding: 15px max(5vw, 20px); background: var(--nav-bg); backdrop-filter: blur(15px); border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 100; gap: 15px; }
-.nav-title { font-size: 24px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; }
-.nav-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.btn {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+}
 
-.nav-search { flex-grow: 1; max-width: 350px; position: relative; }
-#search-input { width: 100%; box-sizing: border-box; padding: 10px 20px 10px 40px; font-family: 'Rubik', sans-serif; font-size: 14px; font-weight: 600; background: var(--input-bg); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 30px; outline: none; }
-#search-input:focus { background: var(--input-focus); border-color: var(--border-hover); }
-.search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: var(--text-dim); }
+.btn:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px var(--accent-glow);
+}
 
-.btn-custom { background: var(--theme-btn-bg); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 12px; cursor: pointer; display: inline-flex; justify-content: center; align-items: center; transition: all 0.2s ease; height: 40px; padding: 0 16px; font-family: 'Rubik', sans-serif; font-weight: 700; font-size: 13px; text-transform: uppercase; text-decoration: none; box-sizing: border-box; }
-.btn-custom:hover { border-color: var(--border-hover); transform: translateY(-2px); }
-.btn-accent { background: var(--accent); color: #000; border: none; }
-.btn-accent:hover { opacity: 0.9; }
+.btn-accent {
+    background: var(--accent);
+    color: #000;
+    border: none;
+}
 
-.tabs-container { width: 100%; display: flex; justify-content: center; padding-top: 25px; }
-.tabs { display: flex; gap: 10px; width: min(900px, 95vw); flex-wrap: wrap; }
-.tab-btn { padding: 12px 24px; background: var(--card-bg); border: 2px solid var(--tab-border); color: var(--text-main); border-radius: 12px; cursor: pointer; font-family: 'Rubik', sans-serif; font-weight: 800; font-size: 15px; flex: 1; text-align: center; }
-.tab-btn.active { background: var(--tab-active-bg); color: var(--tab-active-text); border-color: var(--tab-active-bg); }
+/* WSPÓLNE KONTENERY */
+.container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 30px 20px;
+}
 
-.container { width: 100%; display: flex; flex-direction: column; align-items: center; padding: 20px; gap: 15px; box-sizing: border-box; }
+.hidden { display: none !important; }
 
-.card { width: min(900px, 95vw); height: 220px; display: flex; border-radius: 18px; overflow: hidden; border: 1px solid var(--border-color); background: var(--card-bg); position: relative; transition: transform 0.2s; }
-.card:hover { transform: translateY(-4px); border-color: var(--border-hover); }
-.left { width: 35%; height: 100%; background: linear-gradient(135deg, var(--card-grad-1), var(--card-grad-2)); display: flex; flex-direction: column; justify-content: space-between; padding: 20px; box-sizing: border-box; cursor: pointer; border-right: 2px solid var(--border-color); }
-.right { width: 65%; height: 100%; position: relative; cursor: pointer; background: #000; }
-.right img { width: 100%; height: 100%; object-fit: cover; transition: opacity 0.3s; }
-.right:hover img { opacity: 0.6; }
-.play-button { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 50px; height: 50px; background-color: rgba(255, 0, 0, 0.8); border-radius: 50%; display: flex; justify-content: center; align-items: center; }
-.play-button::after { content: ""; border-style: solid; border-width: 10px 0 10px 16px; border-color: transparent transparent transparent white; margin-left: 4px; }
+/* MENU GŁÓWNE (HERO & LISTA BAZ) */
+.hero {
+    text-align: center;
+    padding: 40px 0 20px;
+}
 
-.place { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
-.verifier { font-size: 11px; text-transform: uppercase; color: var(--text-dim); font-weight: 700; margin-bottom: 8px; }
-.sub { font-size: 12px; color: var(--text-sub); }
-.level-points { font-size: 14px; font-weight: 800; color: var(--accent); padding: 4px 10px; border-radius: 6px; background: rgba(255, 207, 64, 0.1); border: 1px solid rgba(255, 207, 64, 0.2); width: max-content; }
+.hero h1 {
+    font-size: 42px;
+    font-weight: 900;
+    margin-bottom: 10px;
+}
 
-.list-card { width: min(900px, 95vw); background: linear-gradient(135deg, var(--card-bg), var(--card-grad-2)); border: 1px solid var(--border-color); border-radius: 18px; padding: 20px; box-sizing: border-box; display: flex; flex-direction: column; gap: 8px; }
-.list-header { display: flex; justify-content: space-between; align-items: center; }
-.list-title { font-size: 20px; font-weight: 800; }
-.list-highlight { font-size: 18px; font-weight: 800; color: var(--accent); }
+.hero p {
+    color: var(--text-sub);
+    font-size: 16px;
+    max-width: 600px;
+    margin: 0 auto 30px;
+}
 
-.modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
-.modal-overlay.active { opacity: 1; pointer-events: all; }
-.modal-content { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 20px; width: min(650px, 90vw); max-height: 90vh; padding: 30px; box-sizing: border-box; position: relative; overflow-y: auto; color: var(--text-main); }
-.modal-close { position: absolute; top: 20px; right: 20px; background: var(--input-bg); border: 1px solid var(--border-color); color: var(--text-main); width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-weight: bold; }
+.lists-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 30px;
+}
 
-.form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 15px; width: 100%; }
-.form-group label { font-size: 13px; font-weight: 700; color: var(--text-dim); text-transform: uppercase; }
-.form-control { width: 100%; box-sizing: border-box; padding: 12px; background: var(--input-bg); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 8px; font-family: 'Rubik', sans-serif; outline: none; }
-.form-control:focus { border-color: var(--accent); }
-.form-row { display: flex; gap: 15px; flex-wrap: wrap; }
-.form-row > div { flex: 1; min-width: 200px; }
+.list-card-item {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 25px;
+    cursor: pointer;
+    transition: all 0.25s;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
 
-.admin-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 10px; margin-bottom: 10px; flex-wrap: wrap; gap: 10px; }
-.admin-actions { display: flex; gap: 8px; }
+.list-card-item:hover {
+    background: var(--card-hover);
+    border-color: var(--accent);
+    transform: translateY(-4px);
+}
 
-.hidden-section { display: none !important; }
-.link-box { background: var(--input-bg); padding: 10px; border-radius: 8px; border: 1px dashed var(--accent); font-family: monospace; word-break: break-all; margin-bottom: 15px; }
+.list-card-title {
+    font-size: 22px;
+    font-weight: 800;
+    margin-bottom: 8px;
+}
+
+.list-card-author {
+    font-size: 13px;
+    color: var(--text-sub);
+}
+
+/* WIDOK POJEDYNCZEJ LISTY */
+.list-header-banner {
+    background: linear-gradient(135deg, rgba(255, 183, 3, 0.1), rgba(0,0,0,0));
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    padding: 30px;
+    margin-bottom: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 25px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 15px;
+}
+
+.tab-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-sub);
+    font-size: 16px;
+    font-weight: 700;
+    padding: 8px 16px;
+    cursor: pointer;
+    border-radius: 8px;
+}
+
+.tab-btn.active {
+    background: var(--accent);
+    color: #000;
+}
+
+/* KARTY POZIOMÓW */
+.level-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    height: 180px;
+    display: flex;
+    margin-bottom: 15px;
+    overflow: hidden;
+    transition: transform 0.2s;
+}
+
+.level-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.level-info {
+    flex: 1;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.level-title { font-size: 20px; font-weight: 800; }
+.level-meta { font-size: 13px; color: var(--text-sub); }
+.level-pts { color: var(--accent); font-weight: 800; }
+
+.level-media {
+    width: 40%;
+    background: #000;
+    position: relative;
+    cursor: pointer;
+}
+
+.level-media img {
+    width: 100%; height: 100%; object-fit: cover; opacity: 0.8;
+}
+
+/* MODAL */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.8);
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.modal-content {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    width: min(600px, 90vw);
+    max-height: 85vh;
+    overflow-y: auto;
+    padding: 30px;
+    position: relative;
+}
+
+.form-group {
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-group label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-sub);
+    text-transform: uppercase;
+}
+
+.form-control {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border-color);
+    padding: 12px;
+    border-radius: 8px;
+    color: #fff;
+    font-family: inherit;
+}
+
+.form-control:focus { outline: none; border-color: var(--accent); }
+
+.admin-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    margin-bottom: 8px;
+}
 </style>
 </head>
 <body>
 
-<div class="bg-blob blob-1"></div>
-<div class="bg-blob blob-2"></div>
-
 <nav class="navbar">
-    <div class="nav-title" id="site-title">GD SPAM LIST</div>
-    
-    <div class="nav-search">
-        <input type="text" id="search-input" placeholder="Szukaj poziomu...">
-        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-    </div>
-
-    <div class="nav-actions">
-        <button class="btn-custom" id="btn-random" title="Losowy poziom">🎲</button>
-        <button class="btn-custom" id="theme-toggle">☀️</button>
-        <a href="#" target="_blank" class="btn-custom" id="discord-link" style="background: #5865F2; border:none;">Discord</a>
-        <button class="btn-custom btn-accent" id="auth-btn">Zaloguj</button>
+    <div class="logo" onclick="showMainMenu()">GD DEMONLIST HUB</div>
+    <div>
+        <button class="btn btn-accent" onclick="openCreateListModal()">+ Stwórz Listę</button>
     </div>
 </nav>
 
-<div class="tabs-container">
-    <div class="tabs">
-        <button class="tab-btn active" id="btn-levels">Poziomy</button>
-        <button class="tab-btn" id="btn-leaderboard">Ranking Graczy</button>
-        <button class="tab-btn hidden-section" id="btn-dashboard">⚙️ Moja Lista (Admin)</button>
+<!-- VIEWS -->
+
+<!-- 1. MENU GŁÓWNE -->
+<div id="view-main-menu" class="container">
+    <div class="hero">
+        <h1>Odkrywaj i Twórz Listy GD</h1>
+        <p>Przeglądaj listy stworzone przez społeczność lub stwórz własną ze spersonalizowanym linkiem i edytorem online!</p>
+    </div>
+
+    <h2>🌐 Wszystkie Dostępne Listy</h2>
+    <div id="lists-grid-container" class="lists-grid">
+        <!-- Generowane dynamicznie -->
     </div>
 </div>
 
-<div class="container" id="levels-container"></div>
-<div class="container hidden-section" id="leaderboard-container"></div>
-
-<!-- PANEL ADMINA -->
-<div class="container hidden-section" id="dashboard-container">
-    <div class="list-card" style="max-width: 800px; width: 100%;">
-        <h2>🔗 Twój unikalny link do listy</h2>
-        <p style="font-size: 14px; color: var(--text-dim); margin-top: 0;">Skopiuj ten link i wyślij znajomym, aby zobaczyli Twoją listę:</p>
-        <div class="link-box" id="shareable-link"></div>
-    </div>
-
-    <div class="list-card" style="max-width: 800px; width: 100%;">
-        <h2>⚙️ Ustawienia Główne Listy</h2>
-        <div class="form-row">
-            <div class="form-group">
-                <label>Nazwa Listy</label>
-                <input type="text" id="edit-list-title" class="form-control" placeholder="np. Lista Kowalskiego">
-            </div>
-            <div class="form-group">
-                <label>Link do Discorda</label>
-                <input type="text" id="edit-discord-link" class="form-control" placeholder="https://discord.gg/...">
-            </div>
+<!-- 2. WIDOK POJEDYNCZEJ LISTY -->
+<div id="view-list-detail" class="container hidden">
+    <button class="btn" onclick="showMainMenu()" style="margin-bottom: 20px;">← Powrót do Menu</button>
+    
+    <div class="list-header-banner">
+        <div>
+            <h1 id="active-list-title" style="margin:0 0 10px 0;">Nazwa Listy</h1>
+            <p id="active-list-desc" style="margin:0; color:var(--text-sub);">Stworzona przez: <span id="active-list-author">...</span></p>
         </div>
-        <button class="btn-custom btn-accent" onclick="saveListSettings()">Zapisz Ustawienia</button>
+        <div style="display:flex; gap:10px;">
+            <a href="#" target="_blank" id="active-list-discord" class="btn" style="background:#5865F2;">Discord</a>
+            <button class="btn btn-accent hidden" id="btn-admin-tab" onclick="switchTab('admin')">⚙️ Edytuj Listę</button>
+        </div>
     </div>
 
-    <div class="list-card" style="max-width: 800px; width: 100%;">
-        <h2>➕ Dodaj Nowy Poziom</h2>
-        <form id="add-level-form">
-            <div class="form-row">
-                <div class="form-group"><label>Pozycja (#)</label><input type="number" id="lvl-place" class="form-control" required min="1"></div>
-                <div class="form-group"><label>Nazwa Poziomu</label><input type="text" id="lvl-name" class="form-control" required></div>
+    <div class="tabs">
+        <button class="tab-btn active" id="tab-btn-levels" onclick="switchTab('levels')">Poziomy</button>
+        <button class="tab-btn" id="tab-btn-leaderboard" onclick="switchTab('leaderboard')">Ranking Graczy</button>
+        <button class="tab-btn hidden" id="tab-btn-admin-nav" onclick="switchTab('admin')">Panel Admina</button>
+    </div>
+
+    <!-- Zakładka Poziomy -->
+    <div id="tab-content-levels"></div>
+
+    <!-- Zakładka Ranking -->
+    <div id="tab-content-leaderboard" class="hidden"></div>
+
+    <!-- Zakładka Admin -->
+    <div id="tab-content-admin" class="hidden">
+        <div style="background:var(--card-bg); padding:20px; border-radius:16px; border:1px solid var(--border-color); margin-bottom:20px;">
+            <h3>🔑 Twój Hasło/Klucz Edycji</h3>
+            <p style="color:var(--text-sub); font-size:14px;">Używasz tej przeglądarki jako właściciel. Twój link do udostępnienia list innym:</p>
+            <input type="text" id="share-url-input" class="form-control" readonly style="width:100%;">
+        </div>
+
+        <div style="background:var(--card-bg); padding:20px; border-radius:16px; border:1px solid var(--border-color); margin-bottom:20px;">
+            <h3>➕ Dodaj Nowy Poziom</h3>
+            <form id="add-level-form">
+                <div style="display:flex; gap:10px;">
+                    <div class="form-group" style="flex:1;"><label>Pozycja (#)</label><input type="number" id="add-pos" class="form-control" required min="1"></div>
+                    <div class="form-group" style="flex:2;"><label>Nazwa Poziomu</label><input type="text" id="add-name" class="form-control" required></div>
+                </div>
+                <div style="display:flex; gap:10px;">
+                    <div class="form-group" style="flex:1;"><label>Autor</label><input type="text" id="add-author" class="form-control" required></div>
+                    <div class="form-group" style="flex:1;"><label>Verifier</label><input type="text" id="add-verifier" class="form-control" required></div>
+                    <div class="form-group" style="flex:1;"><label>Punkty PTS</label><input type="number" id="add-pts" class="form-control" required></div>
+                </div>
+                <div class="form-group"><label>YouTube Link (URL/Film)</label><input type="text" id="add-yt" class="form-control" required></div>
+                <div class="form-group"><label>Victors (oddziel przecinkami: Player1, Player2)</label><input type="text" id="add-victors" class="form-control"></div>
+                <button type="submit" class="btn btn-accent" style="width:100%; margin-top:10px;">Dodaj Poziom</button>
+            </form>
+        </div>
+
+        <div style="background:var(--card-bg); padding:20px; border-radius:16px; border:1px solid var(--border-color);">
+            <h3>📜 Edycja Obecnych Poziomów</h3>
+            <div id="admin-levels-manage-list"></div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: TWORZENIE NOWEJ LISTY -->
+<div id="modal-create-list" class="modal-overlay">
+    <div class="modal-content">
+        <h2>✨ Stwórz Nową Listę</h2>
+        <form id="create-list-form">
+            <div class="form-group"><label>Unikalne ID Listy (bez spacji, np. top-spam-pl)</label><input type="text" id="new-list-id" class="form-control" required placeholder="moja-lista-123"></div>
+            <div class="form-group"><label>Nazwa Listy</label><input type="text" id="new-list-title" class="form-control" required placeholder="Top 50 Polish Challenge List"></div>
+            <div class="form-group"><label>Twój Nick / Autor</label><input type="text" id="new-list-author" class="form-control" required placeholder="Player1"></div>
+            <div class="form-group"><label>Hasło Admina (do edycji z innych urządzeń)</label><input type="password" id="new-list-pass" class="form-control" required></div>
+            <div class="form-group"><label>Link do Discorda (Opcjonalnie)</label><input type="text" id="new-list-discord" class="form-control" placeholder="https://discord.gg/..."></div>
+            <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+                <button type="button" class="btn" onclick="closeModals()">Anuluj</button>
+                <button type="submit" class="btn btn-accent">Stwórz i Przejdź</button>
             </div>
-            <div class="form-row">
-                <div class="form-group"><label>Twórca</label><input type="text" id="lvl-author" class="form-control" required></div>
-                <div class="form-group"><label>ID Poziomu</label><input type="text" id="lvl-id" class="form-control" required></div>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label>Verifier</label><input type="text" id="lvl-verifier" class="form-control" required></div>
-                <div class="form-group"><label>Punkty</label><input type="number" id="lvl-points" class="form-control" required></div>
-            </div>
-            <div class="form-group"><label>Link YouTube</label><input type="text" id="lvl-yt" class="form-control" required></div>
-            <div class="form-group"><label>Gracze którzy przeszli (Victors - rozdziel przecinkami)</label><input type="text" id="lvl-victors" class="form-control" placeholder="np. Player1, Player2"></div>
-            <button type="submit" class="btn-custom btn-accent" style="width: 100%;">Dodaj Poziom</button>
         </form>
     </div>
-
-    <div class="list-card" style="max-width: 800px; width: 100%;">
-        <h2>📜 Zarządzaj Poziomami (Edycja)</h2>
-        <div id="admin-levels-list"></div>
-    </div>
 </div>
 
-<!-- MODAL EDYCJI POZIOMU -->
-<div id="edit-level-modal" class="modal-overlay">
+<!-- MODAL: EDYCJA POZIOMU -->
+<div id="modal-edit-level" class="modal-overlay">
     <div class="modal-content">
-        <button class="modal-close" onclick="closeModals()">✕</button>
         <h2>✏️ Edytuj Poziom</h2>
         <form id="edit-level-form">
             <input type="hidden" id="edit-lvl-index">
-            <div class="form-row">
-                <div class="form-group"><label>Pozycja (#)</label><input type="number" id="edit-lvl-place" class="form-control" required></div>
-                <div class="form-group"><label>Nazwa Poziomu</label><input type="text" id="edit-lvl-name" class="form-control" required></div>
+            <div style="display:flex; gap:10px;">
+                <div class="form-group" style="flex:1;"><label>Pozycja (#)</label><input type="number" id="edit-pos" class="form-control" required></div>
+                <div class="form-group" style="flex:2;"><label>Nazwa Poziomu</label><input type="text" id="edit-name" class="form-control" required></div>
             </div>
-            <div class="form-row">
-                <div class="form-group"><label>Twórca</label><input type="text" id="edit-lvl-author" class="form-control" required></div>
-                <div class="form-group"><label>ID Poziomu</label><input type="text" id="edit-lvl-id" class="form-control" required></div>
+            <div style="display:flex; gap:10px;">
+                <div class="form-group" style="flex:1;"><label>Autor</label><input type="text" id="edit-author" class="form-control" required></div>
+                <div class="form-group" style="flex:1;"><label>Verifier</label><input type="text" id="edit-verifier" class="form-control" required></div>
+                <div class="form-group" style="flex:1;"><label>Punkty</label><input type="number" id="edit-pts" class="form-control" required></div>
             </div>
-            <div class="form-row">
-                <div class="form-group"><label>Verifier</label><input type="text" id="edit-lvl-verifier" class="form-control" required></div>
-                <div class="form-group"><label>Punkty</label><input type="number" id="edit-lvl-points" class="form-control" required></div>
+            <div class="form-group"><label>YouTube Link</label><input type="text" id="edit-yt" class="form-control" required></div>
+            <div class="form-group"><label>Victors (rozdziel przecinkami)</label><input type="text" id="edit-victors" class="form-control"></div>
+            <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+                <button type="button" class="btn" onclick="closeModals()">Anuluj</button>
+                <button type="submit" class="btn btn-accent">Zapisz Zmiany</button>
             </div>
-            <div class="form-group"><label>Link YouTube</label><input type="text" id="edit-lvl-yt" class="form-control" required></div>
-            <div class="form-group"><label>Victors (rozdziel przecinkami)</label><input type="text" id="edit-lvl-victors" class="form-control"></div>
-            <button type="submit" class="btn-custom btn-accent" style="width: 100%;">Zapisz Zmiany</button>
         </form>
-    </div>
-</div>
-
-<!-- MODAL PODGLĄDU POZIOMU -->
-<div id="level-modal" class="modal-overlay">
-    <div class="modal-content">
-        <button class="modal-close" onclick="closeModals()">✕</button>
-        <div id="modal-body"></div>
-    </div>
-</div>
-
-<!-- MODAL LOGOWANIA -->
-<div id="auth-modal" class="modal-overlay">
-    <div class="modal-content" style="max-width: 400px;">
-        <button class="modal-close" onclick="closeModals()">✕</button>
-        <h2 id="auth-title">Logowanie</h2>
-        <form id="auth-form">
-            <div class="form-group"><label>Nazwa Użytkownika</label><input type="text" id="auth-username" class="form-control" required></div>
-            <div class="form-group"><label>Hasło</label><input type="password" id="auth-password" class="form-control" required></div>
-            <button type="submit" class="btn-custom btn-accent" style="width: 100%; margin-top: 10px;" id="auth-submit-btn">Zaloguj się</button>
-        </form>
-        <p style="text-align: center; font-size: 13px; margin-top: 15px; color: var(--text-dim);">
-            <span id="auth-switch-text">Nie masz konta?</span> <a href="#" id="auth-toggle-link" style="color: var(--accent); font-weight: bold;">Zarejestruj się</a>
-        </p>
     </div>
 </div>
 
 <script>
-// BAZA W PAMIĘCI PRZEGLĄDARKI (Symulacja Backend'u)
-let allLists = JSON.parse(localStorage.getItem("gd_all_lists")) || {};
-let currentUser = JSON.parse(localStorage.getItem("gd_user")) || null;
-let isRegistering = false;
+// =========================================================================
+// 1. KONFIGURACJA BAZY DANYCH (FIREBASE CHMURA)
+// =========================================================================
+// Jeśli chcesz, aby lista działała GLOBALNIE na wszystkich komputerach świata,
+// załóż darmowe konto na https://console.firebase.google.com/, stwórz projekt Firestore 
+// i wklej swoje klucze poniżej. 
+// Jeśli zostawisz null, aplikacja użyje automatycznego trybu LocalStorage / Fallback.
 
-// ODCZYTYWANIE LINKU (np. index.html?list=NazwaGracza)
-const urlParams = new URLSearchParams(window.location.search);
-const listOwnerFromUrl = urlParams.get('list');
+const firebaseConfig = null; 
+/* Przykład konfiguracji:
+const firebaseConfig = {
+    apiKey: "AIzaSy...",
+    authDomain: "twoja-aplikacja.firebaseapp.com",
+    projectId: "twoja-aplikacja",
+    storageBucket: "twoja-aplikacja.appspot.com",
+    messagingSenderId: "123456789",
+    appId: "1:123456789:web:abcdef"
+};
+*/
 
-// KOGO LISTĘ OBECNIE OGLĄDAMY?
-// Jeśli w linku jest ?list=Nazwa, ładujemy tę listę. Jeśli nie, ładujemy listę zalogowanego gracza. W ostateczności domyślną.
-let currentViewedListUser = listOwnerFromUrl || (currentUser ? currentUser.username : "DefaultList");
-
-// INICJALIZACJA LISTY JEŚLI NIE ISTNIEJE
-if (!allLists[currentViewedListUser]) {
-    allLists[currentViewedListUser] = {
-        title: currentViewedListUser === "DefaultList" ? "USKC SPAM LIST" : `Lista Gracza: ${currentViewedListUser}`,
-        discord: "https://discord.gg/",
-        levels: []
-    };
+let db = null;
+if (firebaseConfig) {
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.firestore();
 }
 
-let listData = allLists[currentViewedListUser];
-let isOwner = currentUser && currentUser.username === currentViewedListUser;
+// LocalStorage Fallback Storage
+let localDataStore = JSON.parse(localStorage.getItem("gd_global_hub")) || {
+    "official-demonlist": {
+        id: "official-demonlist",
+        title: "Official GD Challenge List",
+        author: "Admin",
+        pass: "admin123",
+        discord: "https://discord.gg",
+        levels: [
+            { pos: 1, name: "VSC", author: "Bo", verifier: "Bo", pts: 100, yt: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", victors: ["Player1", "Player2"] },
+            { pos: 2, name: "Slaughterhouse", author: "IcedCave", verifier: "SpaceUK", pts: 90, yt: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", victors: [] }
+        ]
+    }
+};
 
-function saveData() {
-    // Zapisujemy listę tylko jeśli jesteśmy właścicielem!
-    if (isOwner) {
-        allLists[currentUser.username] = listData;
-        localStorage.setItem("gd_all_lists", JSON.stringify(allLists));
-        renderApp();
+function saveLocal() {
+    localStorage.setItem("gd_global_hub", JSON.stringify(localDataStore));
+}
+
+// =========================================================================
+// 2. LOGIKA APLIKACJI & NAWIGACJA
+// =========================================================================
+let currentListId = null;
+let currentListData = null;
+let isOwner = false;
+
+window.addEventListener("DOMContentLoaded", () => {
+    const params = new URLSearchParams(window.location.search);
+    const listParam = params.get("list");
+
+    if (listParam) {
+        loadList(listParam);
+    } else {
+        showMainMenu();
+    }
+});
+
+async function getAllLists() {
+    if (db) {
+        const snapshot = await db.collection("lists").get();
+        let lists = {};
+        snapshot.forEach(doc => lists[doc.id] = doc.data());
+        return lists;
+    } else {
+        return localDataStore;
     }
 }
+
+async function showMainMenu() {
+    window.history.pushState({}, "", window.location.pathname);
+    document.getElementById("view-main-menu").classList.remove("hidden");
+    document.getElementById("view-list-detail").classList.add("hidden");
+
+    const container = document.getElementById("lists-grid-container");
+    container.innerHTML = "Ładowanie list...";
+
+    const allLists = await getAllLists();
+    container.innerHTML = "";
+
+    Object.keys(allLists).forEach(id => {
+        const item = allLists[id];
+        const card = document.createElement("div");
+        card.className = "list-card-item";
+        card.onclick = () => loadList(id);
+        card.innerHTML = `
+            <div>
+                <div class="list-card-title">${item.title}</div>
+                <div class="list-card-author">Autor: ${item.author}</div>
+            </div>
+            <div style="margin-top:15px; font-weight:bold; color:var(--accent);">
+                Poziomów: ${item.levels ? item.levels.length : 0}
+            </div>
+        `;
+        container.appendChild(card);
+    });
+}
+
+async function loadList(listId) {
+    currentListId = listId;
+    
+    if (db) {
+        const doc = await db.collection("lists").doc(listId).get();
+        if (doc.exists) currentListData = doc.data();
+    } else {
+        currentListData = localDataStore[listId];
+    }
+
+    if (!currentListData) {
+        alert("Lista nie istnieje!");
+        showMainMenu();
+        return;
+    }
+
+    // Sprawdź czy użytkownik ma zapisane hasło właściciela w pamięci przeglądarki
+    const savedPass = localStorage.getItem(`admin_pass_${listId}`);
+    isOwner = savedPass === currentListData.pass;
+
+    // Aktualizacja URL
+    window.history.pushState({}, "", `?list=${listId}`);
+
+    document.getElementById("view-main-menu").classList.add("hidden");
+    document.getElementById("view-list-detail").classList.remove("hidden");
+
+    document.getElementById("active-list-title").innerText = currentListData.title;
+    document.getElementById("active-list-author").innerText = currentListData.author;
+    document.getElementById("active-list-discord").href = currentListData.discord || "#";
+    document.getElementById("share-url-input").value = window.location.href;
+
+    if (isOwner) {
+        document.getElementById("btn-admin-tab").classList.remove("hidden");
+        document.getElementById("tab-btn-admin-nav").classList.remove("hidden");
+    } else {
+        document.getElementById("btn-admin-tab").classList.add("hidden");
+        document.getElementById("tab-btn-admin-nav").classList.add("hidden");
+    }
+
+    switchTab('levels');
+    renderListLevels();
+    renderLeaderboard();
+    if(isOwner) renderAdminPanel();
+}
+
+// RENDER POZIOMÓW
+function renderListLevels() {
+    const container = document.getElementById("tab-content-levels");
+    container.innerHTML = "";
+
+    const levels = (currentListData.levels || []).sort((a,b) => a.pos - b.pos);
+    
+    if(levels.length === 0) {
+        container.innerHTML = "<p style='color:var(--text-sub)'>Ta lista nie ma jeszcze żadnych poziomów.</p>";
+        return;
+    }
+
+    levels.forEach(l => {
+        const ytId = parseYoutube(l.yt);
+        const card = document.createElement("div");
+        card.className = "level-card";
+        card.innerHTML = `
+            <div class="level-info">
+                <div>
+                    <div class="level-title">#${l.pos} ${l.name}</div>
+                    <div class="level-meta">by ${l.author} • Verified by ${l.verifier}</div>
+                </div>
+                <div class="level-pts">+${l.pts} PTS</div>
+            </div>
+            <div class="level-media" onclick="this.innerHTML='<iframe width=\\'100%\\' height=\\'100%\\' src=\\'https://www.youtube.com/embed/${ytId}?autoplay=1\\' frameborder=\\'0\\' allowfullscreen></iframe>'">
+                <img src="https://img.youtube.com/vi/${ytId}/hqdefault.jpg">
+            </div>
+        `;
+        container.appendChild(card);
+    });
+}
+
+// RENDER RANKINGU
+function renderLeaderboard() {
+    const container = document.getElementById("tab-content-leaderboard");
+    container.innerHTML = "";
+
+    let players = {};
+    (currentListData.levels || []).forEach(l => {
+        const pts = Number(l.pts) || 0;
+        if(l.victors) {
+            l.victors.forEach(v => {
+                const name = v.trim();
+                if(name) {
+                    if(!players[name]) players[name] = { pts: 0, count: 0 };
+                    players[name].pts += pts;
+                    players[name].count += 1;
+                }
+            });
+        }
+    });
+
+    const sorted = Object.keys(players).map(k => ({ name: k, ...players[k] })).sort((a,b) => b.pts - a.pts);
+
+    if(sorted.length === 0) {
+        container.innerHTML = "<p style='color:var(--text-sub)'>Brak zarejestrowanych przejść poziomów.</p>";
+        return;
+    }
+
+    sorted.forEach((p, idx) => {
+        const card = document.createElement("div");
+        card.style.cssText = "background:var(--card-bg); padding:15px 20px; border-radius:12px; border:1px solid var(--border-color); margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;";
+        card.innerHTML = `
+            <div><strong>#${idx + 1} ${p.name}</strong> (${p.count} ukończonych)</div>
+            <div style="color:var(--accent); font-weight:bold;">${p.pts} PTS</div>
+        `;
+        container.appendChild(card);
+    });
+}
+
+// RENDER PANELU ADMINA
+function renderAdminPanel() {
+    const container = document.getElementById("admin-levels-manage-list");
+    container.innerHTML = "";
+
+    (currentListData.levels || []).forEach((l, idx) => {
+        const item = document.createElement("div");
+        item.className = "admin-item";
+        item.innerHTML = `
+            <div><strong>#${l.pos} ${l.name}</strong> (Victors: ${l.victors ? l.victors.length : 0})</div>
+            <div>
+                <button class="btn" onclick="openEditLevelModal(${idx})">✏️ Edytuj</button>
+                <button class="btn" style="background:#ff4747; color:white;" onclick="deleteLevel(${idx})">✕ Usuń</button>
+            </div>
+        `;
+        container.appendChild(item);
+    });
+}
+
+// =========================================================================
+// 3. ZAPISYWANIE ZMIAN W BAZIE
+// =========================================================================
+async function saveCurrentList() {
+    if (db) {
+        await db.collection("lists").doc(currentListId).set(currentListData);
+    } else {
+        localDataStore[currentListId] = currentListData;
+        saveLocal();
+    }
+    renderListLevels();
+    renderLeaderboard();
+    if(isOwner) renderAdminPanel();
+}
+
+// =========================================================================
+// 4. FORMULARZE I EDYCJA
+// =========================================================================
+document.getElementById("create-list-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const id = document.getElementById("new-list-id").value.trim().toLowerCase().replace(/\s+/g, '-');
+    const title = document.getElementById("new-list-title").value.trim();
+    const author = document.getElementById("new-list-author").value.trim();
+    const pass = document.getElementById("new-list-pass").value;
+    const discord = document.getElementById("new-list-discord").value.trim();
+
+    const newList = { id, title, author, pass, discord, levels: [] };
+
+    if(db) {
+        await db.collection("lists").doc(id).set(newList);
+    } else {
+        localDataStore[id] = newList;
+        saveLocal();
+    }
+
+    localStorage.setItem(`admin_pass_${id}`, pass);
+    closeModals();
+    loadList(id);
+});
+
+document.getElementById("add-level-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    if(!isOwner) return;
+
+    const victorsRaw = document.getElementById("add-victors").value;
+    const newLvl = {
+        pos: Number(document.getElementById("add-pos").value),
+        name: document.getElementById("add-name").value.trim(),
+        author: document.getElementById("add-author").value.trim(),
+        verifier: document.getElementById("add-verifier").value.trim(),
+        pts: Number(document.getElementById("add-pts").value),
+        yt: document.getElementById("add-yt").value.trim(),
+        victors: victorsRaw ? victorsRaw.split(",").map(s => s.trim()).filter(Boolean) : []
+    };
+
+    if(!currentListData.levels) currentListData.levels = [];
+    currentListData.levels.push(newLvl);
+    saveCurrentList();
+    e.target.reset();
+    alert("Dodano poziom!");
+});
+
+function openEditLevelModal(index) {
+    const l = currentListData.levels[index];
+    document.getElementById("edit-lvl-index").value = index;
+    document.getElementById("edit-pos").value = l.pos;
+    document.getElementById("edit-name").value = l.name;
+    document.getElementById("edit-author").value = l.author;
+    document.getElementById("edit-verifier").value = l.verifier;
+    document.getElementById("edit-pts").value = l.pts;
+    document.getElementById("edit-yt").value = l.yt;
+    document.getElementById("edit-victors").value = l.victors ? l.victors.join(", ") : "";
+
+    document.getElementById("modal-edit-level").classList.add("active");
+}
+
+document.getElementById("edit-level-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    if(!isOwner) return;
+
+    const idx = document.getElementById("edit-lvl-index").value;
+    const victorsRaw = document.getElementById("edit-victors").value;
+
+    currentListData.levels[idx] = {
+        pos: Number(document.getElementById("edit-pos").value),
+        name: document.getElementById("edit-name").value.trim(),
+        author: document.getElementById("edit-author").value.trim(),
+        verifier: document.getElementById("edit-verifier").value.trim(),
+        pts: Number(document.getElementById("edit-pts").value),
+        yt: document.getElementById("edit-yt").value.trim(),
+        victors: victorsRaw ? victorsRaw.split(",").map(s => s.trim()).filter(Boolean) : []
+    };
+
+    saveCurrentList();
+    closeModals();
+});
+
+function deleteLevel(index) {
+    if(confirm("Czy na pewno chcesz usunąć ten poziom?") && isOwner) {
+        currentListData.levels.splice(index, 1);
+        saveCurrentList();
+    }
+}
+
+// POMOCNICZE
+function switchTab(tabName) {
+    ['levels', 'leaderboard', 'admin'].forEach(t => {
+        const btn = document.getElementById(`tab-btn-${t}`);
+        const content = document.getElementById(`tab-content-${t}`);
+        if(btn) btn.classList.toggle("active", t === tabName);
+        if(content) content.classList.toggle("hidden", t !== tabName);
+    });
+}
+
+function openCreateListModal() { document.getElementById("modal-create-list").classList.add("active"); }
+function closeModals() { document.querySelectorAll(".modal-overlay").forEach(m => m.classList.remove("active")); }
 
 function parseYoutube(yt) {
     if (!yt) return "";
@@ -274,239 +789,6 @@ function parseYoutube(yt) {
         return url.pathname.split('/').pop();
     } catch (e) { return ""; }
 }
-
-function renderApp() {
-    document.getElementById("site-title").innerText = listData.title;
-    document.title = listData.title;
-    document.getElementById("discord-link").href = listData.discord;
-
-    const dashTabBtn = document.getElementById("btn-dashboard");
-    const authBtn = document.getElementById("auth-btn");
-    
-    // Pokaż panel zarządzania TYLKO właścicielowi
-    if (isOwner) {
-        dashTabBtn.classList.remove("hidden-section");
-        const link = window.location.origin + window.location.pathname + "?list=" + currentUser.username;
-        document.getElementById("shareable-link").innerText = link;
-    } else {
-        dashTabBtn.classList.add("hidden-section");
-    }
-
-    if (currentUser) {
-        authBtn.innerText = `Wyloguj (${currentUser.username})`;
-    } else {
-        authBtn.innerText = "Zaloguj / Rejestracja";
-    }
-
-    // Render Poziomów
-    const levelsContainer = document.getElementById("levels-container");
-    levelsContainer.innerHTML = "";
-    listData.levels.sort((a, b) => a.place - b.place).forEach(l => {
-        const ytId = parseYoutube(l.youtube);
-        const card = document.createElement("div");
-        card.className = "card"; card.dataset.name = l.name.toLowerCase();
-        card.innerHTML = `
-            <div class="left" onclick="openLevelModal('${l.id}')">
-                <div>
-                    <div class="place">#${l.place} ${l.name}</div>
-                    <div class="verifier">Verified by: ${l.verifier}</div>
-                    <div class="sub">by ${l.author}<br>ID: ${l.id}</div>
-                </div>
-                <div class="level-points">+${l.points} PTS</div>
-            </div>
-            <div class="right" onclick="this.innerHTML='<iframe width=\\'100%\\' height=\\'100%\\' src=\\'https://www.youtube.com/embed/${ytId}?autoplay=1\\' frameborder=\\'0\\' allowfullscreen></iframe>'">
-                <img src="https://img.youtube.com/vi/${ytId}/hqdefault.jpg" loading="lazy">
-                <div class="play-button"></div>
-            </div>`;
-        levelsContainer.appendChild(card);
-    });
-
-    renderLeaderboard();
-    if (isOwner) renderAdminPanel();
-}
-
-function renderLeaderboard() {
-    const lContainer = document.getElementById("leaderboard-container");
-    lContainer.innerHTML = "";
-    let players = {};
-    listData.levels.forEach(l => {
-        const pts = Number(l.points) || 0;
-        if (l.verifier) {
-            if (!players[l.verifier]) players[l.verifier] = { points:0, verified:0, beaten:0 };
-            players[l.verifier].points += pts; players[l.verifier].verified += 1;
-        }
-        if (l.victors) {
-            l.victors.forEach(v => {
-                const name = v.split('=')[0].trim();
-                if (name) {
-                    if (!players[name]) players[name] = { points:0, verified:0, beaten:0 };
-                    players[name].points += pts; players[name].beaten += 1;
-                }
-            });
-        }
-    });
-
-    Object.keys(players).map(k => ({ name: k, ...players[k] })).sort((a,b) => b.points - a.points).forEach((p, idx) => {
-        const card = document.createElement("div"); card.className = "list-card";
-        card.innerHTML = `
-            <div class="list-header"><div class="list-title">#${idx + 1} ${p.name}</div><div class="list-highlight">${p.points} PTS</div></div>
-            <div style="font-size: 12px; color: var(--text-sub);">Zweryfikowane: ${p.verified} • Ukończone: ${p.beaten}</div>`;
-        lContainer.appendChild(card);
-    });
-}
-
-function renderAdminPanel() {
-    document.getElementById("edit-list-title").value = listData.title;
-    document.getElementById("edit-discord-link").value = listData.discord;
-
-    const adminList = document.getElementById("admin-levels-list");
-    adminList.innerHTML = "";
-    listData.levels.forEach((l, index) => {
-        const item = document.createElement("div");
-        item.className = "admin-item";
-        item.innerHTML = `
-            <div><strong>#${l.place} ${l.name}</strong> (Victors: ${l.victors ? l.victors.length : 0})</div>
-            <div class="admin-actions">
-                <button class="btn-custom" onclick="openEditModal(${index})">✏️ Edytuj</button>
-                <button class="btn-custom" style="background:#ff4747; color:white; border:none;" onclick="deleteLevel(${index})">✕ Usuń</button>
-            </div>
-        `;
-        adminList.appendChild(item);
-    });
-}
-
-// --- EDYCJA I DODAWANIE POZIOMÓW ---
-document.getElementById("add-level-form").addEventListener("submit", (e) => {
-    e.preventDefault();
-    if (!isOwner) return;
-    const vRaw = document.getElementById("lvl-victors").value;
-    listData.levels.push({
-        place: Number(document.getElementById("lvl-place").value),
-        name: document.getElementById("lvl-name").value,
-        author: document.getElementById("lvl-author").value,
-        id: document.getElementById("lvl-id").value,
-        verifier: document.getElementById("lvl-verifier").value,
-        points: Number(document.getElementById("lvl-points").value),
-        youtube: document.getElementById("lvl-yt").value,
-        victors: vRaw ? vRaw.split(",").map(s => s.trim()) : []
-    });
-    saveData(); e.target.reset(); alert("Dodano poziom!");
-});
-
-function openEditModal(index) {
-    const l = listData.levels[index];
-    document.getElementById("edit-lvl-index").value = index;
-    document.getElementById("edit-lvl-place").value = l.place;
-    document.getElementById("edit-lvl-name").value = l.name;
-    document.getElementById("edit-lvl-author").value = l.author;
-    document.getElementById("edit-lvl-id").value = l.id;
-    document.getElementById("edit-lvl-verifier").value = l.verifier;
-    document.getElementById("edit-lvl-points").value = l.points;
-    document.getElementById("edit-lvl-yt").value = l.youtube;
-    document.getElementById("edit-lvl-victors").value = l.victors ? l.victors.join(", ") : "";
-    
-    document.getElementById("edit-level-modal").classList.add("active");
-}
-
-document.getElementById("edit-level-form").addEventListener("submit", (e) => {
-    e.preventDefault();
-    if (!isOwner) return;
-    const idx = document.getElementById("edit-lvl-index").value;
-    const vRaw = document.getElementById("edit-lvl-victors").value;
-    
-    listData.levels[idx] = {
-        place: Number(document.getElementById("edit-lvl-place").value),
-        name: document.getElementById("edit-lvl-name").value,
-        author: document.getElementById("edit-lvl-author").value,
-        id: document.getElementById("edit-lvl-id").value,
-        verifier: document.getElementById("edit-lvl-verifier").value,
-        points: Number(document.getElementById("edit-lvl-points").value),
-        youtube: document.getElementById("edit-lvl-yt").value,
-        victors: vRaw ? vRaw.split(",").map(s => s.trim()).filter(Boolean) : []
-    };
-    saveData(); closeModals(); alert("Zmiany zostały zapisane!");
-});
-
-function deleteLevel(index) {
-    if (confirm("Usunąć ten poziom?") && isOwner) { listData.levels.splice(index, 1); saveData(); }
-}
-
-function saveListSettings() {
-    listData.title = document.getElementById("edit-list-title").value;
-    listData.discord = document.getElementById("edit-discord-link").value;
-    saveData(); alert("Zapisano ustawienia!");
-}
-
-// --- SYSTEM MODALI I ZAKŁADEK ---
-function openLevelModal(levelId) {
-    const l = listData.levels.find(item => item.id == levelId);
-    if (!l) return;
-    const modalBody = document.getElementById("modal-body");
-    const victorsList = l.victors && l.victors.length > 0 ? l.victors.map(v => `<li>${v}</li>`).join("") : "Brak rekordów.";
-    modalBody.innerHTML = `<h2>#${l.place} ${l.name}</h2><p>Autor: <strong>${l.author}</strong> | ID: <strong>${l.id}</strong></p><p>Verifier: <strong>${l.verifier}</strong></p><p>Punkty: <strong style="color: var(--accent)">+${l.points} PTS</strong></p><hr style="border-color: var(--border-color); margin: 15px 0;"><h3>Victors:</h3><ul>${victorsList}</ul>`;
-    document.getElementById("level-modal").classList.add("active");
-}
-function closeModals() { document.querySelectorAll(".modal-overlay").forEach(m => m.classList.remove("active")); }
-
-// --- ZARZĄDZANIE KONTEM ---
-document.getElementById("auth-btn").addEventListener("click", () => {
-    if (currentUser) {
-        currentUser = null; localStorage.removeItem("gd_user");
-        window.location.href = window.location.pathname; // Przeładuj stronę (wyloguj)
-    } else { document.getElementById("auth-modal").classList.add("active"); }
-});
-
-document.getElementById("auth-toggle-link").addEventListener("click", (e) => {
-    e.preventDefault(); isRegistering = !isRegistering;
-    document.getElementById("auth-title").innerText = isRegistering ? "Rejestracja" : "Logowanie";
-    document.getElementById("auth-submit-btn").innerText = isRegistering ? "Zarejestruj się" : "Zaloguj się";
-    document.getElementById("auth-switch-text").innerText = isRegistering ? "Masz już konto?" : "Nie masz konta?";
-    e.target.innerText = isRegistering ? "Zaloguj się" : "Zarejestruj się";
-});
-
-document.getElementById("auth-form").addEventListener("submit", (e) => {
-    e.preventDefault();
-    const userVal = document.getElementById("auth-username").value.trim();
-    const passVal = document.getElementById("auth-password").value.trim();
-    let users = JSON.parse(localStorage.getItem("gd_registered_users")) || [];
-
-    if (isRegistering) {
-        if (users.find(u => u.username === userVal)) return alert("Użytkownik już istnieje!");
-        const newUser = { username: userVal, password: passVal };
-        users.push(newUser); localStorage.setItem("gd_registered_users", JSON.stringify(users));
-        currentUser = newUser; localStorage.setItem("gd_user", JSON.stringify(currentUser));
-    } else {
-        const found = users.find(u => u.username === userVal && u.password === passVal);
-        if (found) { currentUser = found; localStorage.setItem("gd_user", JSON.stringify(currentUser)); } 
-        else return alert("Błędne dane!");
-    }
-    // Po zalogowaniu załaduj listę TEGO użytkownika
-    window.location.href = window.location.pathname + "?list=" + currentUser.username;
-});
-
-// Zmiana Zakładek
-['btn-levels', 'btn-leaderboard', 'btn-dashboard'].forEach(id => {
-    document.getElementById(id).addEventListener("click", function() {
-        ['btn-levels', 'btn-leaderboard', 'btn-dashboard'].forEach(b => document.getElementById(b).classList.remove("active"));
-        ['levels-container', 'leaderboard-container', 'dashboard-container'].forEach(c => document.getElementById(c).classList.add("hidden-section"));
-        this.classList.add("active");
-        document.getElementById(id.replace("btn-", "") + "-container").classList.remove("hidden-section");
-    });
-});
-document.getElementById("btn-random").addEventListener("click", () => {
-    if (listData.levels.length) openLevelModal(listData.levels[Math.floor(Math.random() * listData.levels.length)].id);
-});
-document.getElementById("search-input").addEventListener("input", (e) => {
-    const q = e.target.value.toLowerCase();
-    document.querySelectorAll("#levels-container .card").forEach(c => c.style.display = c.dataset.name.includes(q) ? "flex" : "none");
-});
-document.getElementById("theme-toggle").addEventListener("click", () => {
-    const isLight = document.body.getAttribute("data-theme") === "light";
-    document.body.toggleAttribute("data-theme", !isLight);
-    document.getElementById("theme-toggle").innerText = isLight ? "☀️" : "🌙";
-});
-
-renderApp();
 </script>
 </body>
 </html>
