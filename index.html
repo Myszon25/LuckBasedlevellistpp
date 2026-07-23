@@ -86,6 +86,12 @@ body {
     -webkit-text-fill-color: transparent;
 }
 
+.nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
 /* BUTTONS */
 .btn {
     background: var(--card-bg);
@@ -128,12 +134,36 @@ body {
     color: #ef4444;
 }
 
-.btn-danger:hover {
-    background: #ef4444;
-    color: #fff;
+.btn-danger:hover { background: #ef4444; color: #fff; }
+.btn-sm { padding: 6px 12px; font-size: 12px; }
+
+/* TOAST NOTIFICATIONS */
+#toast-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
-.btn-sm { padding: 6px 12px; font-size: 12px; }
+.toast {
+    background: var(--panel-bg);
+    border: 1px solid var(--accent);
+    color: #fff;
+    padding: 14px 20px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    font-size: 14px;
+    font-weight: 600;
+    animation: slideIn 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
+}
+
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
 
 /* MAIN LAYOUT */
 .container {
@@ -144,27 +174,14 @@ body {
 
 .hidden { display: none !important; }
 
-/* HERO SECTION */
 .hero {
     text-align: center;
     margin-bottom: 50px;
 }
 
-.hero h1 {
-    font-size: 48px;
-    font-weight: 900;
-    letter-spacing: -1px;
-    margin-bottom: 12px;
-}
+.hero h1 { font-size: 48px; font-weight: 900; letter-spacing: -1px; margin-bottom: 12px; }
+.hero p { color: var(--text-muted); font-size: 16px; max-width: 550px; margin: 0 auto; }
 
-.hero p {
-    color: var(--text-muted);
-    font-size: 16px;
-    max-width: 550px;
-    margin: 0 auto;
-}
-
-/* LIST CARDS GRID */
 .lists-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -189,7 +206,6 @@ body {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
-/* LIST DETAIL HEADER */
 .list-banner {
     background: linear-gradient(135deg, var(--panel-bg), rgba(0,242,254,0.05));
     border: 1px solid var(--border-color);
@@ -282,11 +298,7 @@ body {
 }
 
 .level-thumb img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    opacity: 0.8;
-    transition: opacity 0.2s;
+    width: 100%; height: 100%; object-fit: cover; opacity: 0.8; transition: opacity 0.2s;
 }
 
 .level-thumb:hover img { opacity: 1; }
@@ -306,10 +318,7 @@ body {
     transition: opacity 0.25s;
 }
 
-.modal-overlay.active {
-    opacity: 1;
-    pointer-events: all;
-}
+.modal-overlay.active { opacity: 1; pointer-events: all; }
 
 .modal-content {
     background: var(--panel-bg);
@@ -334,11 +343,8 @@ body {
     background: rgba(255,255,255,0.05);
     border: none;
     color: var(--text-main);
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    cursor: pointer;
-    font-weight: bold;
+    width: 32px; height: 32px; border-radius: 50%;
+    cursor: pointer; font-weight: bold;
 }
 
 /* FORMS */
@@ -369,34 +375,12 @@ body {
     transition: border-color 0.2s;
 }
 
-.form-control:focus {
-    border-color: var(--accent);
-}
-
-.form-row {
-    display: flex;
-    gap: 12px;
-}
-
+.form-control:focus { border-color: var(--accent); }
+.form-row { display: flex; gap: 12px; }
 .form-row > div { flex: 1; }
 
-/* DYNAMIC VICTOR INPUT ROWS */
-.victor-input-row {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 8px;
-    align-items: center;
-}
-
-.victor-input-row .form-control { margin-bottom: 0; }
-
-/* VICTOR LIST VIEW (MODAL) */
-.victors-list-view {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-top: 12px;
-}
+.victor-input-row { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
+.victors-list-view { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
 
 .victor-item {
     background: rgba(255,255,255,0.03);
@@ -408,13 +392,7 @@ body {
     align-items: center;
 }
 
-.victor-item a {
-    color: var(--accent);
-    text-decoration: none;
-    font-size: 13px;
-    font-weight: 700;
-}
-
+.victor-item a { color: var(--accent); text-decoration: none; font-size: 13px; font-weight: 700; }
 .victor-item a:hover { text-decoration: underline; }
 
 .admin-item {
@@ -427,17 +405,35 @@ body {
     border-radius: 12px;
     margin-bottom: 10px;
 }
+
+.notice-box {
+    background: rgba(0, 242, 254, 0.05);
+    border: 1px dashed var(--accent);
+    padding: 16px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
 </style>
 </head>
 <body>
+
+<div id="toast-container"></div>
 
 <nav class="navbar">
     <div class="brand" onclick="showMainMenu()">
         <div class="brand-logo">GD</div>
         <div class="brand-name">DEMONLIST HUB</div>
     </div>
-    <div>
-        <button class="btn btn-accent" onclick="openCreateListModal()">+ Create New List</button>
+    <div class="nav-actions">
+        <div id="user-profile-btn" class="hidden">
+            <span id="user-display-name" style="font-weight:700; margin-right:10px; color:var(--accent);"></span>
+            <button class="btn btn-sm" onclick="logoutUser()">Logout</button>
+        </div>
+        <button id="login-btn" class="btn btn-sm" onclick="openLoginModal()">Account Login</button>
+        <button class="btn btn-accent" onclick="openCreateListModal()">+ Create List</button>
     </div>
 </nav>
 
@@ -447,7 +443,7 @@ body {
 <div id="view-main-menu" class="container">
     <div class="hero">
         <h1>Discover & Create GD Lists</h1>
-        <p>Explore community demonlists or build your custom list with custom video proof submissions and online edit controls!</p>
+        <p>Explore community demonlists with real-time position shifting, video proof tracking, and multi-user editor permissions!</p>
     </div>
 
     <h2 style="font-size: 22px; font-weight: 800; margin-bottom: 20px;">🌐 Active Lists</h2>
@@ -461,7 +457,7 @@ body {
     <div class="list-banner">
         <div>
             <h1 id="active-list-title" style="font-size: 32px; font-weight: 900; margin-bottom: 6px;">List Title</h1>
-            <p id="active-list-desc" style="color:var(--text-muted); font-size:14px;">Created by <span id="active-list-author" style="color:#fff; font-weight:700;">...</span></p>
+            <p id="active-list-desc" style="color:var(--text-muted); font-size:14px;">Owner: <span id="active-list-author" style="color:#fff; font-weight:700;">...</span></p>
         </div>
         <div style="display:flex; gap:10px;">
             <a href="#" target="_blank" id="active-list-discord" class="btn" style="background:#5865F2; border:none;">Discord</a>
@@ -483,27 +479,34 @@ body {
 
     <!-- Admin Panel Tab -->
     <div id="tab-content-admin" class="hidden">
-        <div style="background:var(--card-bg); padding:24px; border-radius:16px; border:1px solid var(--border-color); margin-bottom:24px;">
-            <h3 style="margin-bottom:8px;">🔗 Shareable Admin Link</h3>
-            <p style="color:var(--text-muted); font-size:13px; margin-bottom:12px;">Share this direct link for people to view your list:</p>
-            <input type="text" id="share-url-input" class="form-control" readonly style="width:100%;">
+        
+        <!-- EDITOR INVITE BANNER -->
+        <div class="notice-box">
+            <div>
+                <h4 style="margin-bottom:4px;">👥 Multi-Editor Collaboration</h4>
+                <p style="font-size:12px; color:var(--text-muted);">Want a friend to help manage this list? Invite them as a co-editor!</p>
+            </div>
+            <button class="btn btn-sm btn-accent" onclick="copyInviteCode()">📨 Invite Co-Editor</button>
         </div>
 
         <div style="background:var(--card-bg); padding:24px; border-radius:16px; border:1px solid var(--border-color); margin-bottom:24px;">
             <h3 style="margin-bottom:16px;">➕ Add New Level</h3>
             <form id="add-level-form">
                 <div class="form-row">
-                    <div class="form-group"><label>Rank Position (#)</label><input type="number" id="add-pos" class="form-control" required min="1"></div>
+                    <div class="form-group">
+                        <label>Rank Position (#)</label>
+                        <input type="number" id="add-pos" class="form-control" required min="1" value="1">
+                        <small id="add-pos-hint" style="color:var(--text-muted); font-size:11px;">Max allowed position: #1</small>
+                    </div>
                     <div class="form-group" style="flex:2;"><label>Level Name</label><input type="text" id="add-name" class="form-control" required></div>
                 </div>
                 <div class="form-row">
                     <div class="form-group"><label>Creator</label><input type="text" id="add-author" class="form-control" required></div>
                     <div class="form-group"><label>Verifier</label><input type="text" id="add-verifier" class="form-control" required></div>
-                    <div class="form-group"><label>Points (PTS)</label><input type="number" id="add-pts" class="form-control" required></div>
+                    <div class="form-group"><label>Points (PTS)</label><input type="number" id="add-pts" class="form-control" required min="1"></div>
                 </div>
                 <div class="form-group"><label>YouTube Showcase Link</label><input type="text" id="add-yt" class="form-control" required placeholder="https://www.youtube.com/watch?v=..."></div>
                 
-                <!-- DYNAMIC VICTORS SECTION -->
                 <div class="form-group">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
                         <label style="margin:0;">Victors & Proof Videos</label>
@@ -512,7 +515,7 @@ body {
                     <div id="add-victors-container"></div>
                 </div>
 
-                <button type="submit" class="btn btn-accent" style="width:100%; margin-top:10px;">Add Level to List</button>
+                <button type="submit" class="btn btn-accent" style="width:100%; margin-top:10px;">Add Level & Auto-Adjust Ranks</button>
             </form>
         </div>
 
@@ -520,6 +523,21 @@ body {
             <h3 style="margin-bottom:16px;">📜 Existing Levels Management</h3>
             <div id="admin-levels-manage-list"></div>
         </div>
+    </div>
+</div>
+
+<!-- MODAL: LOGIN / REGISTER -->
+<div id="modal-login" class="modal-overlay">
+    <div class="modal-content" style="max-width:400px;">
+        <div class="modal-header">
+            <h2 id="login-modal-title">Account Login</h2>
+            <button class="modal-close" onclick="closeModals()">✕</button>
+        </div>
+        <form id="auth-form">
+            <div class="form-group"><label>Username</label><input type="text" id="auth-username" class="form-control" required placeholder="Player1"></div>
+            <div class="form-group"><label>Password</label><input type="password" id="auth-password" class="form-control" required></div>
+            <button type="submit" class="btn btn-accent" style="width:100%; margin-top:15px;">Login / Register</button>
+        </form>
     </div>
 </div>
 
@@ -531,14 +549,12 @@ body {
             <button class="modal-close" onclick="closeModals()">✕</button>
         </div>
         <form id="create-list-form">
-            <div class="form-group"><label>Unique List ID (No spaces, e.g. top-spam-list)</label><input type="text" id="new-list-id" class="form-control" required placeholder="my-awesome-list"></div>
+            <div class="form-group"><label>Unique List ID (e.g. top-50-demons)</label><input type="text" id="new-list-id" class="form-control" required placeholder="my-awesome-list"></div>
             <div class="form-group"><label>List Title</label><input type="text" id="new-list-title" class="form-control" required placeholder="Top 50 Extreme Challenges"></div>
-            <div class="form-group"><label>Your Name / Author</label><input type="text" id="new-list-author" class="form-control" required placeholder="CreatorNick"></div>
-            <div class="form-group"><label>Admin Password (To edit list from other devices)</label><input type="password" id="new-list-pass" class="form-control" required></div>
             <div class="form-group"><label>Discord Server Link (Optional)</label><input type="text" id="new-list-discord" class="form-control" placeholder="https://discord.gg/..."></div>
             <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
                 <button type="button" class="btn" onclick="closeModals()">Cancel</button>
-                <button type="submit" class="btn btn-accent">Create & Open List</button>
+                <button type="submit" class="btn btn-accent">Create List</button>
             </div>
         </form>
     </div>
@@ -548,13 +564,17 @@ body {
 <div id="modal-edit-level" class="modal-overlay">
     <div class="modal-content">
         <div class="modal-header">
-            <h2>✏️ Edit Level</h2>
+            <h2>✏️ Edit Level & Position</h2>
             <button class="modal-close" onclick="closeModals()">✕</button>
         </div>
         <form id="edit-level-form">
             <input type="hidden" id="edit-lvl-index">
             <div class="form-row">
-                <div class="form-group"><label>Rank Position (#)</label><input type="number" id="edit-pos" class="form-control" required></div>
+                <div class="form-group">
+                    <label>Rank Position (#)</label>
+                    <input type="number" id="edit-pos" class="form-control" required min="1">
+                    <small id="edit-pos-hint" style="color:var(--text-muted); font-size:11px;"></small>
+                </div>
                 <div class="form-group" style="flex:2;"><label>Level Name</label><input type="text" id="edit-name" class="form-control" required></div>
             </div>
             <div class="form-row">
@@ -574,13 +594,13 @@ body {
 
             <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
                 <button type="button" class="btn" onclick="closeModals()">Cancel</button>
-                <button type="submit" class="btn btn-accent">Save Changes</button>
+                <button type="submit" class="btn btn-accent">Save & Auto-Shift Other Levels</button>
             </div>
         </form>
     </div>
 </div>
 
-<!-- MODAL: LEVEL DETAILS & VICTORS SHOWCASE -->
+<!-- MODAL: LEVEL DETAILS SHOWCASE -->
 <div id="modal-level-details" class="modal-overlay">
     <div class="modal-content">
         <div class="modal-header">
@@ -603,61 +623,90 @@ body {
 
 <script>
 // =========================================================================
-// 1. FIREBASE & BACKEND CONFIGURATION
+// 1. STATE MANAGEMENT & LOCAL DATABASE
 // =========================================================================
-const firebaseConfig = null; // Optional: Paste Firebase Firestore Config Object here
+let currentUser = JSON.parse(localStorage.getItem("gd_user")) || null;
 
-let db = null;
-if (firebaseConfig) {
-    firebase.initializeApp(firebaseConfig);
-    db = firebase.firestore();
-}
-
-// Local storage fallback data
-let localDataStore = JSON.parse(localStorage.getItem("gd_global_hub_v2")) || {
+let localDataStore = JSON.parse(localStorage.getItem("gd_hub_v3")) || {
     "official-demonlist": {
         id: "official-demonlist",
         title: "Official GD Demonlist",
-        author: "Demonlist Team",
-        pass: "admin123",
+        author: "Admin",
+        editors: ["Admin"],
         discord: "https://discord.gg",
         levels: [
-            { 
-                pos: 1, 
-                name: "Acheron", 
-                author: "ryami", 
-                verifier: "Zoink", 
-                pts: 100, 
-                yt: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", 
-                victors: [{ name: "Zoink", video: "https://youtube.com" }, { name: "Trick", video: "https://youtube.com" }] 
-            },
-            { 
-                pos: 2, 
-                name: "Avernus", 
-                author: "Pingu", 
-                verifier: "Zoink", 
-                pts: 95, 
-                yt: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", 
-                victors: [{ name: "Zoink", video: "https://youtube.com" }] 
-            }
+            { pos: 1, name: "Acheron", author: "ryami", verifier: "Zoink", pts: 100, yt: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", victors: [{ name: "Zoink", video: "https://youtube.com" }] },
+            { pos: 2, name: "Avernus", author: "Pingu", verifier: "Zoink", pts: 95, yt: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", victors: [] }
         ]
     }
 };
 
 function saveLocal() {
-    localStorage.setItem("gd_global_hub_v2", JSON.stringify(localDataStore));
+    localStorage.setItem("gd_hub_v3", JSON.stringify(localDataStore));
+}
+
+function showToast(msg) {
+    const container = document.getElementById("toast-container");
+    const toast = document.createElement("div");
+    toast.className = "toast";
+    toast.innerText = msg;
+    container.appendChild(toast);
+    setTimeout(() => toast.remove(), 3500);
 }
 
 // =========================================================================
-// 2. CORE APPLICATION STATE
+// 2. USER AUTHENTICATION
+// =========================================================================
+function updateAuthUI() {
+    if (currentUser) {
+        document.getElementById("login-btn").classList.add("hidden");
+        document.getElementById("user-profile-btn").classList.remove("hidden");
+        document.getElementById("user-display-name").innerText = `👤 ${currentUser.username}`;
+    } else {
+        document.getElementById("login-btn").classList.remove("hidden");
+        document.getElementById("user-profile-btn").classList.add("hidden");
+    }
+}
+
+document.getElementById("auth-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const username = document.getElementById("auth-username").value.trim();
+    if(username) {
+        currentUser = { username };
+        localStorage.setItem("gd_user", JSON.stringify(currentUser));
+        updateAuthUI();
+        closeModals();
+        showToast(`Welcome, ${username}!`);
+        if(currentListId) loadList(currentListId);
+    }
+});
+
+function logoutUser() {
+    currentUser = null;
+    localStorage.removeItem("gd_user");
+    updateAuthUI();
+    showToast("Logged out successfully.");
+    if(currentListId) loadList(currentListId);
+}
+
+function openLoginModal() { document.getElementById("modal-login").classList.add("active"); }
+
+// =========================================================================
+// 3. CORE LIST & NAVIGATION
 // =========================================================================
 let currentListId = null;
 let currentListData = null;
 let isOwner = false;
 
 window.addEventListener("DOMContentLoaded", () => {
+    updateAuthUI();
     const params = new URLSearchParams(window.location.search);
     const listParam = params.get("list");
+    const inviteParam = params.get("invite");
+
+    if (inviteParam && currentUser) {
+        joinListAsEditor(inviteParam);
+    }
 
     if (listParam) {
         loadList(listParam);
@@ -666,37 +715,34 @@ window.addEventListener("DOMContentLoaded", () => {
     }
 });
 
-async function getAllLists() {
-    if (db) {
-        const snapshot = await db.collection("lists").get();
-        let lists = {};
-        snapshot.forEach(doc => lists[doc.id] = doc.data());
-        return lists;
-    } else {
-        return localDataStore;
+function joinListAsEditor(listId) {
+    if(localDataStore[listId]) {
+        if(!localDataStore[listId].editors) localDataStore[listId].editors = [];
+        if(!localDataStore[listId].editors.includes(currentUser.username)) {
+            localDataStore[listId].editors.push(currentUser.username);
+            saveLocal();
+            showToast(`🎉 You are now an editor of "${localDataStore[listId].title}"!`);
+        }
     }
 }
 
-async function showMainMenu() {
+function showMainMenu() {
     window.history.pushState({}, "", window.location.pathname);
     document.getElementById("view-main-menu").classList.remove("hidden");
     document.getElementById("view-list-detail").classList.add("hidden");
 
     const container = document.getElementById("lists-grid-container");
-    container.innerHTML = "<p style='color:var(--text-muted);'>Loading lists...</p>";
-
-    const allLists = await getAllLists();
     container.innerHTML = "";
 
-    Object.keys(allLists).forEach(id => {
-        const item = allLists[id];
+    Object.keys(localDataStore).forEach(id => {
+        const item = localDataStore[id];
         const card = document.createElement("div");
         card.className = "list-card";
         card.onclick = () => loadList(id);
         card.innerHTML = `
             <div>
                 <div style="font-size: 20px; font-weight: 800; margin-bottom:6px;">${item.title}</div>
-                <div style="font-size: 13px; color: var(--text-muted);">Author: ${item.author}</div>
+                <div style="font-size: 13px; color: var(--text-muted);">Owner: ${item.author}</div>
             </div>
             <div style="margin-top:20px; font-weight:800; color:var(--accent); font-size:14px;">
                 ${item.levels ? item.levels.length : 0} Levels Listed
@@ -706,24 +752,20 @@ async function showMainMenu() {
     });
 }
 
-async function loadList(listId) {
+function loadList(listId) {
     currentListId = listId;
-    
-    if (db) {
-        const doc = await db.collection("lists").doc(listId).get();
-        if (doc.exists) currentListData = doc.data();
-    } else {
-        currentListData = localDataStore[listId];
-    }
+    currentListData = localDataStore[listId];
 
     if (!currentListData) {
-        alert("List not found!");
+        showToast("List not found!");
         showMainMenu();
         return;
     }
 
-    const savedPass = localStorage.getItem(`admin_pass_${listId}`);
-    isOwner = savedPass === currentListData.pass;
+    isOwner = currentUser && (
+        currentListData.author === currentUser.username || 
+        (currentListData.editors && currentListData.editors.includes(currentUser.username))
+    );
 
     window.history.pushState({}, "", `?list=${listId}`);
 
@@ -733,7 +775,6 @@ async function loadList(listId) {
     document.getElementById("active-list-title").innerText = currentListData.title;
     document.getElementById("active-list-author").innerText = currentListData.author;
     document.getElementById("active-list-discord").href = currentListData.discord || "#";
-    document.getElementById("share-url-input").value = window.location.href;
 
     if (isOwner) {
         document.getElementById("btn-admin-tab").classList.remove("hidden");
@@ -743,19 +784,68 @@ async function loadList(listId) {
         document.getElementById("tab-btn-admin-nav").classList.add("hidden");
     }
 
+    updateMaxPosLimits();
     switchTab('levels');
     renderListLevels();
     renderLeaderboard();
     if(isOwner) renderAdminPanel();
 }
 
-// RENDER LEVEL CARDS
+function updateMaxPosLimits() {
+    const total = currentListData.levels ? currentListData.levels.length : 0;
+    const maxAdd = total + 1;
+    
+    const addInput = document.getElementById("add-pos");
+    addInput.max = maxAdd;
+    addInput.value = maxAdd;
+    document.getElementById("add-pos-hint").innerText = `Max allowed rank position: #${maxAdd}`;
+}
+
+// =========================================================================
+// 4. RANK REORDERING & SHIFT LOGIC (CRITICAL FIX)
+// =========================================================================
+function reorderLevelsArray(levels) {
+    levels.sort((a, b) => a.pos - b.pos);
+    levels.forEach((lvl, idx) => {
+        lvl.pos = idx + 1;
+    });
+}
+
+function insertAndShiftLevel(newLvl) {
+    if (!currentListData.levels) currentListData.levels = [];
+    
+    let targetPos = Number(newLvl.pos);
+    const maxPos = currentListData.levels.length + 1;
+    if (targetPos > maxPos) targetPos = maxPos;
+    if (targetPos < 1) targetPos = 1;
+
+    newLvl.pos = targetPos;
+
+    currentListData.levels.splice(targetPos - 1, 0, newLvl);
+    reorderLevelsArray(currentListData.levels);
+}
+
+function editAndShiftLevel(index, updatedLvl) {
+    let targetPos = Number(updatedLvl.pos);
+    const maxPos = currentListData.levels.length;
+    if (targetPos > maxPos) targetPos = maxPos;
+    if (targetPos < 1) targetPos = 1;
+
+    currentListData.levels.splice(index, 1);
+    updatedLvl.pos = targetPos;
+    currentListData.levels.splice(targetPos - 1, 0, updatedLvl);
+    
+    reorderLevelsArray(currentListData.levels);
+}
+
+// =========================================================================
+// 5. RENDER FUNCTIONS
+// =========================================================================
 function renderListLevels() {
     const container = document.getElementById("tab-content-levels");
     container.innerHTML = "";
 
-    const levels = (currentListData.levels || []).sort((a,b) => a.pos - b.pos);
-    
+    const levels = currentListData.levels || [];
     if(levels.length === 0) {
         container.innerHTML = "<p style='color:var(--text-muted)'>No levels added to this list yet.</p>";
         return;
@@ -783,7 +873,6 @@ function renderListLevels() {
     });
 }
 
-// RENDER LEADERBOARD
 function renderLeaderboard() {
     const container = document.getElementById("tab-content-leaderboard");
     container.innerHTML = "";
@@ -822,7 +911,6 @@ function renderLeaderboard() {
     });
 }
 
-// RENDER ADMIN PANEL
 function renderAdminPanel() {
     const container = document.getElementById("admin-levels-manage-list");
     container.innerHTML = "";
@@ -842,15 +930,132 @@ function renderAdminPanel() {
 }
 
 // =========================================================================
-// 3. DYNAMIC VICTOR INPUTS LOGIC
+// 6. FORMS & HANDLERS
 // =========================================================================
+document.getElementById("add-level-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    if(!isOwner) return;
+
+    const newLvl = {
+        pos: Number(document.getElementById("add-pos").value),
+        name: document.getElementById("add-name").value.trim(),
+        author: document.getElementById("add-author").value.trim(),
+        verifier: document.getElementById("add-verifier").value.trim(),
+        pts: Number(document.getElementById("add-pts").value),
+        yt: document.getElementById("add-yt").value.trim(),
+        victors: getVictorsFromContainer("add-victors-container")
+    };
+
+    insertAndShiftLevel(newLvl);
+    saveLocal();
+    updateMaxPosLimits();
+    
+    renderListLevels();
+    renderLeaderboard();
+    renderAdminPanel();
+
+    e.target.reset();
+    document.getElementById("add-victors-container").innerHTML = "";
+    showToast(`Level "${newLvl.name}" inserted at #${newLvl.pos}! All other levels adjusted.`);
+});
+
+function openEditLevelModal(index) {
+    const l = currentListData.levels[index];
+    const total = currentListData.levels.length;
+
+    document.getElementById("edit-lvl-index").value = index;
+    const posInput = document.getElementById("edit-pos");
+    posInput.max = total;
+    posInput.value = l.pos;
+    document.getElementById("edit-pos-hint").innerText = `Max allowed rank position: #${total}`;
+
+    document.getElementById("edit-name").value = l.name;
+    document.getElementById("edit-author").value = l.author;
+    document.getElementById("edit-verifier").value = l.verifier;
+    document.getElementById("edit-pts").value = l.pts;
+    document.getElementById("edit-yt").value = l.yt;
+
+    const victorsContainer = document.getElementById("edit-victors-container");
+    victorsContainer.innerHTML = "";
+    if (l.victors) {
+        l.victors.forEach(v => addVictorInputRow("edit-victors-container", v.name, v.video));
+    }
+
+    document.getElementById("modal-edit-level").classList.add("active");
+}
+
+document.getElementById("edit-level-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    if(!isOwner) return;
+
+    const idx = Number(document.getElementById("edit-lvl-index").value);
+
+    const updatedLvl = {
+        pos: Number(document.getElementById("edit-pos").value),
+        name: document.getElementById("edit-name").value.trim(),
+        author: document.getElementById("edit-author").value.trim(),
+        verifier: document.getElementById("edit-verifier").value.trim(),
+        pts: Number(document.getElementById("edit-pts").value),
+        yt: document.getElementById("edit-yt").value.trim(),
+        victors: getVictorsFromContainer("edit-victors-container")
+    };
+
+    editAndShiftLevel(idx, updatedLvl);
+    saveLocal();
+    closeModals();
+    
+    renderListLevels();
+    renderLeaderboard();
+    renderAdminPanel();
+    showToast(`Rank position updated! Other levels automatically shifted.`);
+});
+
+function deleteLevel(index) {
+    if(confirm("Are you sure you want to delete this level?") && isOwner) {
+        currentListData.levels.splice(index, 1);
+        reorderLevelsArray(currentListData.levels);
+        saveLocal();
+        updateMaxPosLimits();
+        renderListLevels();
+        renderLeaderboard();
+        renderAdminPanel();
+        showToast("Level deleted and positions re-indexed.");
+    }
+}
+
+document.getElementById("create-list-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    if(!currentUser) {
+        showToast("Please log in to create a list!");
+        openLoginModal();
+        return;
+    }
+
+    const id = document.getElementById("new-list-id").value.trim().toLowerCase().replace(/\s+/g, '-');
+    const title = document.getElementById("new-list-title").value.trim();
+    const discord = document.getElementById("new-list-discord").value.trim();
+
+    localDataStore[id] = { id, title, author: currentUser.username, editors: [], discord, levels: [] };
+    saveLocal();
+    closeModals();
+    loadList(id);
+    showToast("New list created!");
+});
+
+function copyInviteCode() {
+    const inviteUrl = `${window.location.origin}${window.location.pathname}?list=${currentListId}&invite=${currentListId}`;
+    navigator.clipboard.writeText(inviteUrl);
+    showToast("Copied Editor Invite Link to clipboard! Share it with a friend.");
+}
+
+// UTILITY HELPERS
 function addVictorInputRow(containerId, name = "", video = "") {
     const container = document.getElementById(containerId);
     const row = document.createElement("div");
     row.className = "victor-input-row";
     row.innerHTML = `
         <input type="text" class="form-control victor-name" placeholder="Player Nickname" value="${name}" style="flex:1;">
-        <input type="text" class="form-control victor-video" placeholder="Proof Video Link (URL)" value="${video}" style="flex:1.5;">
+        <input type="text" class="form-control victor-video" placeholder="Proof Video Link" value="${video}" style="flex:1.5;">
         <button type="button" class="btn btn-danger btn-sm" onclick="this.parentElement.remove()">✕</button>
     `;
     container.appendChild(row);
@@ -862,16 +1067,11 @@ function getVictorsFromContainer(containerId) {
     rows.forEach(row => {
         const name = row.querySelector(".victor-name").value.trim();
         const video = row.querySelector(".victor-video").value.trim();
-        if(name) {
-            victors.push({ name, video });
-        }
+        if(name) victors.push({ name, video });
     });
     return victors;
 }
 
-// =========================================================================
-// 4. LEVEL DETAILS MODAL
-// =========================================================================
 function openLevelDetailsModal(pos) {
     const l = currentListData.levels.find(item => item.pos === pos);
     if (!l) return;
@@ -894,14 +1094,11 @@ function openLevelDetailsModal(pos) {
         victorsContainer.innerHTML = "<p style='color:var(--text-muted); font-size:13px;'>No victors registered yet.</p>";
     } else {
         victors.forEach(v => {
-            const vName = typeof v === 'object' ? v.name : v;
-            const vVideo = typeof v === 'object' ? v.video : '';
-
             const item = document.createElement("div");
             item.className = "victor-item";
             item.innerHTML = `
-                <div><strong>${vName}</strong></div>
-                <div>${vVideo ? `<a href="${vVideo}" target="_blank">Watch Proof ↗</a>` : `<span style="color:var(--text-muted); font-size:12px;">No video provided</span>`}</div>
+                <div><strong>${v.name}</strong></div>
+                <div>${v.video ? `<a href="${v.video}" target="_blank">Watch Proof ↗</a>` : `<span style="color:var(--text-muted); font-size:12px;">No video provided</span>`}</div>
             `;
             victorsContainer.appendChild(item);
         });
@@ -910,116 +1107,6 @@ function openLevelDetailsModal(pos) {
     document.getElementById("modal-level-details").classList.add("active");
 }
 
-// =========================================================================
-// 5. SAVE & FORM SUBMISSIONS
-// =========================================================================
-async function saveCurrentList() {
-    if (db) {
-        await db.collection("lists").doc(currentListId).set(currentListData);
-    } else {
-        localDataStore[currentListId] = currentListData;
-        saveLocal();
-    }
-    renderListLevels();
-    renderLeaderboard();
-    if(isOwner) renderAdminPanel();
-}
-
-document.getElementById("create-list-form").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const id = document.getElementById("new-list-id").value.trim().toLowerCase().replace(/\s+/g, '-');
-    const title = document.getElementById("new-list-title").value.trim();
-    const author = document.getElementById("new-list-author").value.trim();
-    const pass = document.getElementById("new-list-pass").value;
-    const discord = document.getElementById("new-list-discord").value.trim();
-
-    const newList = { id, title, author, pass, discord, levels: [] };
-
-    if(db) {
-        await db.collection("lists").doc(id).set(newList);
-    } else {
-        localDataStore[id] = newList;
-        saveLocal();
-    }
-
-    localStorage.setItem(`admin_pass_${id}`, pass);
-    closeModals();
-    loadList(id);
-});
-
-document.getElementById("add-level-form").addEventListener("submit", (e) => {
-    e.preventDefault();
-    if(!isOwner) return;
-
-    const newLvl = {
-        pos: Number(document.getElementById("add-pos").value),
-        name: document.getElementById("add-name").value.trim(),
-        author: document.getElementById("add-author").value.trim(),
-        verifier: document.getElementById("add-verifier").value.trim(),
-        pts: Number(document.getElementById("add-pts").value),
-        yt: document.getElementById("add-yt").value.trim(),
-        victors: getVictorsFromContainer("add-victors-container")
-    };
-
-    if(!currentListData.levels) currentListData.levels = [];
-    currentListData.levels.push(newLvl);
-    saveCurrentList();
-    e.target.reset();
-    document.getElementById("add-victors-container").innerHTML = "";
-    alert("Level added successfully!");
-});
-
-function openEditLevelModal(index) {
-    const l = currentListData.levels[index];
-    document.getElementById("edit-lvl-index").value = index;
-    document.getElementById("edit-pos").value = l.pos;
-    document.getElementById("edit-name").value = l.name;
-    document.getElementById("edit-author").value = l.author;
-    document.getElementById("edit-verifier").value = l.verifier;
-    document.getElementById("edit-pts").value = l.pts;
-    document.getElementById("edit-yt").value = l.yt;
-
-    const victorsContainer = document.getElementById("edit-victors-container");
-    victorsContainer.innerHTML = "";
-    if (l.victors) {
-        l.victors.forEach(v => {
-            const vName = typeof v === 'object' ? v.name : v;
-            const vVideo = typeof v === 'object' ? v.video : '';
-            addVictorInputRow("edit-victors-container", vName, vVideo);
-        });
-    }
-
-    document.getElementById("modal-edit-level").classList.add("active");
-}
-
-document.getElementById("edit-level-form").addEventListener("submit", (e) => {
-    e.preventDefault();
-    if(!isOwner) return;
-
-    const idx = document.getElementById("edit-lvl-index").value;
-
-    currentListData.levels[idx] = {
-        pos: Number(document.getElementById("edit-pos").value),
-        name: document.getElementById("edit-name").value.trim(),
-        author: document.getElementById("edit-author").value.trim(),
-        verifier: document.getElementById("edit-verifier").value.trim(),
-        pts: Number(document.getElementById("edit-pts").value),
-        yt: document.getElementById("edit-yt").value.trim(),
-        victors: getVictorsFromContainer("edit-victors-container")
-    };
-
-    saveCurrentList();
-    closeModals();
-});
-
-function deleteLevel(index) {
-    if(confirm("Are you sure you want to delete this level?") && isOwner) {
-        currentListData.levels.splice(index, 1);
-        saveCurrentList();
-    }
-}
-
-// UTILITY HELPERS
 function switchTab(tabName) {
     ['levels', 'leaderboard', 'admin'].forEach(t => {
         const btn = document.getElementById(`tab-btn-${t}`);
@@ -1029,7 +1116,15 @@ function switchTab(tabName) {
     });
 }
 
-function openCreateListModal() { document.getElementById("modal-create-list").classList.add("active"); }
+function openCreateListModal() { 
+    if(!currentUser) {
+        showToast("You need an account to create lists!");
+        openLoginModal();
+        return;
+    }
+    document.getElementById("modal-create-list").classList.add("active"); 
+}
+
 function closeModals() { document.querySelectorAll(".modal-overlay").forEach(m => m.classList.remove("active")); }
 
 function parseYoutube(yt) {
