@@ -1,64 +1,92 @@
 <!DOCTYPE html>
-<html lang="pl">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GD Global List Hub</title>
-<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<title>Geometry Dash Demonlist Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
-<!-- Skrypty Bazy Danych Firebase (Compat dla czystego HTML) -->
+<!-- Firebase Compatibility Libraries -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
 <style>
 :root {
-    --bg-main: #090a0f;
-    --nav-bg: rgba(15, 17, 26, 0.85);
-    --card-bg: #111422;
-    --card-hover: #181c30;
-    --border-color: rgba(255, 255, 255, 0.1);
-    --accent: #ffb703;
-    --accent-glow: rgba(255, 183, 3, 0.3);
-    --text-main: #ffffff;
-    --text-sub: #94a3b8;
+    --bg-dark: #08090d;
+    --card-bg: #11141f;
+    --card-hover: #171b2a;
+    --panel-bg: #141724;
+    --border-color: rgba(255, 255, 255, 0.08);
+    --border-hover: rgba(255, 255, 255, 0.2);
+    --accent: #00f2fe;
+    --accent-glow: rgba(0, 242, 254, 0.25);
+    --accent-grad: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+    --gold: #ffb703;
+    --silver: #cbd5e1;
+    --bronze: #d97706;
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
 }
 
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
 body {
-    margin: 0;
-    background: var(--bg-main);
-    font-family: 'Rubik', sans-serif;
+    background: var(--bg-dark);
+    font-family: 'Plus Jakarta Sans', sans-serif;
     color: var(--text-main);
     min-height: 100vh;
+    overflow-x: hidden;
 }
 
 ::-webkit-scrollbar { width: 8px; }
-::-webkit-scrollbar-track { background: var(--bg-main); }
+::-webkit-scrollbar-track { background: var(--bg-dark); }
 ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent); }
 
 /* NAVBAR */
 .navbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 15px max(5vw, 20px);
-    background: var(--nav-bg);
-    backdrop-filter: blur(12px);
+    padding: 16px 5vw;
+    background: rgba(13, 15, 23, 0.85);
+    backdrop-filter: blur(16px);
     border-bottom: 1px solid var(--border-color);
     position: sticky;
     top: 0;
     z-index: 100;
 }
 
-.logo {
-    font-size: 20px;
-    font-weight: 900;
-    letter-spacing: 1.5px;
-    background: linear-gradient(45deg, #ffb703, #fb8500);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
     cursor: pointer;
 }
 
+.brand-logo {
+    width: 36px;
+    height: 36px;
+    background: var(--accent-grad);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    color: #000;
+    box-shadow: 0 0 15px var(--accent-glow);
+}
+
+.brand-name {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    background: var(--accent-grad);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* BUTTONS */
 .btn {
     background: var(--card-bg);
     border: 1px solid var(--border-color);
@@ -68,8 +96,7 @@ body {
     font-weight: 700;
     font-size: 13px;
     cursor: pointer;
-    transition: all 0.2s;
-    text-transform: uppercase;
+    transition: all 0.2s ease;
     display: inline-flex;
     align-items: center;
     gap: 8px;
@@ -77,57 +104,78 @@ body {
 }
 
 .btn:hover {
-    border-color: var(--accent);
+    border-color: var(--border-hover);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px var(--accent-glow);
+    background: var(--card-hover);
 }
 
 .btn-accent {
-    background: var(--accent);
+    background: var(--accent-grad);
     color: #000;
     border: none;
+    box-shadow: 0 4px 15px var(--accent-glow);
 }
 
-/* WSPÓLNE KONTENERY */
+.btn-accent:hover {
+    opacity: 0.95;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px var(--accent-glow);
+}
+
+.btn-danger {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #ef4444;
+}
+
+.btn-danger:hover {
+    background: #ef4444;
+    color: #fff;
+}
+
+.btn-sm { padding: 6px 12px; font-size: 12px; }
+
+/* MAIN LAYOUT */
 .container {
     max-width: 1100px;
     margin: 0 auto;
-    padding: 30px 20px;
+    padding: 40px 20px;
 }
 
 .hidden { display: none !important; }
 
-/* MENU GŁÓWNE (HERO & LISTA BAZ) */
+/* HERO SECTION */
 .hero {
     text-align: center;
-    padding: 40px 0 20px;
+    margin-bottom: 50px;
 }
 
 .hero h1 {
-    font-size: 42px;
+    font-size: 48px;
     font-weight: 900;
-    margin-bottom: 10px;
+    letter-spacing: -1px;
+    margin-bottom: 12px;
 }
 
 .hero p {
-    color: var(--text-sub);
+    color: var(--text-muted);
     font-size: 16px;
-    max-width: 600px;
-    margin: 0 auto 30px;
+    max-width: 550px;
+    margin: 0 auto;
 }
 
+/* LIST CARDS GRID */
 .lists-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
     gap: 20px;
-    margin-top: 30px;
 }
 
-.list-card-item {
+.list-card {
     background: var(--card-bg);
     border: 1px solid var(--border-color);
     border-radius: 16px;
-    padding: 25px;
+    padding: 24px;
     cursor: pointer;
     transition: all 0.25s;
     display: flex;
@@ -135,29 +183,18 @@ body {
     justify-content: space-between;
 }
 
-.list-card-item:hover {
-    background: var(--card-hover);
+.list-card:hover {
     border-color: var(--accent);
     transform: translateY(-4px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
-.list-card-title {
-    font-size: 22px;
-    font-weight: 800;
-    margin-bottom: 8px;
-}
-
-.list-card-author {
-    font-size: 13px;
-    color: var(--text-sub);
-}
-
-/* WIDOK POJEDYNCZEJ LISTY */
-.list-header-banner {
-    background: linear-gradient(135deg, rgba(255, 183, 3, 0.1), rgba(0,0,0,0));
+/* LIST DETAIL HEADER */
+.list-banner {
+    background: linear-gradient(135deg, var(--panel-bg), rgba(0,242,254,0.05));
     border: 1px solid var(--border-color);
     border-radius: 20px;
-    padding: 30px;
+    padding: 32px;
     margin-bottom: 30px;
     display: flex;
     justify-content: space-between;
@@ -168,81 +205,105 @@ body {
 
 .tabs {
     display: flex;
-    gap: 10px;
+    gap: 8px;
     margin-bottom: 25px;
     border-bottom: 1px solid var(--border-color);
-    padding-bottom: 15px;
+    padding-bottom: 12px;
 }
 
 .tab-btn {
     background: transparent;
     border: none;
-    color: var(--text-sub);
-    font-size: 16px;
+    color: var(--text-muted);
+    font-size: 15px;
     font-weight: 700;
-    padding: 8px 16px;
+    padding: 8px 18px;
     cursor: pointer;
     border-radius: 8px;
+    transition: all 0.2s;
 }
 
 .tab-btn.active {
-    background: var(--accent);
+    background: var(--accent-grad);
     color: #000;
 }
 
-/* KARTY POZIOMÓW */
+/* LEVEL CARDS */
 .level-card {
     background: var(--card-bg);
     border: 1px solid var(--border-color);
     border-radius: 16px;
-    height: 180px;
+    margin-bottom: 16px;
     display: flex;
-    margin-bottom: 15px;
     overflow: hidden;
-    transition: transform 0.2s;
+    height: 160px;
+    transition: all 0.2s;
 }
 
 .level-card:hover {
+    border-color: var(--border-hover);
     transform: translateY(-3px);
-    border-color: rgba(255, 255, 255, 0.3);
 }
 
-.level-info {
+.level-rank {
+    width: 70px;
+    background: rgba(255,255,255,0.02);
+    border-right: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 22px;
+}
+
+.rank-1 { color: var(--gold); background: rgba(255, 183, 3, 0.08); }
+.rank-2 { color: var(--silver); background: rgba(203, 213, 225, 0.08); }
+.rank-3 { color: var(--bronze); background: rgba(217, 119, 6, 0.08); }
+
+.level-details {
     flex: 1;
     padding: 20px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-}
-
-.level-title { font-size: 20px; font-weight: 800; }
-.level-meta { font-size: 13px; color: var(--text-sub); }
-.level-pts { color: var(--accent); font-weight: 800; }
-
-.level-media {
-    width: 40%;
-    background: #000;
-    position: relative;
     cursor: pointer;
 }
 
-.level-media img {
-    width: 100%; height: 100%; object-fit: cover; opacity: 0.8;
+.level-title { font-size: 20px; font-weight: 800; }
+.level-author { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+.level-points { font-size: 14px; font-weight: 800; color: var(--accent); }
+
+.level-thumb {
+    width: 260px;
+    background: #000;
+    position: relative;
+    cursor: pointer;
+    overflow: hidden;
 }
 
-/* MODAL */
+.level-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+}
+
+.level-thumb:hover img { opacity: 1; }
+
+/* MODALS */
 .modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.8);
-    backdrop-filter: blur(8px);
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(10px);
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 1000;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.2s;
+    transition: opacity 0.25s;
 }
 
 .modal-overlay.active {
@@ -251,18 +312,38 @@ body {
 }
 
 .modal-content {
-    background: var(--card-bg);
+    background: var(--panel-bg);
     border: 1px solid var(--border-color);
     border-radius: 20px;
-    width: min(600px, 90vw);
+    width: min(650px, 92vw);
     max-height: 85vh;
     overflow-y: auto;
-    padding: 30px;
+    padding: 32px;
     position: relative;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.8);
 }
 
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.modal-close {
+    background: rgba(255,255,255,0.05);
+    border: none;
+    color: var(--text-main);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+/* FORMS */
 .form-group {
-    margin-bottom: 15px;
+    margin-bottom: 16px;
     display: flex;
     flex-direction: column;
     gap: 6px;
@@ -271,180 +352,260 @@ body {
 .form-group label {
     font-size: 12px;
     font-weight: 700;
-    color: var(--text-sub);
+    color: var(--text-muted);
     text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .form-control {
-    background: rgba(255,255,255,0.05);
+    background: rgba(255, 255, 255, 0.04);
     border: 1px solid var(--border-color);
-    padding: 12px;
-    border-radius: 8px;
+    padding: 12px 16px;
+    border-radius: 10px;
     color: #fff;
     font-family: inherit;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
 }
 
-.form-control:focus { outline: none; border-color: var(--accent); }
+.form-control:focus {
+    border-color: var(--accent);
+}
+
+.form-row {
+    display: flex;
+    gap: 12px;
+}
+
+.form-row > div { flex: 1; }
+
+/* DYNAMIC VICTOR INPUT ROWS */
+.victor-input-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+    align-items: center;
+}
+
+.victor-input-row .form-control { margin-bottom: 0; }
+
+/* VICTOR LIST VIEW (MODAL) */
+.victors-list-view {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.victor-item {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 12px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.victor-item a {
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.victor-item a:hover { text-decoration: underline; }
 
 .admin-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px;
-    background: rgba(255,255,255,0.03);
+    padding: 14px 18px;
+    background: rgba(255,255,255,0.02);
     border: 1px solid var(--border-color);
-    border-radius: 10px;
-    margin-bottom: 8px;
+    border-radius: 12px;
+    margin-bottom: 10px;
 }
 </style>
 </head>
 <body>
 
 <nav class="navbar">
-    <div class="logo" onclick="showMainMenu()">GD DEMONLIST HUB</div>
+    <div class="brand" onclick="showMainMenu()">
+        <div class="brand-logo">GD</div>
+        <div class="brand-name">DEMONLIST HUB</div>
+    </div>
     <div>
-        <button class="btn btn-accent" onclick="openCreateListModal()">+ Stwórz Listę</button>
+        <button class="btn btn-accent" onclick="openCreateListModal()">+ Create New List</button>
     </div>
 </nav>
 
 <!-- VIEWS -->
 
-<!-- 1. MENU GŁÓWNE -->
+<!-- 1. MAIN MENU -->
 <div id="view-main-menu" class="container">
     <div class="hero">
-        <h1>Odkrywaj i Twórz Listy GD</h1>
-        <p>Przeglądaj listy stworzone przez społeczność lub stwórz własną ze spersonalizowanym linkiem i edytorem online!</p>
+        <h1>Discover & Create GD Lists</h1>
+        <p>Explore community demonlists or build your custom list with custom video proof submissions and online edit controls!</p>
     </div>
 
-    <h2>🌐 Wszystkie Dostępne Listy</h2>
-    <div id="lists-grid-container" class="lists-grid">
-        <!-- Generowane dynamicznie -->
-    </div>
+    <h2 style="font-size: 22px; font-weight: 800; margin-bottom: 20px;">🌐 Active Lists</h2>
+    <div id="lists-grid-container" class="lists-grid"></div>
 </div>
 
-<!-- 2. WIDOK POJEDYNCZEJ LISTY -->
+<!-- 2. SINGLE LIST VIEW -->
 <div id="view-list-detail" class="container hidden">
-    <button class="btn" onclick="showMainMenu()" style="margin-bottom: 20px;">← Powrót do Menu</button>
+    <button class="btn" onclick="showMainMenu()" style="margin-bottom: 20px;">← Back to All Lists</button>
     
-    <div class="list-header-banner">
+    <div class="list-banner">
         <div>
-            <h1 id="active-list-title" style="margin:0 0 10px 0;">Nazwa Listy</h1>
-            <p id="active-list-desc" style="margin:0; color:var(--text-sub);">Stworzona przez: <span id="active-list-author">...</span></p>
+            <h1 id="active-list-title" style="font-size: 32px; font-weight: 900; margin-bottom: 6px;">List Title</h1>
+            <p id="active-list-desc" style="color:var(--text-muted); font-size:14px;">Created by <span id="active-list-author" style="color:#fff; font-weight:700;">...</span></p>
         </div>
         <div style="display:flex; gap:10px;">
-            <a href="#" target="_blank" id="active-list-discord" class="btn" style="background:#5865F2;">Discord</a>
-            <button class="btn btn-accent hidden" id="btn-admin-tab" onclick="switchTab('admin')">⚙️ Edytuj Listę</button>
+            <a href="#" target="_blank" id="active-list-discord" class="btn" style="background:#5865F2; border:none;">Discord</a>
+            <button class="btn btn-accent hidden" id="btn-admin-tab" onclick="switchTab('admin')">⚙️ Manage List</button>
         </div>
     </div>
 
     <div class="tabs">
-        <button class="tab-btn active" id="tab-btn-levels" onclick="switchTab('levels')">Poziomy</button>
-        <button class="tab-btn" id="tab-btn-leaderboard" onclick="switchTab('leaderboard')">Ranking Graczy</button>
-        <button class="tab-btn hidden" id="tab-btn-admin-nav" onclick="switchTab('admin')">Panel Admina</button>
+        <button class="tab-btn active" id="tab-btn-levels" onclick="switchTab('levels')">Levels</button>
+        <button class="tab-btn" id="tab-btn-leaderboard" onclick="switchTab('leaderboard')">Leaderboard</button>
+        <button class="tab-btn hidden" id="tab-btn-admin-nav" onclick="switchTab('admin')">Admin Panel</button>
     </div>
 
-    <!-- Zakładka Poziomy -->
+    <!-- Levels Tab -->
     <div id="tab-content-levels"></div>
 
-    <!-- Zakładka Ranking -->
+    <!-- Leaderboard Tab -->
     <div id="tab-content-leaderboard" class="hidden"></div>
 
-    <!-- Zakładka Admin -->
+    <!-- Admin Panel Tab -->
     <div id="tab-content-admin" class="hidden">
-        <div style="background:var(--card-bg); padding:20px; border-radius:16px; border:1px solid var(--border-color); margin-bottom:20px;">
-            <h3>🔑 Twój Hasło/Klucz Edycji</h3>
-            <p style="color:var(--text-sub); font-size:14px;">Używasz tej przeglądarki jako właściciel. Twój link do udostępnienia list innym:</p>
+        <div style="background:var(--card-bg); padding:24px; border-radius:16px; border:1px solid var(--border-color); margin-bottom:24px;">
+            <h3 style="margin-bottom:8px;">🔗 Shareable Admin Link</h3>
+            <p style="color:var(--text-muted); font-size:13px; margin-bottom:12px;">Share this direct link for people to view your list:</p>
             <input type="text" id="share-url-input" class="form-control" readonly style="width:100%;">
         </div>
 
-        <div style="background:var(--card-bg); padding:20px; border-radius:16px; border:1px solid var(--border-color); margin-bottom:20px;">
-            <h3>➕ Dodaj Nowy Poziom</h3>
+        <div style="background:var(--card-bg); padding:24px; border-radius:16px; border:1px solid var(--border-color); margin-bottom:24px;">
+            <h3 style="margin-bottom:16px;">➕ Add New Level</h3>
             <form id="add-level-form">
-                <div style="display:flex; gap:10px;">
-                    <div class="form-group" style="flex:1;"><label>Pozycja (#)</label><input type="number" id="add-pos" class="form-control" required min="1"></div>
-                    <div class="form-group" style="flex:2;"><label>Nazwa Poziomu</label><input type="text" id="add-name" class="form-control" required></div>
+                <div class="form-row">
+                    <div class="form-group"><label>Rank Position (#)</label><input type="number" id="add-pos" class="form-control" required min="1"></div>
+                    <div class="form-group" style="flex:2;"><label>Level Name</label><input type="text" id="add-name" class="form-control" required></div>
                 </div>
-                <div style="display:flex; gap:10px;">
-                    <div class="form-group" style="flex:1;"><label>Autor</label><input type="text" id="add-author" class="form-control" required></div>
-                    <div class="form-group" style="flex:1;"><label>Verifier</label><input type="text" id="add-verifier" class="form-control" required></div>
-                    <div class="form-group" style="flex:1;"><label>Punkty PTS</label><input type="number" id="add-pts" class="form-control" required></div>
+                <div class="form-row">
+                    <div class="form-group"><label>Creator</label><input type="text" id="add-author" class="form-control" required></div>
+                    <div class="form-group"><label>Verifier</label><input type="text" id="add-verifier" class="form-control" required></div>
+                    <div class="form-group"><label>Points (PTS)</label><input type="number" id="add-pts" class="form-control" required></div>
                 </div>
-                <div class="form-group"><label>YouTube Link (URL/Film)</label><input type="text" id="add-yt" class="form-control" required></div>
-                <div class="form-group"><label>Victors (oddziel przecinkami: Player1, Player2)</label><input type="text" id="add-victors" class="form-control"></div>
-                <button type="submit" class="btn btn-accent" style="width:100%; margin-top:10px;">Dodaj Poziom</button>
+                <div class="form-group"><label>YouTube Showcase Link</label><input type="text" id="add-yt" class="form-control" required placeholder="https://www.youtube.com/watch?v=..."></div>
+                
+                <!-- DYNAMIC VICTORS SECTION -->
+                <div class="form-group">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                        <label style="margin:0;">Victors & Proof Videos</label>
+                        <button type="button" class="btn btn-sm" onclick="addVictorInputRow('add-victors-container')">+ Add Victor</button>
+                    </div>
+                    <div id="add-victors-container"></div>
+                </div>
+
+                <button type="submit" class="btn btn-accent" style="width:100%; margin-top:10px;">Add Level to List</button>
             </form>
         </div>
 
-        <div style="background:var(--card-bg); padding:20px; border-radius:16px; border:1px solid var(--border-color);">
-            <h3>📜 Edycja Obecnych Poziomów</h3>
+        <div style="background:var(--card-bg); padding:24px; border-radius:16px; border:1px solid var(--border-color);">
+            <h3 style="margin-bottom:16px;">📜 Existing Levels Management</h3>
             <div id="admin-levels-manage-list"></div>
         </div>
     </div>
 </div>
 
-<!-- MODAL: TWORZENIE NOWEJ LISTY -->
+<!-- MODAL: CREATE LIST -->
 <div id="modal-create-list" class="modal-overlay">
     <div class="modal-content">
-        <h2>✨ Stwórz Nową Listę</h2>
+        <div class="modal-header">
+            <h2>✨ Create Custom List</h2>
+            <button class="modal-close" onclick="closeModals()">✕</button>
+        </div>
         <form id="create-list-form">
-            <div class="form-group"><label>Unikalne ID Listy (bez spacji, np. top-spam-pl)</label><input type="text" id="new-list-id" class="form-control" required placeholder="moja-lista-123"></div>
-            <div class="form-group"><label>Nazwa Listy</label><input type="text" id="new-list-title" class="form-control" required placeholder="Top 50 Polish Challenge List"></div>
-            <div class="form-group"><label>Twój Nick / Autor</label><input type="text" id="new-list-author" class="form-control" required placeholder="Player1"></div>
-            <div class="form-group"><label>Hasło Admina (do edycji z innych urządzeń)</label><input type="password" id="new-list-pass" class="form-control" required></div>
-            <div class="form-group"><label>Link do Discorda (Opcjonalnie)</label><input type="text" id="new-list-discord" class="form-control" placeholder="https://discord.gg/..."></div>
+            <div class="form-group"><label>Unique List ID (No spaces, e.g. top-spam-list)</label><input type="text" id="new-list-id" class="form-control" required placeholder="my-awesome-list"></div>
+            <div class="form-group"><label>List Title</label><input type="text" id="new-list-title" class="form-control" required placeholder="Top 50 Extreme Challenges"></div>
+            <div class="form-group"><label>Your Name / Author</label><input type="text" id="new-list-author" class="form-control" required placeholder="CreatorNick"></div>
+            <div class="form-group"><label>Admin Password (To edit list from other devices)</label><input type="password" id="new-list-pass" class="form-control" required></div>
+            <div class="form-group"><label>Discord Server Link (Optional)</label><input type="text" id="new-list-discord" class="form-control" placeholder="https://discord.gg/..."></div>
             <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
-                <button type="button" class="btn" onclick="closeModals()">Anuluj</button>
-                <button type="submit" class="btn btn-accent">Stwórz i Przejdź</button>
+                <button type="button" class="btn" onclick="closeModals()">Cancel</button>
+                <button type="submit" class="btn btn-accent">Create & Open List</button>
             </div>
         </form>
     </div>
 </div>
 
-<!-- MODAL: EDYCJA POZIOMU -->
+<!-- MODAL: EDIT LEVEL -->
 <div id="modal-edit-level" class="modal-overlay">
     <div class="modal-content">
-        <h2>✏️ Edytuj Poziom</h2>
+        <div class="modal-header">
+            <h2>✏️ Edit Level</h2>
+            <button class="modal-close" onclick="closeModals()">✕</button>
+        </div>
         <form id="edit-level-form">
             <input type="hidden" id="edit-lvl-index">
-            <div style="display:flex; gap:10px;">
-                <div class="form-group" style="flex:1;"><label>Pozycja (#)</label><input type="number" id="edit-pos" class="form-control" required></div>
-                <div class="form-group" style="flex:2;"><label>Nazwa Poziomu</label><input type="text" id="edit-name" class="form-control" required></div>
+            <div class="form-row">
+                <div class="form-group"><label>Rank Position (#)</label><input type="number" id="edit-pos" class="form-control" required></div>
+                <div class="form-group" style="flex:2;"><label>Level Name</label><input type="text" id="edit-name" class="form-control" required></div>
             </div>
-            <div style="display:flex; gap:10px;">
-                <div class="form-group" style="flex:1;"><label>Autor</label><input type="text" id="edit-author" class="form-control" required></div>
-                <div class="form-group" style="flex:1;"><label>Verifier</label><input type="text" id="edit-verifier" class="form-control" required></div>
-                <div class="form-group" style="flex:1;"><label>Punkty</label><input type="number" id="edit-pts" class="form-control" required></div>
+            <div class="form-row">
+                <div class="form-group"><label>Creator</label><input type="text" id="edit-author" class="form-control" required></div>
+                <div class="form-group"><label>Verifier</label><input type="text" id="edit-verifier" class="form-control" required></div>
+                <div class="form-group"><label>Points</label><input type="number" id="edit-pts" class="form-control" required></div>
             </div>
             <div class="form-group"><label>YouTube Link</label><input type="text" id="edit-yt" class="form-control" required></div>
-            <div class="form-group"><label>Victors (rozdziel przecinkami)</label><input type="text" id="edit-victors" class="form-control"></div>
+            
+            <div class="form-group">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <label style="margin:0;">Victors & Proof Videos</label>
+                    <button type="button" class="btn btn-sm" onclick="addVictorInputRow('edit-victors-container')">+ Add Victor</button>
+                </div>
+                <div id="edit-victors-container"></div>
+            </div>
+
             <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
-                <button type="button" class="btn" onclick="closeModals()">Anuluj</button>
-                <button type="submit" class="btn btn-accent">Zapisz Zmiany</button>
+                <button type="button" class="btn" onclick="closeModals()">Cancel</button>
+                <button type="submit" class="btn btn-accent">Save Changes</button>
             </div>
         </form>
+    </div>
+</div>
+
+<!-- MODAL: LEVEL DETAILS & VICTORS SHOWCASE -->
+<div id="modal-level-details" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="detail-title">#1 Level Name</h2>
+            <button class="modal-close" onclick="closeModals()">✕</button>
+        </div>
+        <div id="detail-video-container" style="width:100%; height:280px; background:#000; border-radius:12px; overflow:hidden; margin-bottom:20px;"></div>
+        
+        <div style="margin-bottom:20px;">
+            <p style="color:var(--text-muted); font-size:14px;">Creator: <strong id="detail-author" style="color:#fff;"></strong> | Verifier: <strong id="detail-verifier" style="color:#fff;"></strong></p>
+            <p style="color:var(--text-muted); font-size:14px; margin-top:4px;">Points Granted: <strong id="detail-pts" style="color:var(--accent);"></strong></p>
+        </div>
+
+        <hr style="border-color:var(--border-color); margin-bottom:20px;">
+        
+        <h3>🏆 Victors (<span id="detail-victor-count">0</span>)</h3>
+        <div id="detail-victors-list" class="victors-list-view"></div>
     </div>
 </div>
 
 <script>
 // =========================================================================
-// 1. KONFIGURACJA BAZY DANYCH (FIREBASE CHMURA)
+// 1. FIREBASE & BACKEND CONFIGURATION
 // =========================================================================
-// Jeśli chcesz, aby lista działała GLOBALNIE na wszystkich komputerach świata,
-// załóż darmowe konto na https://console.firebase.google.com/, stwórz projekt Firestore 
-// i wklej swoje klucze poniżej. 
-// Jeśli zostawisz null, aplikacja użyje automatycznego trybu LocalStorage / Fallback.
-
-const firebaseConfig = null; 
-/* Przykład konfiguracji:
-const firebaseConfig = {
-    apiKey: "AIzaSy...",
-    authDomain: "twoja-aplikacja.firebaseapp.com",
-    projectId: "twoja-aplikacja",
-    storageBucket: "twoja-aplikacja.appspot.com",
-    messagingSenderId: "123456789",
-    appId: "1:123456789:web:abcdef"
-};
-*/
+const firebaseConfig = null; // Optional: Paste Firebase Firestore Config Object here
 
 let db = null;
 if (firebaseConfig) {
@@ -452,27 +613,43 @@ if (firebaseConfig) {
     db = firebase.firestore();
 }
 
-// LocalStorage Fallback Storage
-let localDataStore = JSON.parse(localStorage.getItem("gd_global_hub")) || {
+// Local storage fallback data
+let localDataStore = JSON.parse(localStorage.getItem("gd_global_hub_v2")) || {
     "official-demonlist": {
         id: "official-demonlist",
-        title: "Official GD Challenge List",
-        author: "Admin",
+        title: "Official GD Demonlist",
+        author: "Demonlist Team",
         pass: "admin123",
         discord: "https://discord.gg",
         levels: [
-            { pos: 1, name: "VSC", author: "Bo", verifier: "Bo", pts: 100, yt: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", victors: ["Player1", "Player2"] },
-            { pos: 2, name: "Slaughterhouse", author: "IcedCave", verifier: "SpaceUK", pts: 90, yt: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", victors: [] }
+            { 
+                pos: 1, 
+                name: "Acheron", 
+                author: "ryami", 
+                verifier: "Zoink", 
+                pts: 100, 
+                yt: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", 
+                victors: [{ name: "Zoink", video: "https://youtube.com" }, { name: "Trick", video: "https://youtube.com" }] 
+            },
+            { 
+                pos: 2, 
+                name: "Avernus", 
+                author: "Pingu", 
+                verifier: "Zoink", 
+                pts: 95, 
+                yt: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", 
+                victors: [{ name: "Zoink", video: "https://youtube.com" }] 
+            }
         ]
     }
 };
 
 function saveLocal() {
-    localStorage.setItem("gd_global_hub", JSON.stringify(localDataStore));
+    localStorage.setItem("gd_global_hub_v2", JSON.stringify(localDataStore));
 }
 
 // =========================================================================
-// 2. LOGIKA APLIKACJI & NAWIGACJA
+// 2. CORE APPLICATION STATE
 // =========================================================================
 let currentListId = null;
 let currentListData = null;
@@ -506,7 +683,7 @@ async function showMainMenu() {
     document.getElementById("view-list-detail").classList.add("hidden");
 
     const container = document.getElementById("lists-grid-container");
-    container.innerHTML = "Ładowanie list...";
+    container.innerHTML = "<p style='color:var(--text-muted);'>Loading lists...</p>";
 
     const allLists = await getAllLists();
     container.innerHTML = "";
@@ -514,15 +691,15 @@ async function showMainMenu() {
     Object.keys(allLists).forEach(id => {
         const item = allLists[id];
         const card = document.createElement("div");
-        card.className = "list-card-item";
+        card.className = "list-card";
         card.onclick = () => loadList(id);
         card.innerHTML = `
             <div>
-                <div class="list-card-title">${item.title}</div>
-                <div class="list-card-author">Autor: ${item.author}</div>
+                <div style="font-size: 20px; font-weight: 800; margin-bottom:6px;">${item.title}</div>
+                <div style="font-size: 13px; color: var(--text-muted);">Author: ${item.author}</div>
             </div>
-            <div style="margin-top:15px; font-weight:bold; color:var(--accent);">
-                Poziomów: ${item.levels ? item.levels.length : 0}
+            <div style="margin-top:20px; font-weight:800; color:var(--accent); font-size:14px;">
+                ${item.levels ? item.levels.length : 0} Levels Listed
             </div>
         `;
         container.appendChild(card);
@@ -540,16 +717,14 @@ async function loadList(listId) {
     }
 
     if (!currentListData) {
-        alert("Lista nie istnieje!");
+        alert("List not found!");
         showMainMenu();
         return;
     }
 
-    // Sprawdź czy użytkownik ma zapisane hasło właściciela w pamięci przeglądarki
     const savedPass = localStorage.getItem(`admin_pass_${listId}`);
     isOwner = savedPass === currentListData.pass;
 
-    // Aktualizacja URL
     window.history.pushState({}, "", `?list=${listId}`);
 
     document.getElementById("view-main-menu").classList.add("hidden");
@@ -574,7 +749,7 @@ async function loadList(listId) {
     if(isOwner) renderAdminPanel();
 }
 
-// RENDER POZIOMÓW
+// RENDER LEVEL CARDS
 function renderListLevels() {
     const container = document.getElementById("tab-content-levels");
     container.innerHTML = "";
@@ -582,23 +757,25 @@ function renderListLevels() {
     const levels = (currentListData.levels || []).sort((a,b) => a.pos - b.pos);
     
     if(levels.length === 0) {
-        container.innerHTML = "<p style='color:var(--text-sub)'>Ta lista nie ma jeszcze żadnych poziomów.</p>";
+        container.innerHTML = "<p style='color:var(--text-muted)'>No levels added to this list yet.</p>";
         return;
     }
 
     levels.forEach(l => {
         const ytId = parseYoutube(l.yt);
+        const rankClass = l.pos === 1 ? "rank-1" : l.pos === 2 ? "rank-2" : l.pos === 3 ? "rank-3" : "";
         const card = document.createElement("div");
         card.className = "level-card";
         card.innerHTML = `
-            <div class="level-info">
+            <div class="level-rank ${rankClass}">#${l.pos}</div>
+            <div class="level-details" onclick="openLevelDetailsModal(${l.pos})">
                 <div>
-                    <div class="level-title">#${l.pos} ${l.name}</div>
-                    <div class="level-meta">by ${l.author} • Verified by ${l.verifier}</div>
+                    <div class="level-title">${l.name}</div>
+                    <div class="level-author">by ${l.author} • Verified by ${l.verifier}</div>
                 </div>
-                <div class="level-pts">+${l.pts} PTS</div>
+                <div class="level-points">+${l.pts} PTS</div>
             </div>
-            <div class="level-media" onclick="this.innerHTML='<iframe width=\\'100%\\' height=\\'100%\\' src=\\'https://www.youtube.com/embed/${ytId}?autoplay=1\\' frameborder=\\'0\\' allowfullscreen></iframe>'">
+            <div class="level-thumb" onclick="openLevelDetailsModal(${l.pos})">
                 <img src="https://img.youtube.com/vi/${ytId}/hqdefault.jpg">
             </div>
         `;
@@ -606,7 +783,7 @@ function renderListLevels() {
     });
 }
 
-// RENDER RANKINGU
+// RENDER LEADERBOARD
 function renderLeaderboard() {
     const container = document.getElementById("tab-content-leaderboard");
     container.innerHTML = "";
@@ -616,11 +793,12 @@ function renderLeaderboard() {
         const pts = Number(l.pts) || 0;
         if(l.victors) {
             l.victors.forEach(v => {
-                const name = v.trim();
-                if(name) {
-                    if(!players[name]) players[name] = { pts: 0, count: 0 };
-                    players[name].pts += pts;
-                    players[name].count += 1;
+                const name = typeof v === 'object' ? v.name : v;
+                if(name && name.trim()) {
+                    const cleanName = name.trim();
+                    if(!players[cleanName]) players[cleanName] = { pts: 0, count: 0 };
+                    players[cleanName].pts += pts;
+                    players[cleanName].count += 1;
                 }
             });
         }
@@ -629,22 +807,22 @@ function renderLeaderboard() {
     const sorted = Object.keys(players).map(k => ({ name: k, ...players[k] })).sort((a,b) => b.pts - a.pts);
 
     if(sorted.length === 0) {
-        container.innerHTML = "<p style='color:var(--text-sub)'>Brak zarejestrowanych przejść poziomów.</p>";
+        container.innerHTML = "<p style='color:var(--text-muted)'>No victor records submitted yet.</p>";
         return;
     }
 
     sorted.forEach((p, idx) => {
         const card = document.createElement("div");
-        card.style.cssText = "background:var(--card-bg); padding:15px 20px; border-radius:12px; border:1px solid var(--border-color); margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;";
+        card.style.cssText = "background:var(--card-bg); padding:16px 20px; border-radius:12px; border:1px solid var(--border-color); margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;";
         card.innerHTML = `
-            <div><strong>#${idx + 1} ${p.name}</strong> (${p.count} ukończonych)</div>
-            <div style="color:var(--accent); font-weight:bold;">${p.pts} PTS</div>
+            <div><strong style="font-size:16px;">#${idx + 1} ${p.name}</strong> <span style="color:var(--text-muted); font-size:13px; margin-left:8px;">(${p.count} levels completed)</span></div>
+            <div style="color:var(--accent); font-weight:800; font-size:16px;">${p.pts} PTS</div>
         `;
         container.appendChild(card);
     });
 }
 
-// RENDER PANELU ADMINA
+// RENDER ADMIN PANEL
 function renderAdminPanel() {
     const container = document.getElementById("admin-levels-manage-list");
     container.innerHTML = "";
@@ -653,10 +831,10 @@ function renderAdminPanel() {
         const item = document.createElement("div");
         item.className = "admin-item";
         item.innerHTML = `
-            <div><strong>#${l.pos} ${l.name}</strong> (Victors: ${l.victors ? l.victors.length : 0})</div>
-            <div>
-                <button class="btn" onclick="openEditLevelModal(${idx})">✏️ Edytuj</button>
-                <button class="btn" style="background:#ff4747; color:white;" onclick="deleteLevel(${idx})">✕ Usuń</button>
+            <div><strong>#${l.pos} ${l.name}</strong> <span style="color:var(--text-muted); font-size:12px;">(${l.victors ? l.victors.length : 0} Victors)</span></div>
+            <div style="display:flex; gap:8px;">
+                <button class="btn btn-sm" onclick="openEditLevelModal(${idx})">✏️ Edit</button>
+                <button class="btn btn-sm btn-danger" onclick="deleteLevel(${idx})">✕ Delete</button>
             </div>
         `;
         container.appendChild(item);
@@ -664,7 +842,76 @@ function renderAdminPanel() {
 }
 
 // =========================================================================
-// 3. ZAPISYWANIE ZMIAN W BAZIE
+// 3. DYNAMIC VICTOR INPUTS LOGIC
+// =========================================================================
+function addVictorInputRow(containerId, name = "", video = "") {
+    const container = document.getElementById(containerId);
+    const row = document.createElement("div");
+    row.className = "victor-input-row";
+    row.innerHTML = `
+        <input type="text" class="form-control victor-name" placeholder="Player Nickname" value="${name}" style="flex:1;">
+        <input type="text" class="form-control victor-video" placeholder="Proof Video Link (URL)" value="${video}" style="flex:1.5;">
+        <button type="button" class="btn btn-danger btn-sm" onclick="this.parentElement.remove()">✕</button>
+    `;
+    container.appendChild(row);
+}
+
+function getVictorsFromContainer(containerId) {
+    const rows = document.querySelectorAll(`#${containerId} .victor-input-row`);
+    const victors = [];
+    rows.forEach(row => {
+        const name = row.querySelector(".victor-name").value.trim();
+        const video = row.querySelector(".victor-video").value.trim();
+        if(name) {
+            victors.push({ name, video });
+        }
+    });
+    return victors;
+}
+
+// =========================================================================
+// 4. LEVEL DETAILS MODAL
+// =========================================================================
+function openLevelDetailsModal(pos) {
+    const l = currentListData.levels.find(item => item.pos === pos);
+    if (!l) return;
+
+    const ytId = parseYoutube(l.yt);
+    document.getElementById("detail-title").innerText = `#${l.pos} ${l.name}`;
+    document.getElementById("detail-author").innerText = l.author;
+    document.getElementById("detail-verifier").innerText = l.verifier;
+    document.getElementById("detail-pts").innerText = `+${l.pts} PTS`;
+    
+    document.getElementById("detail-video-container").innerHTML = `<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${ytId}" frameborder="0" allowfullscreen></iframe>`;
+
+    const victorsContainer = document.getElementById("detail-victors-list");
+    victorsContainer.innerHTML = "";
+    
+    const victors = l.victors || [];
+    document.getElementById("detail-victor-count").innerText = victors.length;
+
+    if(victors.length === 0) {
+        victorsContainer.innerHTML = "<p style='color:var(--text-muted); font-size:13px;'>No victors registered yet.</p>";
+    } else {
+        victors.forEach(v => {
+            const vName = typeof v === 'object' ? v.name : v;
+            const vVideo = typeof v === 'object' ? v.video : '';
+
+            const item = document.createElement("div");
+            item.className = "victor-item";
+            item.innerHTML = `
+                <div><strong>${vName}</strong></div>
+                <div>${vVideo ? `<a href="${vVideo}" target="_blank">Watch Proof ↗</a>` : `<span style="color:var(--text-muted); font-size:12px;">No video provided</span>`}</div>
+            `;
+            victorsContainer.appendChild(item);
+        });
+    }
+
+    document.getElementById("modal-level-details").classList.add("active");
+}
+
+// =========================================================================
+// 5. SAVE & FORM SUBMISSIONS
 // =========================================================================
 async function saveCurrentList() {
     if (db) {
@@ -678,9 +925,6 @@ async function saveCurrentList() {
     if(isOwner) renderAdminPanel();
 }
 
-// =========================================================================
-// 4. FORMULARZE I EDYCJA
-// =========================================================================
 document.getElementById("create-list-form").addEventListener("submit", async (e) => {
     e.preventDefault();
     const id = document.getElementById("new-list-id").value.trim().toLowerCase().replace(/\s+/g, '-');
@@ -707,7 +951,6 @@ document.getElementById("add-level-form").addEventListener("submit", (e) => {
     e.preventDefault();
     if(!isOwner) return;
 
-    const victorsRaw = document.getElementById("add-victors").value;
     const newLvl = {
         pos: Number(document.getElementById("add-pos").value),
         name: document.getElementById("add-name").value.trim(),
@@ -715,14 +958,15 @@ document.getElementById("add-level-form").addEventListener("submit", (e) => {
         verifier: document.getElementById("add-verifier").value.trim(),
         pts: Number(document.getElementById("add-pts").value),
         yt: document.getElementById("add-yt").value.trim(),
-        victors: victorsRaw ? victorsRaw.split(",").map(s => s.trim()).filter(Boolean) : []
+        victors: getVictorsFromContainer("add-victors-container")
     };
 
     if(!currentListData.levels) currentListData.levels = [];
     currentListData.levels.push(newLvl);
     saveCurrentList();
     e.target.reset();
-    alert("Dodano poziom!");
+    document.getElementById("add-victors-container").innerHTML = "";
+    alert("Level added successfully!");
 });
 
 function openEditLevelModal(index) {
@@ -734,7 +978,16 @@ function openEditLevelModal(index) {
     document.getElementById("edit-verifier").value = l.verifier;
     document.getElementById("edit-pts").value = l.pts;
     document.getElementById("edit-yt").value = l.yt;
-    document.getElementById("edit-victors").value = l.victors ? l.victors.join(", ") : "";
+
+    const victorsContainer = document.getElementById("edit-victors-container");
+    victorsContainer.innerHTML = "";
+    if (l.victors) {
+        l.victors.forEach(v => {
+            const vName = typeof v === 'object' ? v.name : v;
+            const vVideo = typeof v === 'object' ? v.video : '';
+            addVictorInputRow("edit-victors-container", vName, vVideo);
+        });
+    }
 
     document.getElementById("modal-edit-level").classList.add("active");
 }
@@ -744,7 +997,6 @@ document.getElementById("edit-level-form").addEventListener("submit", (e) => {
     if(!isOwner) return;
 
     const idx = document.getElementById("edit-lvl-index").value;
-    const victorsRaw = document.getElementById("edit-victors").value;
 
     currentListData.levels[idx] = {
         pos: Number(document.getElementById("edit-pos").value),
@@ -753,7 +1005,7 @@ document.getElementById("edit-level-form").addEventListener("submit", (e) => {
         verifier: document.getElementById("edit-verifier").value.trim(),
         pts: Number(document.getElementById("edit-pts").value),
         yt: document.getElementById("edit-yt").value.trim(),
-        victors: victorsRaw ? victorsRaw.split(",").map(s => s.trim()).filter(Boolean) : []
+        victors: getVictorsFromContainer("edit-victors-container")
     };
 
     saveCurrentList();
@@ -761,13 +1013,13 @@ document.getElementById("edit-level-form").addEventListener("submit", (e) => {
 });
 
 function deleteLevel(index) {
-    if(confirm("Czy na pewno chcesz usunąć ten poziom?") && isOwner) {
+    if(confirm("Are you sure you want to delete this level?") && isOwner) {
         currentListData.levels.splice(index, 1);
         saveCurrentList();
     }
 }
 
-// POMOCNICZE
+// UTILITY HELPERS
 function switchTab(tabName) {
     ['levels', 'leaderboard', 'admin'].forEach(t => {
         const btn = document.getElementById(`tab-btn-${t}`);
