@@ -52,7 +52,21 @@ h1, h2, h3, .font-heading {
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+
+/* GLOBAL SYNC STATUS BAR */
+#sync-status {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--accent);
+    z-index: 99999;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+#sync-status.syncing { opacity: 1; }
 
 /* NAVBAR */
 .navbar {
@@ -118,33 +132,11 @@ h1, h2, h3, .font-heading {
     text-decoration: none;
 }
 
-.btn:hover {
-    background: var(--surface-hover);
-    border-color: var(--border-strong);
-}
-
-.btn-accent {
-    background: var(--accent);
-    color: #fff;
-    border: 1px solid var(--accent);
-}
-
-.btn-accent:hover {
-    background: var(--accent-hover);
-    border-color: var(--accent-hover);
-}
-
-.btn-danger {
-    background: var(--danger-subtle);
-    border: 1px solid rgba(239, 68, 68, 0.2);
-    color: var(--danger);
-}
-
-.btn-danger:hover {
-    background: var(--danger);
-    color: #fff;
-}
-
+.btn:hover { background: var(--surface-hover); border-color: var(--border-strong); }
+.btn-accent { background: var(--accent); color: #fff; border: 1px solid var(--accent); }
+.btn-accent:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+.btn-danger { background: var(--danger-subtle); border: 1px solid rgba(239, 68, 68, 0.2); color: var(--danger); }
+.btn-danger:hover { background: var(--danger); color: #fff; }
 .btn-sm { padding: 5px 10px; font-size: 12px; border-radius: 6px; }
 
 /* NOTIFICATIONS BELL */
@@ -160,10 +152,7 @@ h1, h2, h3, .font-heading {
     justify-content: center;
     cursor: pointer;
     font-size: 15px;
-    transition: all 0.15s;
 }
-
-.notif-bell-btn:hover { border-color: var(--border-strong); background: var(--surface-hover); }
 
 .notif-badge {
     position: absolute;
@@ -210,42 +199,25 @@ h1, h2, h3, .font-heading {
     to { transform: translateY(0); opacity: 1; }
 }
 
-/* CONTAINER & HERO */
-.container {
-    max-width: 1000px;
-    margin: 0 auto;
-    padding: 36px 20px;
-}
-
+.container { max-width: 1000px; margin: 0 auto; padding: 36px 20px; }
 .hidden { display: none !important; }
 
 .hero {
     margin-bottom: 40px;
-    text-align: left;
     border-bottom: 1px solid var(--border);
     padding-bottom: 28px;
 }
 
-.hero h1 {
-    font-size: 32px;
-    font-weight: 700;
-    margin-bottom: 8px;
-    color: var(--text-primary);
-}
-
+.hero h1 { font-size: 32px; font-weight: 700; margin-bottom: 8px; color: var(--text-primary); }
 .hero p { color: var(--text-secondary); font-size: 14px; max-width: 580px; line-height: 1.5; }
 
-/* GRID & CARDS */
 .section-title {
-    font-size: 15px;
+    font-size: 13px;
     font-weight: 600;
     color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.05em;
     margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
 }
 
 .lists-grid {
@@ -267,10 +239,7 @@ h1, h2, h3, .font-heading {
     justify-content: space-between;
 }
 
-.list-card:hover {
-    border-color: var(--border-strong);
-    background: var(--surface-hover);
-}
+.list-card:hover { border-color: var(--border-strong); background: var(--surface-hover); }
 
 .view-badge {
     background: var(--accent-subtle);
@@ -279,9 +248,6 @@ h1, h2, h3, .font-heading {
     font-weight: 600;
     padding: 3px 8px;
     border-radius: 6px;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
 }
 
 .list-banner {
@@ -314,14 +280,9 @@ h1, h2, h3, .font-heading {
     padding: 8px 14px;
     cursor: pointer;
     border-radius: 6px;
-    transition: all 0.15s;
 }
 
-.tab-btn.active {
-    background: var(--surface);
-    color: var(--text-primary);
-    border: 1px solid var(--border);
-}
+.tab-btn.active { background: var(--surface); color: var(--text-primary); border: 1px solid var(--border); }
 
 /* LEVEL CARD */
 .level-card {
@@ -335,10 +296,7 @@ h1, h2, h3, .font-heading {
     transition: all 0.15s ease;
 }
 
-.level-card:hover {
-    border-color: var(--border-strong);
-    background: var(--surface-hover);
-}
+.level-card:hover { border-color: var(--border-strong); background: var(--surface-hover); }
 
 .level-rank {
     width: 64px;
@@ -410,80 +368,18 @@ h1, h2, h3, .font-heading {
     box-shadow: 0 20px 50px rgba(0,0,0,0.6);
 }
 
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-}
-
-.modal-close {
-    background: transparent;
-    border: none;
-    color: var(--text-muted);
-    width: 30px; height: 30px; border-radius: 6px;
-    cursor: pointer; font-size: 16px;
-    display: flex; align-items: center; justify-content: center;
-    transition: background 0.15s;
-}
-
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.modal-close { background: transparent; border: none; color: var(--text-muted); width: 30px; height: 30px; border-radius: 6px; cursor: pointer; font-size: 16px; }
 .modal-close:hover { background: var(--surface); color: var(--text-primary); }
 
 /* AUTH TABS */
-.auth-tabs {
-    display: flex;
-    background: var(--bg);
-    padding: 3px;
-    border-radius: 8px;
-    margin-bottom: 16px;
-    border: 1px solid var(--border);
-}
+.auth-tabs { display: flex; background: var(--bg); padding: 3px; border-radius: 8px; margin-bottom: 16px; border: 1px solid var(--border); }
+.auth-tab-btn { flex: 1; padding: 8px; border: none; background: transparent; color: var(--text-secondary); font-weight: 600; font-size: 12px; cursor: pointer; border-radius: 6px; }
+.auth-tab-btn.active { background: var(--surface); color: var(--text-primary); }
 
-.auth-tab-btn {
-    flex: 1;
-    padding: 8px;
-    border: none;
-    background: transparent;
-    color: var(--text-secondary);
-    font-weight: 600;
-    font-size: 12px;
-    cursor: pointer;
-    border-radius: 6px;
-}
-
-.auth-tab-btn.active {
-    background: var(--surface);
-    color: var(--text-primary);
-}
-
-/* FORMS */
-.form-group {
-    margin-bottom: 14px;
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
-
-.form-group label {
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-}
-
-.form-control {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    padding: 10px 12px;
-    border-radius: 8px;
-    color: var(--text-primary);
-    font-family: inherit;
-    font-size: 13px;
-    outline: none;
-    transition: border-color 0.15s;
-}
-
+.form-group { margin-bottom: 14px; display: flex; flex-direction: column; gap: 5px; }
+.form-group label { font-size: 11px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.04em; }
+.form-control { background: var(--bg); border: 1px solid var(--border); padding: 10px 12px; border-radius: 8px; color: var(--text-primary); font-family: inherit; font-size: 13px; outline: none; }
 .form-control:focus { border-color: var(--accent); }
 .form-row { display: flex; gap: 10px; }
 .form-row > div { flex: 1; }
@@ -491,65 +387,20 @@ h1, h2, h3, .font-heading {
 .victor-input-row { display: flex; gap: 8px; margin-bottom: 6px; align-items: center; }
 .victors-list-view { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
 
-.victor-item {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 10px 14px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
+.victor-item { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; }
 .victor-item a { color: var(--accent); text-decoration: none; font-size: 12px; font-weight: 600; }
 
-.admin-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 16px;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    margin-bottom: 8px;
-}
+.admin-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 8px; }
 
-.captcha-box {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 12px;
-    margin-bottom: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
+.captcha-box { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; }
+.invite-card { background: var(--bg); border: 1px solid var(--border); padding: 14px; border-radius: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
 
-.invite-card {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    padding: 14px;
-    border-radius: 10px;
-    margin-bottom: 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-/* ENLARGED ELEGANT VIDEO PLAYER */
-#detail-video-container {
-    width: 100%;
-    height: 360px;
-    background: #000;
-    border-radius: 10px;
-    overflow: hidden;
-    margin-bottom: 16px;
-    border: 1px solid var(--border);
-}
+#detail-video-container { width: 100%; height: 360px; background: #000; border-radius: 10px; overflow: hidden; margin-bottom: 16px; border: 1px solid var(--border); }
 </style>
 </head>
 <body>
 
+<div id="sync-status"></div>
 <div id="toast-container"></div>
 
 <!-- NAVBAR -->
@@ -559,7 +410,6 @@ h1, h2, h3, .font-heading {
         <div class="brand-name font-heading">DEMONLIST CENTRAL</div>
     </div>
     <div class="nav-actions">
-        <!-- Notification Bell -->
         <div id="notif-bell" class="notif-bell-btn hidden" onclick="openNotificationsModal()" title="Notifications">
             🔔
             <div id="notif-badge-count" class="notif-badge hidden">0</div>
@@ -579,14 +429,12 @@ h1, h2, h3, .font-heading {
 <div id="view-main-menu" class="container">
     <div class="hero">
         <h1 class="font-heading">Geometry Dash Demonlists</h1>
-        <p>Host dynamic level rankings, track player points, verify video submissions, and collaborate with co-editors.</p>
+        <p>Host dynamic level rankings, track player points, verify video submissions, and collaborate with co-editors globally.</p>
     </div>
 
-    <!-- POPULAR LISTS SECTION -->
     <div class="section-title">🔥 Popular Demonlists</div>
     <div id="popular-lists-grid" class="lists-grid"></div>
 
-    <!-- ALL LISTS SECTION -->
     <div class="section-title" style="margin-top: 10px;">🌐 All Demonlists</div>
     <div id="all-lists-grid" class="lists-grid"></div>
 </div>
@@ -610,14 +458,12 @@ h1, h2, h3, .font-heading {
         </div>
     </div>
 
-    <!-- TABS NAV -->
     <div class="tabs">
         <button class="tab-btn active" id="tab-btn-levels" onclick="switchTab('levels')">Demons / Levels</button>
         <button class="tab-btn" id="tab-btn-leaderboard" onclick="switchTab('leaderboard')">Player Leaderboard</button>
         <button class="tab-btn hidden" id="tab-btn-admin-nav" onclick="switchTab('admin')">Admin Panel</button>
     </div>
 
-    <!-- TAB 1: LEVELS -->
     <div id="tab-content-levels">
         <div style="margin-bottom:16px;">
             <input type="text" id="search-levels-input" class="form-control" placeholder="Search levels or creators..." oninput="filterLevelsList()" style="max-width:320px;">
@@ -625,13 +471,9 @@ h1, h2, h3, .font-heading {
         <div id="levels-list-container"></div>
     </div>
 
-    <!-- TAB 2: LEADERBOARD -->
     <div id="tab-content-leaderboard" class="hidden"></div>
 
-    <!-- TAB 3: ADMIN PANEL -->
     <div id="tab-content-admin" class="hidden">
-        
-        <!-- INVITE USER BOX -->
         <div style="background:var(--surface); padding:20px; border-radius:12px; border:1px solid var(--border); margin-bottom:20px;">
             <h3 class="font-heading" style="font-size: 16px; margin-bottom:4px;">📨 Invite Co-Editor</h3>
             <p style="color:var(--text-secondary); font-size:12px; margin-bottom:12px;">Type the username of a registered player to send them an invitation notification.</p>
@@ -641,7 +483,6 @@ h1, h2, h3, .font-heading {
             </div>
         </div>
 
-        <!-- ADD LEVEL BOX -->
         <div style="background:var(--surface); padding:20px; border-radius:12px; border:1px solid var(--border); margin-bottom:20px;">
             <h3 class="font-heading" style="font-size: 16px; margin-bottom:14px;">➕ Add New Demon</h3>
             <form id="add-level-form">
@@ -672,7 +513,6 @@ h1, h2, h3, .font-heading {
             </form>
         </div>
 
-        <!-- MANAGE EXISTING LEVELS -->
         <div style="background:var(--surface); padding:20px; border-radius:12px; border:1px solid var(--border);">
             <h3 class="font-heading" style="font-size: 16px; margin-bottom:14px;">📜 Manage Listed Demons</h3>
             <div id="admin-levels-manage-list"></div>
@@ -682,7 +522,7 @@ h1, h2, h3, .font-heading {
 
 <!-- MODALS -->
 
-<!-- 1. AUTHENTICATION MODAL -->
+<!-- AUTH MODAL -->
 <div id="modal-auth" class="modal-overlay">
     <div class="modal-content" style="max-width:400px;">
         <div class="modal-header">
@@ -695,19 +535,16 @@ h1, h2, h3, .font-heading {
             <button class="auth-tab-btn" id="auth-tab-register" onclick="switchAuthTab('register')">Register</button>
         </div>
 
-        <!-- LOGIN FORM -->
         <form id="form-login">
             <div class="form-group"><label>Username</label><input type="text" id="login-username" class="form-control" required placeholder="Your username"></div>
             <div class="form-group"><label>Password</label><input type="password" id="login-password" class="form-control" required placeholder="••••••••"></div>
             <button type="submit" class="btn btn-accent" style="width:100%; margin-top:10px;">Log In</button>
         </form>
 
-        <!-- REGISTER FORM -->
         <form id="form-register" class="hidden">
             <div class="form-group"><label>Choose Username</label><input type="text" id="reg-username" class="form-control" required placeholder="Username"></div>
             <div class="form-group"><label>Choose Password</label><input type="password" id="reg-password" class="form-control" required placeholder="Password"></div>
             
-            <!-- CAPTCHA -->
             <div class="captcha-box">
                 <div>
                     <span style="font-size:11px; color:var(--text-muted); display:block;">Anti-Bot Verification</span>
@@ -721,7 +558,7 @@ h1, h2, h3, .font-heading {
     </div>
 </div>
 
-<!-- 2. NOTIFICATIONS INBOX MODAL -->
+<!-- NOTIFICATIONS MODAL -->
 <div id="modal-notifications" class="modal-overlay">
     <div class="modal-content" style="max-width:460px;">
         <div class="modal-header">
@@ -732,7 +569,7 @@ h1, h2, h3, .font-heading {
     </div>
 </div>
 
-<!-- 3. CREATE LIST MODAL -->
+<!-- CREATE LIST MODAL -->
 <div id="modal-create-list" class="modal-overlay">
     <div class="modal-content" style="max-width:460px;">
         <div class="modal-header">
@@ -751,7 +588,7 @@ h1, h2, h3, .font-heading {
     </div>
 </div>
 
-<!-- 4. EDIT LEVEL MODAL -->
+<!-- EDIT LEVEL MODAL -->
 <div id="modal-edit-level" class="modal-overlay">
     <div class="modal-content">
         <div class="modal-header">
@@ -791,7 +628,7 @@ h1, h2, h3, .font-heading {
     </div>
 </div>
 
-<!-- 5. LEVEL DETAILS MODAL -->
+<!-- LEVEL DETAILS MODAL -->
 <div id="modal-level-details" class="modal-overlay">
     <div class="modal-content">
         <div class="modal-header">
@@ -799,7 +636,6 @@ h1, h2, h3, .font-heading {
             <button class="modal-close" onclick="closeModals()">✕</button>
         </div>
         
-        <!-- VIDEO PLAYER -->
         <div id="detail-video-container"></div>
         
         <div style="margin-bottom:16px;">
@@ -816,54 +652,80 @@ h1, h2, h3, .font-heading {
 
 <script>
 // =========================================================================
-// DATA STORES & LOCAL STORAGE
+// GLOBAL CLOUD STORE (JSONBIN PUBLIC API BACKEND)
 // =========================================================================
-let currentUser = JSON.parse(localStorage.getItem("gd_current_user_v5")) || null;
+const GLOBAL_BIN_ID = "65f0a0e2dc74654018b31a89"; 
+const API_URL = `https://api.jsonbin.io/v3/b/${GLOBAL_BIN_ID}`;
 
-// User Database initialized with 'myszon' (Superadmin)
-let usersDB = JSON.parse(localStorage.getItem("gd_users_db_v5")) || {
-    "myszon": { password: "szyszkaqw", invites: [] }
-};
+let currentUser = JSON.parse(localStorage.getItem("gd_current_user_v6")) || null;
 
-if (!usersDB["myszon"]) {
-    usersDB["myszon"] = { password: "szyszkaqw", invites: [] };
-}
-
-// Default Demonlists
-let localDataStore = JSON.parse(localStorage.getItem("gd_hub_v5")) || {
-    "top-10-demons": {
-        id: "top-10-demons",
-        title: "Main Demonlist",
-        author: "myszon",
-        editors: [],
-        discord: "https://discord.gg",
-        views: 1420,
-        levels: [
-            { pos: 1, name: "Acheron", author: "Ryamu & More", verifier: "Zoink", pts: 100, yt: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", victors: [{ name: "Zoink", video: "https://youtube.com" }, { name: "Trick", video: "" }] },
-            { pos: 2, name: "Avernus", author: "Pingu & More", verifier: "Zoink", pts: 95, yt: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", victors: [{ name: "Diamond", video: "" }] },
-            { pos: 3, name: "Silent Clubstep", author: "Nailok", verifier: "Paqtez", pts: 90, yt: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", victors: [] }
-        ]
+let globalData = {
+    users: {
+        "myszon": { password: "szyszkaqw", invites: [] }
     },
-    "impossible-challenges": {
-        id: "impossible-challenges",
-        title: "Impossible List",
-        author: "myszon",
-        editors: [],
-        discord: "https://discord.gg",
-        views: 2890,
-        levels: [
-            { pos: 1, name: "Ton 618", author: "TheSavageGD", verifier: "Bot", pts: 200, yt: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", victors: [] }
-        ]
+    lists: {
+        "top-10-demons": {
+            id: "top-10-demons",
+            title: "Main Demonlist",
+            author: "myszon",
+            editors: [],
+            discord: "https://discord.gg",
+            views: 1420,
+            levels: [
+                { pos: 1, name: "Acheron", author: "Ryamu & More", verifier: "Zoink", pts: 100, yt: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", victors: [{ name: "Zoink", video: "https://youtube.com" }, { name: "Trick", video: "" }] },
+                { pos: 2, name: "Avernus", author: "Pingu & More", verifier: "Zoink", pts: 95, yt: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", victors: [{ name: "Diamond", video: "" }] },
+                { pos: 3, name: "Silent Clubstep", author: "Nailok", verifier: "Paqtez", pts: 90, yt: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", victors: [] }
+            ]
+        }
     }
 };
 
-function saveData() {
-    localStorage.setItem("gd_users_db_v5", JSON.stringify(usersDB));
-    localStorage.setItem("gd_hub_v5", JSON.stringify(localDataStore));
+function setSyncing(isSyncing) {
+    const bar = document.getElementById("sync-status");
+    if (isSyncing) bar.classList.add("syncing");
+    else bar.classList.remove("syncing");
+}
+
+async function fetchGlobalData() {
+    setSyncing(true);
+    try {
+        const res = await fetch(API_URL + "/latest", {
+            headers: { "X-Bin-Meta": "false" }
+        });
+        if (res.ok) {
+            const data = await res.json();
+            if (data && data.users && data.lists) {
+                globalData = data;
+                if (!globalData.users["myszon"]) {
+                    globalData.users["myszon"] = { password: "szyszkaqw", invites: [] };
+                }
+            }
+        }
+    } catch (e) {
+        console.warn("Using default state due to network fetch delay", e);
+    } finally {
+        setSyncing(false);
+    }
+}
+
+async function saveGlobalData() {
+    setSyncing(true);
     if (currentUser) {
-        localStorage.setItem("gd_current_user_v5", JSON.stringify(currentUser));
+        localStorage.setItem("gd_current_user_v6", JSON.stringify(currentUser));
     } else {
-        localStorage.removeItem("gd_current_user_v5");
+        localStorage.removeItem("gd_current_user_v6");
+    }
+
+    try {
+        await fetch(API_URL, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(globalData)
+        });
+    } catch (e) {
+        console.error("Cloud sync failed", e);
+    } finally {
+        setSyncing(false);
     }
 }
 
@@ -903,14 +765,16 @@ function openAuthModal(type = 'login') {
     document.getElementById("modal-auth").classList.add("active");
 }
 
-document.getElementById("form-login").addEventListener("submit", (e) => {
+document.getElementById("form-login").addEventListener("submit", async (e) => {
     e.preventDefault();
+    await fetchGlobalData();
+    
     const user = document.getElementById("login-username").value.trim();
     const pass = document.getElementById("login-password").value;
 
-    if (usersDB[user] && usersDB[user].password === pass) {
+    if (globalData.users[user] && globalData.users[user].password === pass) {
         currentUser = { username: user };
-        saveData();
+        await saveGlobalData();
         updateAuthUI();
         closeModals();
         showToast(`Welcome back, ${user}!`);
@@ -920,8 +784,10 @@ document.getElementById("form-login").addEventListener("submit", (e) => {
     }
 });
 
-document.getElementById("form-register").addEventListener("submit", (e) => {
+document.getElementById("form-register").addEventListener("submit", async (e) => {
     e.preventDefault();
+    await fetchGlobalData();
+
     const user = document.getElementById("reg-username").value.trim();
     const pass = document.getElementById("reg-password").value;
     const captchaAns = Number(document.getElementById("captcha-answer").value);
@@ -932,14 +798,14 @@ document.getElementById("form-register").addEventListener("submit", (e) => {
         return;
     }
 
-    if (usersDB[user]) {
+    if (globalData.users[user]) {
         showToast("❌ Username is already registered");
         return;
     }
 
-    usersDB[user] = { password: pass, invites: [] };
+    globalData.users[user] = { password: pass, invites: [] };
     currentUser = { username: user };
-    saveData();
+    await saveGlobalData();
     updateAuthUI();
     closeModals();
     showToast(`Account created! Logged in as ${user}`);
@@ -948,7 +814,7 @@ document.getElementById("form-register").addEventListener("submit", (e) => {
 
 function logoutUser() {
     currentUser = null;
-    saveData();
+    saveGlobalData();
     updateAuthUI();
     showToast("Logged out successfully");
     if (currentListId) loadList(currentListId);
@@ -974,18 +840,20 @@ function updateAuthUI() {
 // =========================================================================
 // INBOX & INVITES
 // =========================================================================
-function sendDirectInvite() {
+async function sendDirectInvite() {
     if (!currentUser || !isOwner) return;
 
     const targetUser = document.getElementById("invite-username-input").value.trim();
-
     if (!targetUser) return;
+    
     if (targetUser === currentUser.username) {
         showToast("Cannot invite yourself!");
         return;
     }
 
-    if (!usersDB[targetUser]) {
+    await fetchGlobalData();
+
+    if (!globalData.users[targetUser]) {
         showToast("❌ User not found");
         return;
     }
@@ -995,29 +863,29 @@ function sendDirectInvite() {
         return;
     }
 
-    if (!usersDB[targetUser].invites) usersDB[targetUser].invites = [];
+    if (!globalData.users[targetUser].invites) globalData.users[targetUser].invites = [];
 
-    const existingInvite = usersDB[targetUser].invites.find(i => i.listId === currentListId);
+    const existingInvite = globalData.users[targetUser].invites.find(i => i.listId === currentListId);
     if (existingInvite) {
         showToast("Invite already sent!");
         return;
     }
 
-    usersDB[targetUser].invites.push({
+    globalData.users[targetUser].invites.push({
         id: Date.now(),
         from: currentUser.username,
         listId: currentListId,
         listTitle: currentListData.title
     });
 
-    saveData();
+    await saveGlobalData();
     document.getElementById("invite-username-input").value = "";
     showToast(`Invite sent to ${targetUser}`);
 }
 
 function checkNotificationsCount() {
-    if (!currentUser || !usersDB[currentUser.username]) return;
-    const invites = usersDB[currentUser.username].invites || [];
+    if (!currentUser || !globalData.users[currentUser.username]) return;
+    const invites = globalData.users[currentUser.username].invites || [];
     const badge = document.getElementById("notif-badge-count");
 
     if (invites.length > 0) {
@@ -1032,7 +900,7 @@ function openNotificationsModal() {
     const container = document.getElementById("notifications-list-container");
     container.innerHTML = "";
 
-    const invites = (usersDB[currentUser.username] && usersDB[currentUser.username].invites) || [];
+    const invites = (globalData.users[currentUser.username] && globalData.users[currentUser.username].invites) || [];
 
     if (invites.length === 0) {
         container.innerHTML = "<p style='color:var(--text-muted); font-size:13px; text-align:center;'>No pending invitations.</p>";
@@ -1059,23 +927,24 @@ function openNotificationsModal() {
     document.getElementById("modal-notifications").classList.add("active");
 }
 
-function respondInvite(inviteId, accept) {
-    const userInvites = usersDB[currentUser.username].invites;
+async function respondInvite(inviteId, accept) {
+    await fetchGlobalData();
+    const userInvites = globalData.users[currentUser.username].invites;
     const index = userInvites.findIndex(i => i.id === inviteId);
 
     if (index !== -1) {
         const inv = userInvites[index];
         if (accept) {
-            if (localDataStore[inv.listId]) {
-                if (!localDataStore[inv.listId].editors) localDataStore[inv.listId].editors = [];
-                if (!localDataStore[inv.listId].editors.includes(currentUser.username)) {
-                    localDataStore[inv.listId].editors.push(currentUser.username);
+            if (globalData.lists[inv.listId]) {
+                if (!globalData.lists[inv.listId].editors) globalData.lists[inv.listId].editors = [];
+                if (!globalData.lists[inv.listId].editors.includes(currentUser.username)) {
+                    globalData.lists[inv.listId].editors.push(currentUser.username);
                 }
             }
             showToast(`Joined "${inv.listTitle}" as Co-Editor`);
         }
         userInvites.splice(index, 1);
-        saveData();
+        await saveGlobalData();
         checkNotificationsCount();
         openNotificationsModal();
         if (currentListId === inv.listId) loadList(currentListId);
@@ -1089,12 +958,15 @@ let currentListId = null;
 let currentListData = null;
 let isOwner = false;
 
-window.addEventListener("DOMContentLoaded", () => {
+window.addEventListener("DOMContentLoaded", async () => {
+    await fetchGlobalData();
     updateAuthUI();
     showMainMenu();
 });
 
-function showMainMenu() {
+async function showMainMenu() {
+    await fetchGlobalData();
+
     document.getElementById("view-main-menu").classList.remove("hidden");
     document.getElementById("view-list-detail").classList.add("hidden");
 
@@ -1103,7 +975,7 @@ function showMainMenu() {
     popGrid.innerHTML = "";
     allGrid.innerHTML = "";
 
-    const listsArray = Object.keys(localDataStore).map(id => localDataStore[id]);
+    const listsArray = Object.keys(globalData.lists).map(id => globalData.lists[id]);
     const popularLists = [...listsArray].sort((a,b) => (b.views || 0) - (a.views || 0));
 
     popularLists.slice(0, 3).forEach(item => {
@@ -1134,9 +1006,10 @@ function createListCardElement(item) {
     return card;
 }
 
-function loadList(listId) {
+async function loadList(listId) {
+    await fetchGlobalData();
     currentListId = listId;
-    currentListData = localDataStore[listId];
+    currentListData = globalData.lists[listId];
 
     if (!currentListData) {
         showToast("Demonlist not found!");
@@ -1144,12 +1017,10 @@ function loadList(listId) {
         return;
     }
 
-    // View counter
     if (!currentListData.views) currentListData.views = 0;
     currentListData.views += 1;
-    saveData();
+    saveGlobalData();
 
-    // SUPERADMIN CHECK ('myszon' has full control over all lists)
     const isSuperAdmin = currentUser && currentUser.username === "myszon";
     isOwner = isSuperAdmin || (currentUser && (
         currentListData.author === currentUser.username || 
@@ -1181,11 +1052,11 @@ function loadList(listId) {
     if (isOwner) renderAdminPanel();
 }
 
-function deleteCurrentList() {
+async function deleteCurrentList() {
     if (!isOwner) return;
     if (confirm(`Permanently delete list "${currentListData.title}"?`)) {
-        delete localDataStore[currentListId];
-        saveData();
+        delete globalData.lists[currentListId];
+        await saveGlobalData();
         showToast("Demonlist deleted");
         showMainMenu();
     }
@@ -1342,7 +1213,7 @@ function renderAdminPanel() {
 // =========================================================================
 // FORM HANDLERS
 // =========================================================================
-document.getElementById("add-level-form").addEventListener("submit", (e) => {
+document.getElementById("add-level-form").addEventListener("submit", async (e) => {
     e.preventDefault();
     if (!isOwner) return;
 
@@ -1357,7 +1228,7 @@ document.getElementById("add-level-form").addEventListener("submit", (e) => {
     };
 
     insertAndShiftLevel(newLvl);
-    saveData();
+    await saveGlobalData();
     updateMaxPosLimits();
     
     renderListLevels();
@@ -1394,7 +1265,7 @@ function openEditLevelModal(index) {
     document.getElementById("modal-edit-level").classList.add("active");
 }
 
-document.getElementById("edit-level-form").addEventListener("submit", (e) => {
+document.getElementById("edit-level-form").addEventListener("submit", async (e) => {
     e.preventDefault();
     if (!isOwner) return;
 
@@ -1411,7 +1282,7 @@ document.getElementById("edit-level-form").addEventListener("submit", (e) => {
     };
 
     editAndShiftLevel(idx, updatedLvl);
-    saveData();
+    await saveGlobalData();
     closeModals();
     
     renderListLevels();
@@ -1420,11 +1291,11 @@ document.getElementById("edit-level-form").addEventListener("submit", (e) => {
     showToast(`Saved changes for "${updatedLvl.name}"`);
 });
 
-function deleteLevel(index) {
+async function deleteLevel(index) {
     if (confirm("Delete this level?") && isOwner) {
         currentListData.levels.splice(index, 1);
         reorderLevelsArray(currentListData.levels);
-        saveData();
+        await saveGlobalData();
         updateMaxPosLimits();
         renderListLevels();
         renderLeaderboard();
@@ -1433,7 +1304,7 @@ function deleteLevel(index) {
     }
 }
 
-document.getElementById("create-list-form").addEventListener("submit", (e) => {
+document.getElementById("create-list-form").addEventListener("submit", async (e) => {
     e.preventDefault();
     if (!currentUser) {
         showToast("Please log in first!");
@@ -1445,8 +1316,9 @@ document.getElementById("create-list-form").addEventListener("submit", (e) => {
     const title = document.getElementById("new-list-title").value.trim();
     const discord = document.getElementById("new-list-discord").value.trim();
 
-    localDataStore[id] = { id, title, author: currentUser.username, editors: [], discord, views: 1, levels: [] };
-    saveData();
+    await fetchGlobalData();
+    globalData.lists[id] = { id, title, author: currentUser.username, editors: [], discord, views: 1, levels: [] };
+    await saveGlobalData();
     closeModals();
     loadList(id);
     showToast("Demonlist created!");
