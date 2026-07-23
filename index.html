@@ -1,638 +1,676 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Luck Based List</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;900&display=swap" rel="stylesheet">
+<title>Geometry Dash List Maker</title>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;600;700;800&display=swap" rel="stylesheet">
 
 <style>
-    /* ================================== */
-    /* THEME VARIABLES (DARK & LIGHT)     */
-    /* ================================== */
-    :root {
-        --bg-color: #020204;
-        --card-bg: rgba(12, 12, 18, 0.65);
-        --modal-bg: rgba(12, 12, 18, 0.85);
-        --accent-1: #9b7bff;
-        --accent-2: #00d4ff;
-        --accent-pink: #ff4dff;
-        --discord: #5865F2;
-        --discord-text: #8c94f8;
-        
-        --glass-border: rgba(255, 255, 255, 0.08);
-        --glass-border-hover: rgba(255, 255, 255, 0.2);
-        --text-main: #ffffff;
-        --text-muted: #b3b3b3;
-        --nav-bg: rgba(8, 8, 12, 0.6);
-        --input-bg: rgba(0, 0, 0, 0.4);
-        --input-focus-bg: rgba(0, 0, 0, 0.6);
-        --stat-bg: rgba(255, 255, 255, 0.02);
-        
-        --ambient-opacity: 0.07;
-        --ambient-opacity-high: 0.15;
-        --card-gradient: linear-gradient(to right, rgba(2,2,4,1) 0%, rgba(2,2,4,0.7) 40%, rgba(2,2,4,0.2) 100%);
-        --toast-bg: rgba(20, 20, 30, 0.9);
-        --scrollbar-thumb: #1a1a26;
-        --empty-border: rgba(255, 255, 255, 0.1);
-        --rank-badge-bg: linear-gradient(135deg, #12121c, #1a1a2e);
-        --shadow-dark: rgba(0, 0, 0, 0.7);
-        --shadow-hover: rgba(0, 0, 0, 0.8);
-        --text-shadow: rgba(0, 0, 0, 0.5);
-        --skeleton-base: #0f0f15;
-        --skeleton-shine: #1a1a24;
-        
-        --id-bg: rgba(255, 255, 255, 0.05);
-        --id-hover: rgba(255, 255, 255, 0.15);
-        --wr-hover-bg: white;
-        --wr-hover-color: black;
-        --play-overlay: rgba(0, 0, 0, 0.4);
-        --play-overlay-hover: rgba(0, 0, 0, 0.1);
-    }
+:root {
+    --bg-main: #000000;
+    --nav-bg: rgba(10, 10, 10, 0.7);
+    --text-main: #ffffff;
+    --text-dim: #aaaaaa;
+    --text-sub: #888888;
+    --border-color: rgba(255, 255, 255, 0.15);
+    --border-hover: rgba(255, 255, 255, 0.4);
+    --card-bg: #0a0a0a;
+    --card-grad-1: #050505;
+    --card-grad-2: #111111;
+    --input-bg: rgba(255, 255, 255, 0.05);
+    --input-focus: rgba(255, 255, 255, 0.1);
+    --shadow-color: rgba(0, 0, 0, 0.5);
+    --theme-btn-bg: rgba(255, 255, 255, 0.1);
+    --tab-active-bg: #ffffff;
+    --tab-active-text: #000000;
+    --tab-border: rgba(255, 255, 255, 0.2);
+    --accent: #ffcf40;
+    --blob-1: rgba(255, 207, 64, 0.15);
+    --blob-2: rgba(255, 71, 71, 0.15);
+}
 
-    [data-theme="light"] {
-        --bg-color: #f0f2f5;
-        --card-bg: rgba(255, 255, 255, 0.75);
-        --modal-bg: rgba(255, 255, 255, 0.9);
-        --accent-1: #7848ff;
-        --accent-2: #008be5;
-        --accent-pink: #d900d9;
-        --discord: #5865F2;
-        --discord-text: #5865F2;
-        
-        --glass-border: rgba(0, 0, 0, 0.08);
-        --glass-border-hover: rgba(0, 0, 0, 0.2);
-        --text-main: #1a1a2e;
-        --text-muted: #5a5a75;
-        --nav-bg: rgba(255, 255, 255, 0.75);
-        --input-bg: rgba(0, 0, 0, 0.05);
-        --input-focus-bg: rgba(255, 255, 255, 0.9);
-        --stat-bg: rgba(255, 255, 255, 0.5);
-        
-        --ambient-opacity: 0.12;
-        --ambient-opacity-high: 0.25;
-        --card-gradient: linear-gradient(to right, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.85) 45%, rgba(255,255,255,0.15) 100%);
-        --toast-bg: rgba(255, 255, 255, 0.95);
-        --scrollbar-thumb: #c8d0e0;
-        --empty-border: rgba(0, 0, 0, 0.15);
-        --rank-badge-bg: linear-gradient(135deg, #ffffff, #eef0f5);
-        --shadow-dark: rgba(0, 0, 0, 0.08);
-        --shadow-hover: rgba(0, 0, 0, 0.12);
-        --text-shadow: rgba(255, 255, 255, 0.8);
-        --skeleton-base: #e2e5eb;
-        --skeleton-shine: #ffffff;
-        
-        --id-bg: rgba(0, 0, 0, 0.04);
-        --id-hover: rgba(0, 0, 0, 0.08);
-        --wr-hover-bg: #1a1a2e;
-        --wr-hover-color: white;
-        --play-overlay: rgba(255, 255, 255, 0.2);
-        --play-overlay-hover: rgba(255, 255, 255, 0);
-    }
+[data-theme="light"] {
+    --bg-main: #f4f4f5;
+    --nav-bg: rgba(255, 255, 255, 0.85);
+    --text-main: #18181b;
+    --text-dim: #52525b;
+    --text-sub: #71717a;
+    --border-color: rgba(0, 0, 0, 0.1);
+    --border-hover: rgba(0, 0, 0, 0.3);
+    --card-bg: #ffffff;
+    --card-grad-1: #ffffff;
+    --card-grad-2: #f4f4f5;
+    --input-bg: rgba(0, 0, 0, 0.05);
+    --input-focus: rgba(0, 0, 0, 0.1);
+    --shadow-color: rgba(0, 0, 0, 0.1);
+    --theme-btn-bg: rgba(0, 0, 0, 0.05);
+    --tab-active-bg: #000000;
+    --tab-active-text: #ffffff;
+    --tab-border: rgba(0, 0, 0, 0.2);
+    --accent: #d9a000;
+    --blob-1: rgba(217, 160, 0, 0.2);
+    --blob-2: rgba(88, 101, 242, 0.15);
+}
 
-    /* PREMIUM SCROLLBAR */
-    ::-webkit-scrollbar { width: 8px; height: 8px; }
-    ::-webkit-scrollbar-track { background: var(--bg-color); }
-    ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 10px; }
-    ::-webkit-scrollbar-thumb:hover { background: var(--accent-1); }
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: var(--bg-main); }
+::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent); }
 
-    /* GLOBAL STYLES */
-    body {
-        margin: 0; background: var(--bg-color); font-family: 'Rubik', sans-serif;
-        color: var(--text-main); overflow-x: hidden; padding-top: 150px;
-        min-height: 100vh; transition: background-color 0.5s ease, color 0.5s ease;
-    }
-    body.modal-open { overflow: hidden; } /* Prevents scrolling when modal is open */
+body {
+    margin: 0;
+    background: var(--bg-main);
+    font-family: 'Rubik', sans-serif;
+    color: var(--text-main);
+    overflow-x: hidden;
+    transition: background 0.3s ease, color 0.3s ease;
+}
 
-    /* SCROLL PROGRESS BAR */
-    #scrollProgress { position: fixed; top: 0; left: 0; height: 3px; background: linear-gradient(to right, var(--accent-pink), var(--accent-1), var(--accent-2)); width: 0%; z-index: 10000; transition: width 0.1s ease-out; }
+.bg-blob {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(80px);
+    z-index: -1;
+    animation: floatBlob 12s infinite alternate ease-in-out;
+    pointer-events: none;
+}
+.blob-1 { width: 500px; height: 500px; background: var(--blob-1); top: -150px; left: -150px; }
+.blob-2 { width: 400px; height: 400px; background: var(--blob-2); bottom: -100px; right: -100px; animation-delay: -6s; animation-direction: alternate-reverse; }
 
-    /* DEEP SPACE AMBIENT BACKGROUND */
-    .ambient-bg { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: -2; background: radial-gradient(circle at 15% 25%, rgba(255, 77, 255, var(--ambient-opacity)) 0%, transparent 45%), radial-gradient(circle at 85% 75%, rgba(0, 212, 255, var(--ambient-opacity)) 0%, transparent 45%), radial-gradient(circle at 50% 50%, rgba(155, 123, 255, var(--ambient-opacity)) 0%, transparent 60%); filter: blur(30px); animation: drift 20s ease-in-out infinite alternate; transition: background 0.5s ease; }
-    .cursor-glow { position: fixed; top: -150px; left: -150px; width: 300px; height: 300px; background: radial-gradient(circle, rgba(155, 123, 255, var(--ambient-opacity-high)) 0%, transparent 70%); border-radius: 50%; pointer-events: none; z-index: -1; transition: transform 0.15s ease-out; will-change: transform; }
-    @keyframes drift { 0% { transform: scale(1); } 100% { transform: scale(1.15); } }
+@keyframes floatBlob {
+    0% { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(100px, 100px) scale(1.1); }
+}
 
-    /* ===================== */
-    /* PREMIUM ROUNDED NAV   */
-    /* ===================== */
-    .navbar { position: fixed; top: 24px; left: 50%; transform: translateX(-50%); z-index: 999; width: 92%; max-width: 1250px; height: 76px; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; padding: 0 30px; border-radius: 100px; background: var(--nav-bg); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); border: 1px solid var(--glass-border); box-shadow: 0 25px 50px var(--shadow-dark), inset 0 1px 0 var(--glass-border); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-    .navbar:hover { box-shadow: 0 30px 60px var(--shadow-hover), 0 0 40px rgba(155, 123, 255, 0.15); transform: translateX(-50%) translateY(-2px); }
-    .logo { font-size: 24px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; background: linear-gradient(to right, var(--text-main), var(--accent-pink), var(--accent-2), var(--text-main)); background-size: 300%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: moveGradient 6s linear infinite; transition: all 0.3s ease; }
-    .right-nav { display: flex; align-items: center; gap: 14px; }
-    #searchBar { width: 190px; height: 44px; padding: 0 20px; border-radius: 100px; border: 1px solid var(--glass-border); background: var(--input-bg); color: var(--text-main); font-family: inherit; font-weight: 500; outline: none; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-    #searchBar:focus { width: 250px; background: var(--input-focus-bg); border-color: var(--accent-1); box-shadow: 0 0 25px rgba(155, 123, 255, 0.25); }
-    .sort-dropdown { height: 44px; padding: 0 16px; border-radius: 100px; border: 1px solid var(--glass-border); background: var(--input-bg); color: var(--text-muted); font-family: inherit; font-weight: 600; font-size: 13px; outline: none; cursor: pointer; transition: all 0.3s; }
-    .sort-dropdown:hover { background: var(--id-hover); color: var(--text-main); }
-    .sort-dropdown option { background: var(--bg-color); color: var(--text-main); }
-    .theme-toggle { width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--glass-border); background: var(--input-bg); color: var(--text-main); display: flex; align-items: center; justify-content: center; cursor: pointer; outline: none; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-    .theme-toggle:hover { background: var(--id-hover); transform: translateY(-2px); box-shadow: 0 10px 20px var(--shadow-dark); }
-    .theme-toggle svg { width: 20px; height: 20px; stroke: currentColor; transition: transform 0.5s ease; }
-    .theme-toggle:active svg { transform: rotate(45deg) scale(0.8); }
-    #moonIcon { display: none; } #sunIcon { display: block; }
-    [data-theme="light"] #moonIcon { display: block; } [data-theme="light"] #sunIcon { display: none; }
-    .btn { height: 44px; padding: 0 24px; border-radius: 100px; display: flex; align-items: center; justify-content: center; text-decoration: none; font-weight: 700; font-size: 13px; transition: all 0.3s ease; white-space: nowrap; cursor: pointer; }
-    .discord { background: rgba(88, 101, 242, 0.15); color: var(--discord-text); border: 1px solid rgba(88, 101, 242, 0.3); }
-    .discord:hover { background: var(--discord); color: white; transform: translateY(-2px); box-shadow: 0 10px 25px rgba(88, 101, 242, 0.4); }
+.navbar {
+    display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center;
+    padding: 15px max(5vw, 20px); background: var(--nav-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+    border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 100; gap: 15px;
+}
+.nav-title { font-size: 24px; font-weight: 800; color: var(--text-main); text-transform: uppercase; letter-spacing: 2px; }
+.nav-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 
-    /* ===================== */
-    /* DASHBOARD & FILTERS   */
-    /* ===================== */
-    .container { width: 100%; display: flex; flex-direction: column; align-items: center; padding: 0 20px 80px 20px; gap: 20px; box-sizing: border-box; }
-    .stats-panel { width: min(920px, 95vw); display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
-    .stat-box { background: var(--stat-bg); border: 1px solid var(--glass-border); border-radius: 20px; padding: 18px 24px; backdrop-filter: blur(10px); transition: all 0.3s; }
-    .stat-box:hover { border-color: var(--glass-border-hover); transform: translateY(-2px); box-shadow: 0 10px 30px var(--shadow-dark); }
-    .stat-label { font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 700; letter-spacing: 1px; transition: color 0.5s; }
-    .stat-value { font-size: 24px; font-weight: 900; color: var(--text-main); margin-top: 4px; transition: color 0.5s; }
-    .stat-box:nth-child(2) .stat-value { color: var(--accent-2); }
-    .filter-wrapper { width: min(920px, 95vw); display: flex; gap: 10px; overflow-x: auto; padding: 5px 0 15px 0; -ms-overflow-style: none; scrollbar-width: none; }
-    .filter-wrapper::-webkit-scrollbar { display: none; }
-    .filter-btn { padding: 8px 16px; border-radius: 100px; font-size: 12px; font-weight: 700; text-transform: uppercase; background: var(--input-bg); border: 1px solid var(--glass-border); color: var(--text-muted); cursor: pointer; transition: all 0.3s; white-space: nowrap; }
-    .filter-btn:hover { background: var(--id-hover); color: var(--text-main); transform: translateY(-1px); }
-    .filter-btn.active { background: var(--text-main); color: var(--bg-color); border-color: var(--text-main); box-shadow: 0 5px 15px rgba(255,255,255,0.1); }
+.nav-search { flex-grow: 1; max-width: 350px; position: relative; }
+#search-input {
+    width: 100%; box-sizing: border-box; padding: 10px 20px 10px 40px;
+    font-family: 'Rubik', sans-serif; font-size: 14px; font-weight: 600;
+    background: var(--input-bg); border: 1px solid var(--border-color);
+    color: var(--text-main); border-radius: 30px; outline: none; transition: all 0.3s ease;
+}
+#search-input:focus { background: var(--input-focus); border-color: var(--border-hover); }
+.search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: var(--text-dim); }
 
-    /* ===================== */
-    /* ELEGANT CARD LAYOUT   */
-    /* ===================== */
-    #levelsContainer { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 25px; perspective: 1000px; }
-    .card { width: min(920px, 95vw); height: 240px; display: flex; border-radius: 26px; overflow: hidden; background: var(--card-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); box-shadow: 0 20px 45px var(--shadow-dark); position: relative; opacity: 0; transform: translateY(35px); transition: background 0.5s ease, border-color 0.5s ease, box-shadow 0.3s ease, opacity 0.5s ease; transform-style: preserve-3d; }
-    @keyframes cardEnter { to { opacity: 1; transform: translateY(0); } }
-    .card:hover { border-color: var(--glass-border-hover); box-shadow: 0 30px 60px var(--shadow-hover), 0 0 40px rgba(155, 123, 255, 0.15); z-index: 10; }
-    .left { width: 40%; height: 100%; position: relative; cursor: pointer; background: #000; overflow: hidden; flex-shrink: 0; }
-    .left img, .right img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
-    .card:hover .left img, .card:hover .right img { transform: scale(1.06); }
-    .left iframe { width: 100%; height: 100%; border: none; }
-    .right { width: 60%; height: 100%; position: relative; overflow: hidden; }
-    .card-ui-layer { position: absolute; inset: 0; z-index: 2; background: var(--card-gradient); padding: 26px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; transition: background 0.5s ease; }
-    
-    .play-overlay { position: absolute; inset: 0; background: var(--play-overlay); display: flex; justify-content: center; align-items: center; transition: background 0.3s; }
-    .left:hover .play-overlay { background: var(--play-overlay-hover); }
-    .play-btn { width: 56px; height: 56px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255,255,255,0.4); backdrop-filter: blur(12px); border-radius: 50%; display: flex; justify-content: center; align-items: center; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
-    .play-btn::after { content: ''; border-top: 10px solid transparent; border-bottom: 10px solid transparent; border-left: 16px solid white; margin-left: 5px; }
-    .left:hover .play-btn { transform: scale(1.15); background: white; box-shadow: 0 0 30px rgba(255,255,255,0.6); }
-    .left:hover .play-btn::after { border-left-color: black; }
+.btn-custom {
+    background: var(--theme-btn-bg); border: 1px solid var(--border-color); color: var(--text-main);
+    border-radius: 12px; cursor: pointer; display: inline-flex; justify-content: center; align-items: center;
+    transition: all 0.3s ease; height: 40px; padding: 0 16px; font-family: 'Rubik', sans-serif;
+    font-weight: 700; font-size: 13px; text-transform: uppercase; text-decoration: none; box-sizing: border-box;
+}
+.btn-custom:hover { border-color: var(--border-hover); transform: translateY(-2px); box-shadow: 0 5px 15px var(--shadow-color); }
+.btn-accent { background: var(--accent); color: #000; border: none; }
+.btn-accent:hover { opacity: 0.9; }
 
-    .ui-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; }
-    .title-wrapper { display: flex; align-items: center; gap: 12px; }
-    .rank-badge { background: var(--rank-badge-bg); border: 1px solid var(--glass-border); color: var(--accent-1); padding: 4px 12px; border-radius: 10px; font-weight: 900; font-size: 15px; transition: background 0.5s; }
-    .title { font-size: 26px; font-weight: 900; letter-spacing: -0.5px; text-shadow: 0 2px 10px var(--text-shadow); transition: text-shadow 0.5s; }
-    .sub { font-size: 14px; color: var(--text-muted); margin-top: 8px; font-weight: 500; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; transition: color 0.5s;}
-    .sub b { color: var(--text-main); transition: color 0.5s; }
-    .id-copy { cursor: pointer; padding: 2px 6px; border-radius: 6px; background: var(--id-bg); border: 1px solid var(--glass-border); transition: all 0.2s; display: inline-flex; align-items: center; gap: 4px; color: var(--text-main); }
-    .id-copy:hover { background: var(--id-hover); }
-    .tags-container { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap;}
-    .tag { font-size: 10px; font-weight: 700; text-transform: uppercase; padding: 4px 8px; border-radius: 6px; background: rgba(155, 123, 255, 0.1); color: var(--accent-1); border: 1px solid rgba(155, 123, 255, 0.2); }
-    .tag.cyan { background: rgba(0, 212, 255, 0.1); color: var(--accent-2); border-color: rgba(0, 212, 255, 0.2); }
-    .chance { font-weight: 900; font-size: 22px; color: var(--accent-2); text-shadow: 0 0 20px rgba(0, 212, 255, 0.4); }
+.discord-btn { background: #5865F2; color: white; border: none; gap: 8px; }
+.discord-btn:hover { background: #4752C4; }
+.discord-btn svg { width: 18px; height: 18px; fill: currentColor; }
 
-    .ui-bottom { display: flex; justify-content: flex-end; gap: 10px; }
-    .action-btn { padding: 8px 20px; border-radius: 12px; background: var(--id-bg); border: 1px solid var(--glass-border); font-size: 13px; font-weight: 700; text-decoration: none; color: var(--text-main); transition: all 0.3s; display: flex; align-items: center; gap: 6px; cursor: pointer; }
-    .action-btn:hover { background: var(--wr-hover-bg); color: var(--wr-hover-color); transform: translateY(-2px); box-shadow: 0 10px 20px var(--shadow-dark); }
-    .action-btn.icon-only { padding: 8px 12px; }
+.tabs-container { width: 100%; display: flex; justify-content: center; padding-top: 25px; }
+.tabs { display: flex; gap: 10px; width: min(900px, 95vw); flex-wrap: wrap; }
+.tab-btn {
+    padding: 12px 24px; background: var(--card-bg); border: 2px solid var(--tab-border); color: var(--text-main);
+    border-radius: 12px; cursor: pointer; font-family: 'Rubik', sans-serif; font-weight: 800; font-size: 15px;
+    transition: all 0.3s ease; flex: 1; text-align: center;
+}
+.tab-btn:hover { border-color: var(--border-hover); transform: translateY(-2px); }
+.tab-btn.active { background: var(--tab-active-bg); color: var(--tab-active-text); border-color: var(--tab-active-bg); }
 
-    /* ===================== */
-    /* MODAL OVERLAY (NEW)   */
-    /* ===================== */
-    .modal-overlay {
-        position: fixed; inset: 0; z-index: 10000;
-        background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(15px);
-        display: flex; justify-content: center; align-items: center;
-        opacity: 0; pointer-events: none;
-        transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    .modal-overlay.active { opacity: 1; pointer-events: all; }
-    
-    .modal-content {
-        width: min(900px, 92vw); max-height: 90vh;
-        background: var(--modal-bg); border: 1px solid var(--glass-border);
-        border-radius: 26px; box-shadow: 0 30px 60px rgba(0,0,0,0.8), 0 0 50px rgba(155, 123, 255, 0.1);
-        display: flex; flex-direction: column; overflow-y: auto; overflow-x: hidden;
-        transform: scale(0.9) translateY(30px); transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-    .modal-overlay.active .modal-content { transform: scale(1) translateY(0); }
+.container { width: 100%; display: flex; flex-direction: column; align-items: center; padding: 20px; gap: 15px; box-sizing: border-box; }
 
-    /* Modal custom scrollbar */
-    .modal-content::-webkit-scrollbar { width: 6px; }
-    .modal-content::-webkit-scrollbar-thumb { background: var(--accent-1); border-radius: 10px; }
+.card {
+    width: min(900px, 95vw); height: 220px; display: flex; border-radius: 18px; overflow: hidden;
+    border: 1px solid var(--border-color); background: var(--card-bg); position: relative;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px var(--shadow-color); border-color: var(--border-hover); }
 
-    .modal-header {
-        display: flex; justify-content: space-between; align-items: center;
-        padding: 24px 30px; border-bottom: 1px solid var(--glass-border);
-        background: rgba(0,0,0,0.1);
-    }
-    .modal-header-left { display: flex; align-items: center; gap: 15px; }
-    .modal-close-btn {
-        background: var(--id-bg); border: 1px solid var(--glass-border); color: var(--text-main);
-        width: 36px; height: 36px; border-radius: 50%; font-size: 20px; display: flex;
-        justify-content: center; align-items: center; cursor: pointer; transition: all 0.2s;
-    }
-    .modal-close-btn:hover { background: var(--accent-pink); color: white; transform: rotate(90deg); border-color: var(--accent-pink); }
+.left {
+    width: 35%; height: 100%; background: linear-gradient(135deg, var(--card-grad-1) 0%, var(--card-grad-2) 100%);
+    display: flex; flex-direction: column; justify-content: space-between; padding: 20px; box-sizing: border-box;
+    z-index: 2; border-right: 2px solid var(--border-color); cursor: pointer;
+}
+.right { width: 65%; height: 100%; position: relative; cursor: pointer; background: #000; }
+.right img { width: 100%; height: 100%; object-fit: cover; transition: opacity 0.3s; }
+.right:hover img { opacity: 0.6; }
+.play-button {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 50px; height: 50px;
+    background-color: rgba(255, 0, 0, 0.8); border-radius: 50%; display: flex; justify-content: center; align-items: center;
+}
+.play-button::after {
+    content: ""; border-style: solid; border-width: 10px 0 10px 16px; border-color: transparent transparent transparent white; margin-left: 4px;
+}
 
-    .modal-video-container { width: 100%; aspect-ratio: 16/9; background: #000; position: relative; }
-    .modal-video-container iframe { width: 100%; height: 100%; border: none; }
+.place { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
+.verifier { font-size: 11px; text-transform: uppercase; color: var(--text-dim); font-weight: 700; margin-bottom: 8px; }
+.sub { font-size: 12px; color: var(--text-sub); }
+.level-points { font-size: 14px; font-weight: 800; color: var(--accent); padding: 4px 10px; border-radius: 6px; background: rgba(255, 207, 64, 0.1); border: 1px solid rgba(255, 207, 64, 0.2); width: max-content; }
 
-    .modal-body { padding: 30px; display: flex; flex-direction: column; gap: 25px; }
-    .modal-stats-grid {
-        display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;
-    }
-    .m-stat {
-        background: var(--id-bg); border: 1px solid var(--glass-border); border-radius: 16px;
-        padding: 16px; display: flex; flex-direction: column; gap: 4px;
-    }
-    .m-stat-label { font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 700; }
-    .m-stat-val { font-size: 18px; font-weight: 700; color: var(--text-main); }
-    .m-stat-val.highlight { color: var(--accent-2); }
-    
-    .modal-desc {
-        font-size: 15px; line-height: 1.6; color: var(--text-muted);
-        background: rgba(0,0,0,0.1); padding: 20px; border-radius: 16px; border: 1px dashed var(--glass-border);
-    }
-    .modal-footer {
-        display: flex; justify-content: flex-end; gap: 15px;
-        padding: 0 30px 30px 30px;
-    }
+.list-card {
+    width: min(900px, 95vw); background: linear-gradient(135deg, var(--card-bg) 0%, var(--card-grad-2) 100%);
+    border: 1px solid var(--border-color); border-radius: 18px; padding: 20px; box-sizing: border-box;
+    display: flex; flex-direction: column; gap: 8px;
+}
+.list-header { display: flex; justify-content: space-between; align-items: center; }
+.list-title { font-size: 20px; font-weight: 800; }
+.list-highlight { font-size: 18px; font-weight: 800; color: var(--accent); }
 
-    /* SKELETON LOADER */
-    .skeleton-card { width: min(920px, 95vw); height: 240px; border-radius: 26px; background: var(--skeleton-base); border: 1px solid var(--glass-border); position: relative; overflow: hidden; }
-    .skeleton-card::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, var(--skeleton-shine), transparent); transform: translateX(-100%); animation: shimmer 1.5s infinite; opacity: 0.3; }
-    @keyframes shimmer { 100% { transform: translateX(100%); } }
+.modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px);
+    display: flex; justify-content: center; align-items: center; z-index: 1000;
+    opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+}
+.modal-overlay.active { opacity: 1; pointer-events: all; }
+.modal-content {
+    background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 20px;
+    width: min(650px, 90vw); max-height: 85vh; padding: 30px; box-sizing: border-box;
+    position: relative; overflow-y: auto; color: var(--text-main);
+}
+.modal-close {
+    position: absolute; top: 20px; right: 20px; background: var(--input-bg); border: 1px solid var(--border-color);
+    color: var(--text-main); width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-weight: bold;
+}
 
-    #backToTop { position: fixed; bottom: 30px; left: 30px; width: 50px; height: 50px; border-radius: 50%; background: var(--text-main); color: var(--bg-color); border: none; font-size: 24px; font-weight: 900; cursor: pointer; box-shadow: 0 10px 25px var(--shadow-dark); z-index: 1000; opacity: 0; transform: translateY(20px) scale(0.8); pointer-events: none; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-    #backToTop.visible { opacity: 1; transform: translateY(0) scale(1); pointer-events: all; }
-    #backToTop:hover { transform: translateY(-5px) scale(1.1); box-shadow: 0 15px 35px rgba(155, 123, 255, 0.4); }
+/* Formularze i Panel Admina */
+.form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 15px; width: 100%; }
+.form-group label { font-size: 13px; font-weight: 700; color: var(--text-dim); text-transform: uppercase; }
+.form-control {
+    width: 100%; box-sizing: border-box; padding: 12px; background: var(--input-bg);
+    border: 1px solid var(--border-color); color: var(--text-main); border-radius: 8px;
+    font-family: 'Rubik', sans-serif; outline: none;
+}
+.form-control:focus { border-color: var(--accent); }
+.form-row { display: flex; gap: 15px; }
 
-    .toast-container { position: fixed; bottom: 30px; right: 30px; display: flex; flex-direction: column; gap: 10px; z-index: 10001; }
-    .toast { background: var(--toast-bg); backdrop-filter: blur(10px); border: 1px solid var(--accent-1); color: var(--text-main); padding: 12px 20px; border-radius: 12px; font-size: 14px; font-weight: 600; box-shadow: 0 10px 30px var(--shadow-dark); transform: translateX(120%); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.5s, color 0.5s; display: flex; align-items: center; gap: 10px; }
-    .toast.show { transform: translateX(0); }
-    .empty-state { text-align: center; padding: 50px; border: 1px dashed var(--empty-border); border-radius: 20px; color: var(--text-muted); font-weight: 500; display: none; width: min(920px, 95vw); box-sizing: border-box; }
+.admin-item {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 12px; background: var(--input-bg); border: 1px solid var(--border-color);
+    border-radius: 10px; margin-bottom: 10px;
+}
 
-    @media(max-width: 900px) {
-        .navbar { flex-direction: column; height: auto; padding: 20px; border-radius: 24px; gap: 15px; top: 12px; width: 94%; }
-        .right-nav { flex-wrap: wrap; justify-content: center; width: 100%; gap: 10px; }
-        #searchBar { width: 100% !important; }
-        .sort-dropdown, .btn, .theme-toggle { width: 100%; }
-        .theme-toggle { border-radius: 100px; height: 44px; }
-        body { padding-top: 320px; }
-        .stats-panel { gap: 12px; width: 94%; }
-        .card { flex-direction: column; height: auto; width: 94vw; border-radius: 20px; }
-        .left { width: 100%; height: 190px; }
-        .right { width: 100%; height: auto; }
-        .card-ui-layer { position: relative; padding: 20px; background: var(--bg-color); gap: 20px; }
-        .ui-top { flex-direction: column; gap: 12px; }
-        .chance { align-self: flex-start; font-size: 20px; }
-        .ui-bottom { width: 100%; flex-wrap: wrap; }
-        .action-btn { flex: 1; justify-content: center; box-sizing: border-box; }
-        .cursor-glow { display: none; }
-        #backToTop { bottom: 20px; left: 20px; width: 45px; height: 45px; font-size: 20px;}
-        
-        .modal-header { padding: 20px; }
-        .modal-body { padding: 20px; gap: 20px; }
-        .modal-footer { padding: 0 20px 20px 20px; flex-direction: column; }
-    }
-    @keyframes moveGradient { 0% { background-position: 0% 50%; } 100% { background-position: 100% 50%; } }
+.hidden-section { display: none !important; }
 </style>
 </head>
-
 <body>
 
-<!-- UI OVERLAYS -->
-<div id="scrollProgress"></div>
-<div class="ambient-bg"></div>
-<div class="cursor-glow" id="cursorGlow"></div>
-<div class="toast-container" id="toastBox"></div>
-<button id="backToTop" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" aria-label="Scroll to top">↑</button>
+<div class="bg-blob blob-1"></div>
+<div class="bg-blob blob-2"></div>
 
-<!-- LEVEL INFO MODAL -->
-<div id="levelModal" class="modal-overlay" onclick="if(event.target === this) closeModal()">
+<nav class="navbar">
+    <div class="nav-title" id="site-title">GD SPAM LIST</div>
+    
+    <div class="nav-search">
+        <input type="text" id="search-input" placeholder="Szukaj poziomu...">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+    </div>
+
+    <div class="nav-actions">
+        <button class="btn-custom" id="btn-random" title="Losowy poziom">🎲</button>
+        <button class="btn-custom" id="theme-toggle">☀️</button>
+        <a href="https://discord.gg/" target="_blank" class="btn-custom discord-btn" id="discord-link">
+            <svg viewBox="0 0 127.14 96.36"><path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1,105.25,105.25,0,0,0,32.19-16.14c0,0,.04-.06.05-.09h0c2.69-27.42-2.73-51.49-18.95-72.06ZM42.63,65.22C38,65.22,34.15,61,34.15,55.9S37.9,46.58,42.63,46.58c4.76,0,8.56,4.31,8.48,9.32C51.11,61,47.41,65.22,42.63,65.22Zm41.88,0c-4.73,0-8.52-4.22-8.52-9.32s3.73-9.32,8.52-9.32c4.76,0,8.56,4.31,8.48,9.32C93,61,89.28,65.22,84.51,65.22Z"/></svg>
+            Discord
+        </a>
+        <button class="btn-custom btn-accent" id="auth-btn">Zaloguj / Rejestracja</button>
+    </div>
+</nav>
+
+<div class="tabs-container">
+    <div class="tabs">
+        <button class="tab-btn active" id="btn-levels">Poziomy</button>
+        <button class="tab-btn" id="btn-leaderboard">Ranking Graczy</button>
+        <button class="tab-btn hidden-section" id="btn-dashboard">⚙️ Moja Lista (Admin)</button>
+    </div>
+</div>
+
+<!-- KONTENERY ZAWARTOŚCI -->
+<div class="container" id="levels-container"></div>
+<div class="container hidden-section" id="leaderboard-container"></div>
+
+<!-- PANEL EDYCJI DLA ZALOGOWANEGO UŻYTKOWNIKA -->
+<div class="container hidden-section" id="dashboard-container">
+    <div class="list-card" style="max-width: 800px; width: 100%;">
+        <h2>⚙️ Ustawienia Mojej Listy</h2>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Nazwa Listy</label>
+                <input type="text" id="edit-list-title" class="form-control" placeholder="np. Moja GD Lista">
+            </div>
+            <div class="form-group">
+                <label>Link do Discorda</label>
+                <input type="text" id="edit-discord-link" class="form-control" placeholder="https://discord.gg/...">
+            </div>
+        </div>
+        <button class="btn-custom btn-accent" onclick="saveListSettings()">Zapisz Ustawienia Listy</button>
+    </div>
+
+    <div class="list-card" style="max-width: 800px; width: 100%;">
+        <h2>➕ Dodaj Nowy Poziom do Listy</h2>
+        <form id="add-level-form">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Pozycja na liście (#)</label>
+                    <input type="number" id="lvl-place" class="form-control" required min="1" placeholder="1">
+                </div>
+                <div class="form-group">
+                    <label>Nazwa Poziomu</label>
+                    <input type="text" id="lvl-name" class="form-control" required placeholder="np. Slaughterhouse">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Twórca (Author)</label>
+                    <input type="text" id="lvl-author" class="form-control" required placeholder="IcEDCave">
+                </div>
+                <div class="form-group">
+                    <label>ID Poziomu</label>
+                    <input type="text" id="lvl-id" class="form-control" required placeholder="73478939">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Verifier (Osoba sprawdzająca)</label>
+                    <input type="text" id="lvl-verifier" class="form-control" required placeholder="Doggie">
+                </div>
+                <div class="form-group">
+                    <label>Punkty za poziom</label>
+                    <input type="number" id="lvl-points" class="form-control" required placeholder="100">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Link do Pokazu / Showcase (YouTube)</label>
+                <input type="text" id="lvl-yt" class="form-control" required placeholder="https://www.youtube.com/watch?y=...">
+            </div>
+            <div class="form-group">
+                <label>Osoby które przeszły poziom (Victors - rozdziel przecinkami)</label>
+                <input type="text" id="lvl-victors" class="form-control" placeholder="Player1, Player2=http://yt.com/video, Player3">
+            </div>
+            <button type="submit" class="btn-custom btn-accent" style="width: 100%;">Dodaj Poziom</button>
+        </form>
+    </div>
+
+    <div class="list-card" style="max-width: 800px; width: 100%;">
+        <h2>📜 Zarządzaj Poziomami</h2>
+        <div id="admin-levels-list"></div>
+    </div>
+</div>
+
+<!-- MODAL DANYCH POZIOMU -->
+<div id="level-modal" class="modal-overlay">
     <div class="modal-content">
-        <div class="modal-header">
-            <div class="modal-header-left">
-                <div class="rank-badge" id="mRank">#1</div>
-                <div class="title" id="mTitle" style="font-size: 22px;">Level Name</div>
-            </div>
-            <button class="modal-close-btn" onclick="closeModal()">×</button>
-        </div>
-        
-        <div class="modal-video-container" id="mVideoContainer">
-            <!-- Iframe injected here via JS -->
-        </div>
-
-        <div class="modal-body">
-            <div class="modal-stats-grid">
-                <div class="m-stat">
-                    <span class="m-stat-label">Creator</span>
-                    <span class="m-stat-val" id="mAuthor">Unknown</span>
-                </div>
-                <div class="m-stat">
-                    <span class="m-stat-label">Verifier</span>
-                    <span class="m-stat-val" id="mVerifier">Unknown</span>
-                </div>
-                <div class="m-stat">
-                    <span class="m-stat-label">Level ID</span>
-                    <span class="m-stat-val id-copy" id="mID" onclick="copyData(this.innerText.replace(' 📋',''), 'ID')" style="width: max-content;">12345 📋</span>
-                </div>
-                <div class="m-stat">
-                    <span class="m-stat-label">Success Chance</span>
-                    <span class="m-stat-val highlight" id="mChance">0%</span>
-                </div>
-                <div class="m-stat">
-                    <span class="m-stat-label">Length</span>
-                    <span class="m-stat-val" id="mLength">-</span>
-                </div>
-                <div class="m-stat">
-                    <span class="m-stat-label">Objects</span>
-                    <span class="m-stat-val" id="mObjects">-</span>
-                </div>
-            </div>
-
-            <div class="modal-desc" id="mDesc">
-                No description provided for this level.
-            </div>
-        </div>
-
-        <div class="modal-footer">
-            <a class="action-btn" id="mWRBtn" href="#" target="_blank">🏆 View World Record</a>
-            <button class="action-btn" id="mShareBtn" style="background: var(--accent-1); color: white; border-color: var(--accent-1);">🔗 Copy Share Link</button>
-        </div>
+        <button class="modal-close" onclick="closeModals()">✕</button>
+        <div id="modal-body"></div>
     </div>
 </div>
 
-<!-- NAVIGATION -->
-<div class="navbar">
-    <div class="logo" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">Luck Based List</div>
-    <div class="right-nav">
-        <input type="text" id="searchBar" placeholder="Search levels...">
-        <select id="sortSelect" class="sort-dropdown">
-            <option value="place">Sort: Placement</option>
-            <option value="chance">Sort: Lowest Chance</option>
-            <option value="alpha">Sort: Alphabetical</option>
-        </select>
-        <button class="theme-toggle" id="themeToggle" aria-label="Toggle Dark/Light Mode">
-            <svg id="sunIcon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-2.25l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" /></svg>
-            <svg id="moonIcon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" /></svg>
-        </button>
-        <a class="btn theo-btn" href="luckbasedlevellisttp" target="_blank">Technically Possible</a>
-        <a class="btn discord" href="https://discord.gg/YfQBH4v23B" target="_blank">Discord</a>
+<!-- MODAL LOGOWANIA / REJESTRACJI -->
+<div id="auth-modal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 400px;">
+        <button class="modal-close" onclick="closeModals()">✕</button>
+        <h2 id="auth-title">Logowanie</h2>
+        <form id="auth-form">
+            <div class="form-group">
+                <label>Nazwa Użytkownika</label>
+                <input type="text" id="auth-username" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label>Hasło</label>
+                <input type="password" id="auth-password" class="form-control" required>
+            </div>
+            <button type="submit" class="btn-custom btn-accent" style="width: 100%; margin-top: 10px;" id="auth-submit-btn">Zaloguj się</button>
+        </form>
+        <p style="text-align: center; font-size: 13px; margin-top: 15px; color: var(--text-dim);">
+            <span id="auth-switch-text">Nie masz konta?</span> 
+            <a href="#" id="auth-toggle-link" style="color: var(--accent); text-decoration: none; font-weight: bold;">Zarejestruj się</a>
+        </p>
     </div>
-</div>
-
-<!-- MAIN DASHBOARD -->
-<div class="container">
-    <div class="stats-panel">
-        <div class="stat-box">
-            <div class="stat-label">Total Documented</div>
-            <div class="stat-value" id="statTotal">0</div>
-        </div>
-        <div class="stat-box">
-            <div class="stat-label">Hardest Verified</div>
-            <div class="stat-value" id="statHardest">-</div>
-        </div>
-    </div>
-
-    <!-- DYNAMIC FILTER BAR -->
-    <div class="filter-wrapper" id="filterWrapper"></div>
-
-    <!-- CARDS RENDER AREA -->
-    <div id="levelsContainer"></div>
-    <div id="emptyState" class="empty-state">No matches recorded for your specific parameters.</div>
 </div>
 
 <script>
-// --- STATE MANAGEMENT ---
-let levelsData = [];
-let currentTagFilter = 'All';
+// --- STAN APLIKACJI I DANE ---
+let currentUser = JSON.parse(localStorage.getItem("gd_user")) || null;
+let isRegistering = false;
 
-// --- THEME ENGINE ---
-const themeToggle = document.getElementById('themeToggle');
-const savedTheme = localStorage.getItem('theme') || 'dark';
-document.documentElement.setAttribute('data-theme', savedTheme);
-
-themeToggle.addEventListener('click', () => {
-    let currentTheme = document.documentElement.getAttribute('data-theme');
-    let newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', newTheme);
-    localStorage.setItem('theme', newTheme);
-    showToast(`${newTheme === 'dark' ? 'Dark' : 'Light'} Mode Enabled`);
-});
-
-// --- AMBIENT EFFECTS & SCROLL LOGIC ---
-const glow = document.getElementById('cursorGlow');
-const progressBar = document.getElementById('scrollProgress');
-const backToTopBtn = document.getElementById('backToTop');
-
-document.addEventListener('mousemove', (e) => {
-    if(window.innerWidth > 900) { glow.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`; }
-});
-
-window.addEventListener('scroll', () => {
-    const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
-    const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-    const progress = (scrollTop / scrollHeight) * 100;
-    progressBar.style.width = progress + '%';
-    if (scrollTop > 400) { backToTopBtn.classList.add('visible'); } else { backToTopBtn.classList.remove('visible'); }
-});
-
-// --- TOAST SYSTEM ---
-const toastBox = document.getElementById('toastBox');
-window.showToast = function(message) {
-    let toast = document.createElement('div');
-    toast.className = 'toast';
-    toast.innerHTML = `<span>✨</span> ${message}`;
-    toastBox.appendChild(toast);
-    setTimeout(() => toast.classList.add('show'), 10);
-    setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 3000);
-}
-
-// --- UTILITIES ---
-window.copyData = function(text, type) {
-    navigator.clipboard.writeText(text).then(() => showToast(`Copied ${type}!`)).catch(err => console.error('Copy failed', err));
-}
-
-window.playVideo = function(element, videoId) {
-    element.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
-    element.style.cursor = 'default';
+// Domyślne dane dla listy GD
+let listData = JSON.parse(localStorage.getItem("gd_list_data")) || {
+    title: "USKC SPAM LIST",
+    discord: "https://discord.gg/Z5PSQ7VNkF",
+    levels: [
+        {
+            place: 1,
+            name: "Acheron",
+            author: "Riot & more",
+            id: "84323212",
+            verifier: "Zoink",
+            points: 100,
+            youtube: "https://www.youtube.com/watch?v=L2G338421",
+            victors: ["Trick", "whip"]
+        }
+    ]
 };
 
-// --- MODAL ENGINE (NEW) ---
-const modal = document.getElementById('levelModal');
-
-window.openModal = function(id) {
-    const level = levelsData.find(l => String(l.id) === String(id));
-    if(!level) return;
-
-    // Populate data
-    document.getElementById('mRank').innerText = `#${level.place}`;
-    document.getElementById('mTitle').innerText = level.name;
-    document.getElementById('mAuthor').innerText = level.author;
-    document.getElementById('mVerifier').innerText = level.verifier || level.wrName || 'Unknown';
-    document.getElementById('mID').innerHTML = `${level.id} <span style="font-size: 14px">📋</span>`;
-    document.getElementById('mChance').innerText = level.chance;
-    document.getElementById('mLength').innerText = level.length || 'Unknown';
-    document.getElementById('mObjects').innerText = level.objects || 'Unknown';
-    document.getElementById('mDesc').innerText = level.description || `An extremely difficult luck-based challenge by ${level.author}. With a ${level.chance} success rate, it stands at #${level.place} on the list.`;
-    
-    document.getElementById('mWRBtn').href = level.wrLink;
-    document.getElementById('mShareBtn').onclick = () => copyData(`Check out ${level.name} (#${level.place})! ID: ${level.id}`, 'Share Text');
-
-    // Setup Video Embed (Autoplays inside modal)
-    document.getElementById('mVideoContainer').innerHTML = `<iframe src="https://www.youtube.com/embed/${level.youtube}?autoplay=1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
-
-    // Show modal & lock scroll
-    modal.classList.add('active');
-    document.body.classList.add('modal-open');
+function saveData() {
+    localStorage.setItem("gd_list_data", JSON.stringify(listData));
+    renderApp();
 }
 
-window.closeModal = function() {
-    modal.classList.remove('active');
-    document.body.classList.remove('modal-open');
-    // Clear iframe to stop video playing in background
-    setTimeout(() => { document.getElementById('mVideoContainer').innerHTML = ''; }, 400);
+// --- HELPER YOUTUBE ---
+function parseYoutube(youtubeInput) {
+    if (!youtubeInput) return { id: "", start: 0 };
+    let videoId = youtubeInput.trim();
+    try {
+        const urlStr = videoId.startsWith('http') ? videoId : 'https://youtube.com/' + videoId;
+        const url = new URL(urlStr);
+        if (url.hostname.includes('youtu.be')) videoId = url.pathname.slice(1);
+        else if (url.searchParams.has('v')) videoId = url.searchParams.get('v');
+        else videoId = url.pathname.split('/').pop();
+    } catch (e) {}
+    return { id: videoId };
 }
 
-// --- DATA PIPELINE ---
-const levelsContainer = document.getElementById("levelsContainer");
-const searchBar = document.getElementById("searchBar");
-const sortSelect = document.getElementById("sortSelect");
-const emptyState = document.getElementById("emptyState");
-const filterWrapper = document.getElementById("filterWrapper");
+// --- RENDERING STRONY ---
+function renderApp() {
+    // Ustawienia Nagłówka
+    document.getElementById("site-title").innerText = listData.title;
+    document.title = listData.title;
+    document.getElementById("discord-link").href = listData.discord;
 
-function extractAndRenderTags(data) {
-    let tags = new Set(['All']);
-    data.forEach(l => l.tags?.forEach(t => tags.add(t)));
-    filterWrapper.innerHTML = '';
-    tags.forEach(tag => {
-        let btn = document.createElement('button');
-        btn.className = `filter-btn ${tag === currentTagFilter ? 'active' : ''}`;
-        btn.innerText = tag;
-        btn.onclick = () => { currentTagFilter = tag; extractAndRenderTags(data); processPipeline(); };
-        filterWrapper.appendChild(btn);
-    });
-}
+    // Przycisk Autoryzacji
+    const authBtn = document.getElementById("auth-btn");
+    const dashTabBtn = document.getElementById("btn-dashboard");
+    if (currentUser) {
+        authBtn.innerText = `Wyloguj (${currentUser.username})`;
+        dashTabBtn.classList.remove("hidden-section");
+    } else {
+        authBtn.innerText = "Zaloguj / Rejestracja";
+        dashTabBtn.classList.add("hidden-section");
+    }
 
-function runStatisticsCompute(data) {
-    if(data.length === 0) return;
-    document.getElementById("statTotal").innerText = data.length;
-    let hardest = data.reduce((min, l) => l.place < min.place ? l : min, data[0]);
-    document.getElementById("statHardest").innerText = hardest ? `#${hardest.place} ${hardest.name}` : "-";
-}
+    // Sortowanie Poziomów
+    listData.levels.sort((a, b) => a.place - b.place);
 
-function applyTiltEffect() {
-    if(window.innerWidth <= 900) return; 
-    const cards = document.querySelectorAll('.card');
-    cards.forEach(card => {
-        card.addEventListener('mousemove', e => {
-            const rect = card.getBoundingClientRect();
-            const x = e.clientX - rect.left; const y = e.clientY - rect.top;
-            const centerX = rect.width / 2; const centerY = rect.height / 2;
-            const rotateX = ((y - centerY) / centerY) * -4; 
-            const rotateY = ((x - centerX) / centerX) * 4;
-            card.style.transform = `perspective(1000px) translateY(-5px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-        });
-        card.addEventListener('mouseleave', () => { card.style.transform = `perspective(1000px) translateY(0) rotateX(0deg) rotateY(0deg)`; });
-    });
-}
-
-function render(data) {
+    // 1. Renderowanie Poziomów
+    const levelsContainer = document.getElementById("levels-container");
     levelsContainer.innerHTML = "";
-    if(data.length === 0) { emptyState.style.display = "block"; return; }
-    emptyState.style.display = "none";
-
-    data.forEach((l, index) => {
-        let card = document.createElement("div");
+    listData.levels.forEach(l => {
+        const yt = parseYoutube(l.youtube);
+        const card = document.createElement("div");
         card.className = "card";
-        card.style.animation = `cardEnter 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards ${index * 0.08}s`;
-
-        let tagsHTML = "";
-        if (l.tags && l.tags.length > 0) {
-            tagsHTML = `<div class="tags-container">` + l.tags.map(t => `<div class="tag ${t === 'Verified' ? 'cyan' : ''}">${t}</div>`).join('') + `</div>`;
-        }
-
+        card.dataset.name = l.name.toLowerCase();
+        
         card.innerHTML = `
-        <div class="left" onclick="playVideo(this, '${l.youtube}')">
-            <img src="https://img.youtube.com/vi/${l.youtube}/hqdefault.jpg" alt="Thumbnail" loading="lazy">
-            <div class="play-overlay"><div class="play-btn"></div></div>
-        </div>
-        <div class="right">
-            <img src="${l.gif}" alt="Loop" style="position:absolute; inset:0; z-index:1;" loading="lazy">
-            <div class="card-ui-layer">
-                <div class="ui-top">
-                    <div class="text-group">
-                        <div class="title-wrapper">
-                            <div class="rank-badge">#${l.place}</div>
-                            <div class="title">${l.name}</div>
-                        </div>
-                        <div class="sub">
-                            Creator: <b>${l.author}</b> • ID: 
-                            <span class="id-copy" onclick="copyData('${l.id}', 'ID')">${l.id} 📋</span>
-                        </div>
-                        ${tagsHTML}
-                    </div>
-                    <div class="chance">${l.chance}</div>
+            <div class="left" onclick="openLevelModal('${l.id}')">
+                <div>
+                    <div class="place">#${l.place} ${l.name}</div>
+                    <div class="verifier">Verified by: ${l.verifier || "Unkown"}</div>
+                    <div class="sub">by ${l.author}<br>ID: ${l.id}</div>
                 </div>
-                <div class="ui-bottom">
-                    <!-- NEW INFO BUTTON ADDED HERE -->
-                    <button class="action-btn icon-only" onclick="openModal('${l.id}')" aria-label="Detailed Info">👁️ Info</button>
-                    <button class="action-btn icon-only" onclick="copyData('Check out ${l.name} (#${l.place})! ID: ${l.id}', 'Info')" aria-label="Share">🔗</button>
-                    <a class="action-btn" href="${l.wrLink}" target="_blank">🏆 ${l.wrName}</a>
-                </div>
+                <div class="level-points">+${l.points} PTS</div>
             </div>
-        </div>
+            <div class="right" onclick="embedVideo(this, '${yt.id}')">
+                <img src="https://img.youtube.com/vi/${yt.id}/hqdefault.jpg" loading="lazy" alt="Thumbnail">
+                <div class="play-button"></div>
+            </div>
         `;
         levelsContainer.appendChild(card);
     });
-    applyTiltEffect();
+
+    // 2. Renderowanie Rankingu (Leaderboard)
+    renderLeaderboard();
+
+    // 3. Renderowanie Panelu Zarządzania
+    renderAdminPanel();
 }
 
-function renderSkeletons() {
-    levelsContainer.innerHTML = "";
-    emptyState.style.display = "none";
-    for(let i=0; i<3; i++) {
-        let skel = document.createElement('div');
-        skel.className = 'skeleton-card';
-        levelsContainer.appendChild(skel);
+function embedVideo(container, ytId) {
+    container.innerHTML = `<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${ytId}?autoplay=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+}
+
+function renderLeaderboard() {
+    const leaderboardContainer = document.getElementById("leaderboard-container");
+    leaderboardContainer.innerHTML = "";
+    
+    let players = {};
+
+    listData.levels.forEach(l => {
+        const points = Number(l.points) || 0;
+        
+        // Punkty za Verifiera
+        if (l.verifier) {
+            if (!players[l.verifier]) players[l.verifier] = { points: 0, verified: 0, beaten: 0 };
+            players[l.verifier].points += points;
+            players[l.verifier].verified += 1;
+        }
+
+        // Punkty za Victors
+        if (l.victors && Array.isArray(l.victors)) {
+            l.victors.forEach(v => {
+                const name = v.split('=')[0].trim();
+                if (name) {
+                    if (!players[name]) players[name] = { points: 0, verified: 0, beaten: 0 };
+                    players[name].points += points;
+                    players[name].beaten += 1;
+                }
+            });
+        }
+    });
+
+    const sorted = Object.keys(players).map(k => ({ name: k, ...players[k] })).sort((a,b) => b.points - a.points);
+
+    sorted.forEach((p, index) => {
+        const card = document.createElement("div");
+        card.className = "list-card";
+        card.dataset.player = p.name.toLowerCase();
+        card.innerHTML = `
+            <div class="list-header">
+                <div class="list-title">#${index + 1} ${p.name}</div>
+                <div class="list-highlight">${p.points} PTS</div>
+            </div>
+            <div style="font-size: 12px; color: var(--text-sub);">
+                Zweryfikowane: ${p.verified} • Ukończone: ${p.beaten}
+            </div>
+        `;
+        leaderboardContainer.appendChild(card);
+    });
+}
+
+function renderAdminPanel() {
+    document.getElementById("edit-list-title").value = listData.title;
+    document.getElementById("edit-discord-link").value = listData.discord;
+
+    const adminList = document.getElementById("admin-levels-list");
+    adminList.innerHTML = "";
+
+    listData.levels.forEach((l, index) => {
+        const item = document.createElement("div");
+        item.className = "admin-item";
+        item.innerHTML = `
+            <div>
+                <strong>#${l.place} ${l.name}</strong> (ID: ${l.id})
+            </div>
+            <button class="btn-custom" style="background: #ff4747; color: white;" onclick="deleteLevel(${index})">Usuń</button>
+        `;
+        adminList.appendChild(item);
+    });
+}
+
+// --- MODAL DANYCH POZIOMU ---
+function openLevelModal(levelId) {
+    const l = listData.levels.find(item => item.id == levelId);
+    if (!l) return;
+
+    const modalBody = document.getElementById("modal-body");
+    const victorsList = l.victors && l.victors.length > 0 ? l.victors.map(v => `<li>${v}</li>`).join("") : "Brak rekordów.";
+
+    modalBody.innerHTML = `
+        <h2>#${l.place} ${l.name}</h2>
+        <p>Autor: <strong>${l.author}</strong> | ID: <strong>${l.id}</strong></p>
+        <p>Verifier: <strong>${l.verifier}</strong></p>
+        <p>Punkty: <strong style="color: var(--accent)">+${l.points} PTS</strong></p>
+        <hr style="border-color: var(--border-color); margin: 15px 0;">
+        <h3>Gracze, którzy ukończyli (Victors):</h3>
+        <ul>${victorsList}</ul>
+    `;
+    document.getElementById("level-modal").classList.add("active");
+}
+
+function closeModals() {
+    document.querySelectorAll(".modal-overlay").forEach(m => m.classList.remove("active"));
+}
+
+// --- DODAWANIE / USUWAMIE POZIOMÓW ---
+document.getElementById("add-level-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const victorsRaw = document.getElementById("lvl-victors").value;
+    const victorsArr = victorsRaw ? victorsRaw.split(",").map(s => s.trim()) : [];
+
+    const newLevel = {
+        place: Number(document.getElementById("lvl-place").value),
+        name: document.getElementById("lvl-name").value,
+        author: document.getElementById("lvl-author").value,
+        id: document.getElementById("lvl-id").value,
+        verifier: document.getElementById("lvl-verifier").value,
+        points: Number(document.getElementById("lvl-points").value),
+        youtube: document.getElementById("lvl-yt").value,
+        victors: victorsArr
+    };
+
+    listData.levels.push(newLevel);
+    saveData();
+    e.target.reset();
+    alert("Dodano poziom pomyślnie!");
+});
+
+function deleteLevel(index) {
+    if (confirm("Czy na pewno chcesz usunąć ten poziom?")) {
+        listData.levels.splice(index, 1);
+        saveData();
     }
 }
 
-function processPipeline() {
-    let query = searchBar.value.toLowerCase();
-    let sortOption = sortSelect.value;
-    let filtered = levelsData.filter(l => {
-        let matchesSearch = l.name.toLowerCase().includes(query) || l.author.toLowerCase().includes(query) || String(l.id).includes(query);
-        let matchesTag = currentTagFilter === 'All' || (l.tags && l.tags.includes(currentTagFilter));
-        return matchesSearch && matchesTag;
-    });
-
-    if(sortOption === "place") { filtered.sort((a,b) => a.place - b.place); } 
-    else if (sortOption === "chance") { filtered.sort((a,b) => parseFloat(a.chance) - parseFloat(b.chance)); } 
-    else if (sortOption === "alpha") { filtered.sort((a,b) => a.name.localeCompare(b.name)); }
-
-    renderSkeletons();
-    setTimeout(() => { render(filtered); }, 400); 
+function saveListSettings() {
+    listData.title = document.getElementById("edit-list-title").value;
+    listData.discord = document.getElementById("edit-discord-link").value;
+    saveData();
+    alert("Zapisano ustawienia listy!");
 }
 
-// --- INITIALIZATION ---
-// Added expanded extended data fields (description, length, objects, verifier) to demo payload
-const demoData = [
-    { place: 1, name: "VSC", author: "BoBoBo", verifier: "Paqeo", id: "666666", chance: "0.001%", tags: ["Extreme", "Timings", "Short"], youtube: "dQw4w9WgXcQ", gif: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3VwY2NmdXJvYmdkMDNnbW96ZHZ0b3E0bWN6ZnA1bWxpY3p6bXF6dyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o7Tov7edZ6tTuOg8w/giphy.gif", wrLink: "#", wrName: "Paqeo", length: "0m 18s", objects: "14,500", description: "VSC stands as a monument to timing perfection. It requires inhuman consistency over a highly condensed period of time. This level pushed the absolute limits of verification when it was first introduced." },
-    { place: 2, name: "Tartarus", author: "Riot & More", verifier: "Dolphy", id: "123456", chance: "0.052%", tags: ["Verified", "Frame Perfect"], youtube: "dQw4w9WgXcQ", gif: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM2VwYm81b3ZkM3JicnpqNDVhcWpxZnNwbTVvNXZpdXp0cHhrNDRxbyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/l0HlHFRbmaZtBRhXG/giphy.gif", wrLink: "#", wrName: "Mefewe", length: "1m 58s", objects: "32,109", description: "Once the unquestioned hardest level in the game, Tartarus features incredibly tight straight flying and brutal ship control. A true legendary extreme demon." },
-    { place: 3, name: "Acheron", author: "Zoink", verifier: "Zoink", id: "987654", chance: "0.089%", tags: ["Extreme", "Verified"], youtube: "dQw4w9WgXcQ", gif: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3VwY2NmdXJvYmdkMDNnbW96ZHZ0b3E0bWN6ZnA1bWxpY3p6bXF6dyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o7Tov7edZ6tTuOg8w/giphy.gif", wrLink: "#", wrName: "Zoink", length: "2m 14s", objects: "44,992", description: "An evolution of the top 1 formula, Acheron features nearly frame-perfect inputs back to back for over two minutes, draining the stamina of even the best players." }
-];
+// --- AUTH SYSTEM (LOGOWANIE/REJESTRACJA) ---
+const authBtn = document.getElementById("auth-btn");
+const authModal = document.getElementById("auth-modal");
 
-fetch("levels.json").then(r => r.json()).then(data => {
-    levelsData = data; runStatisticsCompute(levelsData); extractAndRenderTags(levelsData); processPipeline();
-}).catch(() => {
-    console.warn("levels.json not found, using demo data.");
-    levelsData = demoData; runStatisticsCompute(levelsData); extractAndRenderTags(levelsData); processPipeline();
+authBtn.addEventListener("click", () => {
+    if (currentUser) {
+        currentUser = null;
+        localStorage.removeItem("gd_user");
+        renderApp();
+        switchTab(document.getElementById("btn-levels"), document.getElementById("levels-container"));
+    } else {
+        authModal.classList.add("active");
+    }
 });
 
-// Event Listeners
-searchBar.addEventListener("input", processPipeline);
-sortSelect.addEventListener("change", processPipeline);
-// Escape key closes modal
-document.addEventListener('keydown', (e) => {
-    if(e.key === "Escape" && modal.classList.contains('active')) closeModal();
+document.getElementById("auth-toggle-link").addEventListener("click", (e) => {
+    e.preventDefault();
+    isRegistering = !isRegistering;
+    document.getElementById("auth-title").innerText = isRegistering ? "Rejestracja" : "Logowanie";
+    document.getElementById("auth-submit-btn").innerText = isRegistering ? "Zarejestruj się" : "Zaloguj się";
+    document.getElementById("auth-switch-text").innerText = isRegistering ? "Masz już konto?" : "Nie masz konta?";
+    document.getElementById("auth-toggle-link").innerText = isRegistering ? "Zaloguj się" : "Zarejestruj się";
 });
+
+document.getElementById("auth-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const userVal = document.getElementById("auth-username").value.trim();
+    const passVal = document.getElementById("auth-password").value.trim();
+
+    let users = JSON.parse(localStorage.getItem("gd_registered_users")) || [];
+
+    if (isRegistering) {
+        if (users.find(u => u.username === userVal)) {
+            alert("Użytkownik o takiej nazwie już istnieje!");
+            return;
+        }
+        const newUser = { username: userVal, password: passVal };
+        users.push(newUser);
+        localStorage.setItem("gd_registered_users", JSON.stringify(users));
+        currentUser = newUser;
+        localStorage.setItem("gd_user", JSON.stringify(currentUser));
+        closeModals();
+        renderApp();
+    } else {
+        const found = users.find(u => u.username === userVal && u.password === passVal);
+        if (found) {
+            currentUser = found;
+            localStorage.setItem("gd_user", JSON.stringify(currentUser));
+            closeModals();
+            renderApp();
+        } else {
+            alert("Nieprawidłowa nazwa użytkownika lub hasło!");
+        }
+    }
+});
+
+// --- PRZEŁĄCZANIE ZAKŁADEK I MOTYWU ---
+const btnLevels = document.getElementById("btn-levels");
+const btnLeaderboard = document.getElementById("btn-leaderboard");
+const btnDashboard = document.getElementById("btn-dashboard");
+
+const levelsContainer = document.getElementById("levels-container");
+const leaderboardContainer = document.getElementById("leaderboard-container");
+const dashboardContainer = document.getElementById("dashboard-container");
+
+function switchTab(activeBtn, activeContainer) {
+    [btnLevels, btnLeaderboard, btnDashboard].forEach(b => b.classList.remove("active"));
+    [levelsContainer, leaderboardContainer, dashboardContainer].forEach(c => c.classList.add("hidden-section"));
+
+    activeBtn.classList.add("active");
+    activeContainer.classList.remove("hidden-section");
+}
+
+btnLevels.addEventListener("click", () => switchTab(btnLevels, levelsContainer));
+btnLeaderboard.addEventListener("click", () => switchTab(btnLeaderboard, leaderboardContainer));
+btnDashboard.addEventListener("click", () => switchTab(btnDashboard, dashboardContainer));
+
+// Losowy Poziom
+document.getElementById("btn-random").addEventListener("click", () => {
+    if (listData.levels.length === 0) return;
+    const rand = listData.levels[Math.floor(Math.random() * listData.levels.length)];
+    openLevelModal(rand.id);
+});
+
+// Wyszukiwarka
+document.getElementById("search-input").addEventListener("input", (e) => {
+    const q = e.target.value.toLowerCase();
+    document.querySelectorAll("#levels-container .card").forEach(c => {
+        c.style.display = c.dataset.name.includes(q) ? "flex" : "none";
+    });
+});
+
+// Zmiana Motywu
+document.getElementById("theme-toggle").addEventListener("click", () => {
+    const isLight = document.body.getAttribute("data-theme") === "light";
+    if (isLight) {
+        document.body.removeAttribute("data-theme");
+        document.getElementById("theme-toggle").innerText = "☀️";
+    } else {
+        document.body.setAttribute("data-theme", "light");
+        document.getElementById("theme-toggle").innerText = "🌙";
+    }
+});
+
+// INICJALIZACJA
+renderApp();
 </script>
-
 </body>
 </html>
