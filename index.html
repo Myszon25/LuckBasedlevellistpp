@@ -1,920 +1,1170 @@
 <!DOCTYPE html>
-<html lang="pl">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Demonlist Central</title>
-    
-    <!-- Supabase JS Library -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Demonlist Central &mdash; Geometry Dash Rankings</title>
 
-    <style>
-        :root {
-            --bg-dark: #0a0d14;
-            --bg-card: #121824;
-            --bg-input: #1a2234;
-            --border: #232d42;
-            --border-hover: #3b4c6e;
-            --accent: #6366f1;
-            --accent-hover: #4f46e5;
-            --accent-light: rgba(99, 102, 241, 0.15);
-            --text-main: #f3f4f6;
-            --text-muted: #9ca3af;
-            --text-subtle: #6b7280;
-            --danger: #ef4444;
-            --danger-subtle: rgba(239, 68, 68, 0.15);
-            --success: #10b981;
-            --gold: #f59e0b;
-            --silver: #94a3b8;
-            --bronze: #b45309;
-        }
+<!-- Favicon prevention -->
+<link rel="icon" href="data:,">
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-        }
+<!-- Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
 
-        body {
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow-x: hidden;
-        }
+<!-- SUPABASE SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-        .font-heading {
-            font-family: 'Space Grotesk', sans-serif;
-        }
+<style>
+:root {
+    --bg-dark: #07090e;
+    --bg-card: #0e131f;
+    --bg-card-hover: #141b2d;
+    --bg-input: #0a0d15;
+    --border: rgba(255, 255, 255, 0.08);
+    --border-hover: rgba(255, 255, 255, 0.18);
+    --accent: #6366f1;
+    --accent-glow: rgba(99, 102, 241, 0.25);
+    --accent-hover: #4f46e5;
+    --text-main: #f3f4f6;
+    --text-muted: #9ca3af;
+    --text-subtle: #6b7280;
+    --gold: #fbbf24;
+    --silver: #94a3b8;
+    --bronze: #d97706;
+    --danger: #ef4444;
+    --danger-subtle: rgba(239, 68, 68, 0.12);
+    --success: #10b981;
+    --radius: 12px;
+}
 
-        a { color: inherit; text-decoration: none; }
-        button { cursor: pointer; border: none; background: none; font-family: inherit; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
-        /* HEADER & NAVBAR */
-        header {
-            background: rgba(18, 24, 36, 0.8);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--border);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            padding: 12px 24px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
+body {
+    background-color: var(--bg-dark);
+    background-image: 
+        radial-gradient(circle at 15% 15%, rgba(99, 102, 241, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 85% 85%, rgba(139, 92, 246, 0.05) 0%, transparent 40%);
+    background-attachment: fixed;
+    font-family: 'Inter', -apple-system, sans-serif;
+    color: var(--text-main);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    -webkit-font-smoothing: antialiased;
+}
 
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 18px;
-            font-weight: 800;
-            color: #fff;
-            cursor: pointer;
-        }
+h1, h2, h3, h4, .font-heading {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    letter-spacing: -0.025em;
+}
 
-        .logo-icon {
-            width: 32px;
-            height: 32px;
-            background: linear-gradient(135deg, var(--accent), #a855f7);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 900;
-            font-size: 16px;
-        }
+/* Custom Scrollbar */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-dark); }
+::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.12); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.22); }
 
-        .nav-actions {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
+.container {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 32px 20px;
+    width: 100%;
+    flex: 1;
+}
 
-        /* BUTTONS & BADGES */
-        .btn {
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 600;
-            transition: all 0.2s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: var(--bg-input);
-            color: var(--text-main);
-            border: 1px solid var(--border);
-        }
+/* NAVBAR */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 6vw;
+    background: rgba(7, 9, 14, 0.8);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
 
-        .btn:hover {
-            border-color: var(--border-hover);
-            background: #232d42;
-        }
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    user-select: none;
+}
 
-        .btn-accent {
-            background: var(--accent);
-            color: #fff;
-            border: none;
-        }
+.brand-icon {
+    width: 38px;
+    height: 38px;
+    background: linear-gradient(135deg, var(--accent), #8b5cf6);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 15px;
+    color: #fff;
+    box-shadow: 0 4px 16px var(--accent-glow);
+}
 
-        .btn-accent:hover {
-            background: var(--accent-hover);
-        }
+.brand-title {
+    font-size: 18px;
+    font-weight: 800;
+    color: #fff;
+}
 
-        .btn-danger {
-            background: var(--danger-subtle);
-            color: var(--danger);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-        }
+.status-tag {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.02em;
+}
+.status-online { background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); }
+.status-offline { background: rgba(239, 68, 68, 0.15); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); }
 
-        .btn-danger:hover {
-            background: var(--danger);
-            color: #fff;
-        }
+.nav-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
 
-        .btn-sm {
-            padding: 4px 10px;
-            font-size: 12px;
-        }
+/* BUTTONS */
+.btn {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--text-main);
+    padding: 9px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+}
 
-        .status-tag {
-            font-size: 11px;
-            font-weight: 700;
-            padding: 4px 8px;
-            border-radius: 20px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
+.btn:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--border-hover);
+    transform: translateY(-1px);
+}
 
-        .status-online { background: rgba(16, 185, 129, 0.15); color: var(--success); }
-        .status-offline { background: rgba(156, 163, 175, 0.15); color: var(--text-muted); }
+.btn-accent {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+    box-shadow: 0 4px 16px var(--accent-glow);
+}
+.btn-accent:hover {
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
+}
 
-        .super-badge {
-            background: linear-gradient(135deg, #f59e0b, #ef4444);
-            color: #fff;
-            font-size: 9px;
-            font-weight: 800;
-            padding: 2px 6px;
-            border-radius: 4px;
-            text-transform: uppercase;
-        }
+.btn-danger {
+    background: var(--danger-subtle);
+    border-color: rgba(239, 68, 68, 0.25);
+    color: var(--danger);
+}
+.btn-danger:hover {
+    background: var(--danger);
+    color: #fff;
+}
 
-        /* MAIN CONTAINER */
-        main {
-            flex: 1;
-            max-width: 1200px;
-            width: 100%;
-            margin: 0 auto;
-            padding: 24px;
-        }
+.btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 6px; }
 
-        .hidden { display: none !important; }
+/* NOTIFICATIONS BELL */
+.icon-btn {
+    position: relative;
+    width: 38px;
+    height: 38px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--text-muted);
+}
+.icon-btn:hover { border-color: var(--border-hover); color: #fff; background: var(--bg-card-hover); }
 
-        /* SEARCH & INPUTS */
-        .form-control {
-            width: 100%;
-            padding: 10px 14px;
-            background: var(--bg-input);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            color: var(--text-main);
-            font-size: 13px;
-            outline: none;
-            transition: border-color 0.2s;
-        }
+.badge-count {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: var(--danger);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 800;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--bg-dark);
+}
 
-        .form-control:focus {
-            border-color: var(--accent);
-        }
+/* HERO & SEARCH BAR */
+.hero {
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+}
 
-        .form-group {
-            margin-bottom: 14px;
-        }
+.hero h1 { font-size: 32px; font-weight: 800; margin-bottom: 8px; }
+.hero p { color: var(--text-muted); font-size: 14px; max-width: 600px; line-height: 1.6; }
 
-        .form-group label {
-            display: block;
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--text-muted);
-            margin-bottom: 6px;
-        }
+.search-box {
+    position: relative;
+    margin-top: 20px;
+    max-width: 420px;
+}
 
-        /* CARD GRIDS */
-        .grid-cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 16px;
-            margin-top: 16px;
-        }
+.search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-subtle);
+    pointer-events: none;
+}
 
-        .card-list {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 18px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
+.search-input {
+    width: 100%;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 11px 14px 11px 40px;
+    color: #fff;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+.search-input:focus { border-color: var(--accent); }
 
-        .card-list:hover {
-            border-color: var(--accent);
-            transform: translateY(-2px);
-        }
+/* GRID LAYOUTS */
+.section-header {
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--text-subtle);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin: 28px 0 16px 0;
+}
 
-        .pill-views {
-            font-size: 11px;
-            background: rgba(255,255,255,0.05);
-            padding: 2px 8px;
-            border-radius: 12px;
-            color: var(--text-muted);
-        }
+.grid-lists {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+}
 
-        /* LIST VIEW & LEVEL CARDS */
-        .list-header {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 24px;
-            margin-bottom: 20px;
-        }
+.card-list {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.card-list:hover {
+    border-color: var(--border-hover);
+    background: var(--bg-card-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(0,0,0,0.4);
+}
 
-        .tabs-nav {
-            display: flex;
-            gap: 8px;
-            border-bottom: 1px solid var(--border);
-            margin-bottom: 20px;
-        }
+.pill-views {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    padding: 3px 8px;
+    border-radius: 6px;
+}
 
-        .tab-btn {
-            padding: 10px 16px;
-            font-weight: 600;
-            font-size: 13px;
-            color: var(--text-muted);
-            border-bottom: 2px solid transparent;
-            margin-bottom: -1px;
-        }
+.super-badge {
+    background: linear-gradient(135deg, #f59e0b, #ef4444);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    margin-left: 6px;
+}
 
-        .tab-btn.active {
-            color: var(--accent);
-            border-bottom-color: var(--accent);
-        }
+/* LIST DETAIL VIEW */
+.list-banner {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+}
 
-        .level-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 14px;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            transition: border-color 0.2s;
-        }
+.tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 12px;
+}
 
-        .level-card:hover {
-            border-color: var(--border-hover);
-        }
+.tab-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 14px;
+    font-weight: 600;
+    padding: 8px 16px;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.15s;
+}
+.tab-btn.active {
+    background: var(--bg-card);
+    color: var(--text-main);
+    border: 1px solid var(--border);
+}
 
-        .level-rank {
-            font-size: 18px;
-            font-weight: 800;
-            width: 40px;
-            text-align: center;
-            color: var(--text-subtle);
-        }
+/* LEVEL CARD */
+.level-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 10px;
+    display: flex;
+    overflow: hidden;
+    height: 100px;
+    transition: all 0.2s ease;
+}
+.level-card:hover {
+    border-color: var(--border-hover);
+    background: var(--bg-card-hover);
+    transform: translateX(3px);
+}
 
-        .rank-1 { color: var(--gold); }
-        .rank-2 { color: var(--silver); }
-        .rank-3 { color: var(--bronze); }
+.level-rank {
+    width: 64px;
+    border-right: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 18px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    color: var(--text-subtle);
+}
 
-        .level-info {
-            flex: 1;
-            cursor: pointer;
-        }
+.rank-1 { color: var(--gold); background: rgba(251, 191, 36, 0.08); }
+.rank-2 { color: var(--silver); background: rgba(148, 163, 184, 0.08); }
+.rank-3 { color: var(--bronze); background: rgba(217, 119, 6, 0.08); }
 
-        .level-name {
-            font-size: 15px;
-            font-weight: 700;
-            color: #fff;
-        }
+.level-info {
+    flex: 1;
+    padding: 14px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 3px;
+    cursor: pointer;
+}
 
-        .level-meta {
-            font-size: 12px;
-            color: var(--text-muted);
-            margin-top: 2px;
-        }
+.level-name { font-size: 15px; font-weight: 700; color: #fff; }
+.level-meta { font-size: 12px; color: var(--text-subtle); }
+.level-pts { font-size: 13px; font-weight: 700; color: var(--accent); margin-top: 2px; }
 
-        .level-pts {
-            font-weight: 800;
-            color: var(--accent);
-            font-size: 14px;
-        }
+.level-thumb {
+    width: 170px;
+    background: #000;
+    position: relative;
+    cursor: pointer;
+    overflow: hidden;
+}
+.level-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.8;
+    transition: opacity 0.2s, transform 0.3s;
+}
+.level-card:hover .level-thumb img { opacity: 1; transform: scale(1.04); }
 
-        .level-thumb {
-            width: 80px;
-            height: 48px;
-            border-radius: 6px;
-            overflow: hidden;
-            background: #000;
-            cursor: pointer;
-            flex-shrink: 0;
-        }
+/* FLOATING CHAT WIDGET */
+.chat-toggle-btn {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 999;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 30px;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    box-shadow: 0 8px 24px var(--accent-glow);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.chat-toggle-btn:hover { transform: scale(1.05); background: var(--accent-hover); }
 
-        .level-thumb img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+.chat-widget {
+    position: fixed;
+    bottom: 80px;
+    right: 24px;
+    width: 340px;
+    height: 480px;
+    background: #0e131f;
+    border: 1px solid var(--border-hover);
+    border-radius: 16px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+    z-index: 999;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
 
-        /* MODALS */
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 0, 0, 0.75);
-            backdrop-filter: blur(4px);
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.2s ease;
-        }
+.chat-header {
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.03);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
 
-        .modal-overlay.active {
-            opacity: 1;
-            pointer-events: auto;
-        }
+.chat-tabs {
+    display: flex;
+    background: rgba(0,0,0,0.3);
+    border-bottom: 1px solid var(--border);
+}
+.chat-tab {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 8px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s;
+}
+.chat-tab.active {
+    background: var(--bg-card);
+    color: #fff;
+    border-bottom: 2px solid var(--accent);
+}
 
-        .modal-box {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            width: 100%;
-            max-width: 500px;
-            max-height: 90vh;
-            overflow-y: auto;
-            padding: 24px;
-            position: relative;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
-        }
+.chat-messages {
+    flex: 1;
+    padding: 12px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
 
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 18px;
-        }
+.chat-msg {
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    padding: 8px 12px;
+    border-radius: 10px;
+    font-size: 12px;
+}
+.chat-msg-user { font-weight: 700; color: var(--accent); font-size: 11px; margin-bottom: 2px; }
+.chat-msg-time { float: right; font-weight: 400; color: var(--text-subtle); font-size: 10px; }
+.chat-msg-text { color: var(--text-main); word-break: break-word; font-size: 12px; line-height: 1.4; }
 
-        .modal-title {
-            font-size: 18px;
-            font-weight: 700;
-        }
+.chat-input-area {
+    padding: 10px;
+    border-top: 1px solid var(--border);
+    background: rgba(0,0,0,0.2);
+    display: flex;
+    gap: 6px;
+}
 
-        .close-btn {
-            font-size: 20px;
-            color: var(--text-muted);
-        }
+.dm-user-item {
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.15s;
+    margin-bottom: 6px;
+}
+.dm-user-item:hover { border-color: var(--accent); background: var(--bg-card-hover); }
 
-        /* CHAT WIDGET */
-        #chat-widget {
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
-            width: 340px;
-            height: 460px;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
-            display: flex;
-            flex-direction: column;
-            z-index: 500;
-            overflow: hidden;
-        }
+/* MODALS */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(4, 6, 10, 0.85);
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+.modal-overlay.active { opacity: 1; pointer-events: all; }
 
-        .chat-header {
-            padding: 12px 16px;
-            background: var(--bg-input);
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+.modal-content {
+    background: #101625;
+    border: 1px solid var(--border-hover);
+    border-radius: 16px;
+    width: min(600px, 92vw);
+    max-height: 88vh;
+    overflow-y: auto;
+    padding: 28px;
+    position: relative;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+}
+.modal-large { width: min(840px, 94vw) !important; }
 
-        .chat-body {
-            flex: 1;
-            padding: 12px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
 
-        .chat-msg {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid var(--border);
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-size: 12px;
-        }
+.modal-close {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+}
+.modal-close:hover { background: var(--bg-card); color: #fff; }
 
-        .chat-msg-user {
-            font-weight: 700;
-            color: var(--accent);
-            margin-bottom: 2px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+/* FORMS & INPUTS */
+.form-group { margin-bottom: 16px; display: flex; flex-direction: column; gap: 6px; }
+.form-group label { font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+.form-control {
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    padding: 10px 14px;
+    border-radius: 8px;
+    color: #fff;
+    font-family: inherit;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+.form-control:focus { border-color: var(--accent); }
+.form-row { display: flex; gap: 12px; flex-wrap: wrap; }
+.form-row > div { flex: 1; min-width: 120px; }
 
-        .chat-msg-time {
-            font-size: 10px;
-            color: var(--text-subtle);
-            font-weight: 400;
-        }
+.victor-row { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
+.victor-item {
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
 
-        .chat-footer {
-            padding: 10px;
-            border-top: 1px solid var(--border);
-            background: var(--bg-input);
-        }
+.admin-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 8px;
+}
 
-        /* TOAST NOTIFICATIONS */
-        #toast-container {
-            position: fixed;
-            bottom: 24px;
-            left: 24px;
-            z-index: 2000;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
+/* ENLARGED VIDEO PLAYER CONTAINER */
+#detail-video-box {
+    width: 100%;
+    height: 440px;
+    background: #000;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 20px;
+    border: 1px solid var(--border);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.6);
+}
 
-        .toast {
-            background: #1e293b;
-            color: #fff;
-            border: 1px solid var(--accent);
-            padding: 10px 16px;
-            border-radius: 8px;
-            font-size: 13px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            animation: fadeIn 0.2s ease;
-        }
+/* TOASTS */
+#toast-container {
+    position: fixed;
+    bottom: 24px;
+    left: 24px;
+    z-index: 99999;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.toast {
+    background: #141b2d;
+    border: 1px solid var(--border-hover);
+    color: #fff;
+    padding: 12px 18px;
+    border-radius: 10px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    font-size: 13px;
+    font-weight: 600;
+    animation: slideUp 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+@keyframes slideUp {
+    from { transform: translateY(12px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+.hidden { display: none !important; }
 
-        .victor-row {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 8px;
-        }
-
-        .dm-user-item {
-            padding: 10px;
-            background: var(--bg-input);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            margin-bottom: 6px;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .dm-user-item:hover {
-            border-color: var(--accent);
-        }
-    </style>
+/* FOOTER */
+.footer {
+    border-top: 1px solid var(--border);
+    padding: 24px 6vw;
+    background: rgba(7, 9, 14, 0.95);
+    margin-top: 40px;
+}
+.footer-inner {
+    max-width: 1080px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+.discord-link {
+    background: #5865f2;
+    color: #fff;
+    font-weight: 700;
+    font-size: 12px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+</style>
 </head>
 <body>
 
-    <!-- HEADER -->
-    <header>
-        <div class="logo font-heading" data-action="show-home">
-            <div class="logo-icon">GD</div>
-            Demonlist Central
-        </div>
+<div id="toast-container"></div>
 
-        <div class="nav-actions">
-            <span id="db-status-badge" class="status-tag status-offline">Connecting...</span>
-
-            <button type="button" class="btn hidden" id="notif-btn" data-action="open-notifications">
-                🔔 <span id="notif-badge-count" class="hidden" style="background:var(--danger); color:#fff; font-size:10px; padding:1px 5px; border-radius:10px;">0</span>
-            </button>
-
-            <button type="button" class="btn btn-accent hidden" id="btn-super-admin" data-action="open-super-admin">
-                ⚙️ Admin
-            </button>
-
-            <div id="user-profile-btn" class="hidden" style="display:flex; align-items:center; gap:8px;">
-                <span id="user-display-name" style="font-size:13px; font-weight:700;"></span>
-                <button type="button" class="btn btn-sm btn-danger" data-action="logout">Sign Out</button>
-            </div>
-
-            <button type="button" class="btn btn-accent" id="auth-modal-btn" data-action="open-auth" data-type="login">
-                Sign In
-            </button>
-        </div>
-    </header>
-
-    <!-- MAIN CONTENT -->
-    <main>
-        <!-- HOME VIEW -->
-        <section id="view-home">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
-                <div>
-                    <h1 class="font-heading" style="font-size:24px;">Community Demonlists</h1>
-                    <p style="color:var(--text-muted); font-size:13px;">Create, share, and track custom Geometry Dash difficulty rankings.</p>
-                </div>
-                <button type="button" class="btn btn-accent" data-action="open-create-list">+ Create Demonlist</button>
-            </div>
-
-            <div class="form-group" style="margin-bottom:24px;">
-                <input type="text" id="home-search-input" class="form-control" placeholder="🔍 Search lists by title or author...">
-            </div>
-
-            <h3 class="font-heading" style="font-size:16px; margin-bottom:12px; color:var(--text-muted);">🔥 POPULAR LISTS</h3>
-            <div id="popular-lists-grid" class="grid-cards" style="margin-bottom:32px;"></div>
-
-            <h3 class="font-heading" style="font-size:16px; margin-bottom:12px; color:var(--text-muted);">ALL DEMONLISTS</h3>
-            <div id="all-lists-grid" class="grid-cards"></div>
-        </section>
-
-        <!-- LIST DETAIL VIEW -->
-        <section id="view-list" class="hidden">
-            <div class="list-header">
-                <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px;">
-                    <div>
-                        <button type="button" class="btn btn-sm" data-action="show-home" style="margin-bottom:12px;">← Back to Lists</button>
-                        <h1 id="active-list-title" class="font-heading" style="font-size:28px;">-</h1>
-                        <div style="font-size:13px; color:var(--text-muted); margin-top:4px;">
-                            Created by: <strong id="active-list-author" style="color:#fff;">-</strong> &bull; <span id="active-list-views" class="pill-views">👁️ 0 views</span>
-                        </div>
-                    </div>
-                    <div style="display:flex; gap:8px;">
-                        <a id="active-list-discord" href="#" target="_blank" class="btn btn-sm" style="background:#5865F2; color:#fff; border:none;">Discord</a>
-                        <button type="button" id="btn-delete-list" class="btn btn-sm btn-danger hidden" data-action="delete-current-list">Delete List</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="tabs-nav">
-                <button type="button" class="tab-btn active" id="tab-btn-levels" data-action="switch-tab" data-tab="levels">Demons Ranking</button>
-                <button type="button" class="tab-btn" id="tab-btn-leaderboard" data-action="switch-tab" data-tab="leaderboard">Leaderboard</button>
-                <button type="button" class="tab-btn hidden" id="tab-btn-admin" data-action="switch-tab" data-tab="admin">⚙️ Manage List</button>
-            </div>
-
-            <!-- TAB: LEVELS -->
-            <div id="tab-content-levels">
-                <div class="form-group" style="margin-bottom:16px;">
-                    <input type="text" id="search-levels-input" class="form-control" placeholder="Search level name, ID or creator...">
-                </div>
-                <div id="levels-list-container"></div>
-            </div>
-
-            <!-- TAB: LEADERBOARD -->
-            <div id="tab-content-leaderboard" class="hidden"></div>
-
-            <!-- TAB: ADMIN PANEL -->
-            <div id="tab-content-admin" class="hidden">
-                <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:20px; margin-bottom:20px;">
-                    <h3 class="font-heading" style="font-size:16px; margin-bottom:12px;">➕ Add New Demon</h3>
-                    <form id="add-level-form">
-                        <div style="display:grid; grid-template-columns: 1fr 2fr 1fr; gap:10px;">
-                            <div class="form-group"><label>Rank #</label><input type="number" id="add-pos" class="form-control" min="1" required></div>
-                            <div class="form-group"><label>Level Name</label><input type="text" id="add-name" class="form-control" required></div>
-                            <div class="form-group"><label>In-game ID</label><input type="text" id="add-level-id" class="form-control"></div>
-                        </div>
-                        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px;">
-                            <div class="form-group"><label>Creator</label><input type="text" id="add-author" class="form-control" required></div>
-                            <div class="form-group"><label>Verifier</label><input type="text" id="add-verifier" class="form-control" required></div>
-                            <div class="form-group"><label>Points (PTS)</label><input type="number" id="add-pts" class="form-control" required></div>
-                        </div>
-                        <div class="form-group"><label>YouTube Proof URL</label><input type="text" id="add-yt" class="form-control"></div>
-
-                        <label style="font-size:12px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Victors</label>
-                        <div id="add-victors-container"></div>
-                        <button type="button" class="btn btn-sm" data-action="add-victor-row" data-container="add-victors-container" style="margin-bottom:14px;">+ Add Victor</button>
-
-                        <div><button type="submit" class="btn btn-accent">Add Level to List</button></div>
-                    </form>
-                </div>
-
-                <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:20px; margin-bottom:20px;">
-                    <h3 class="font-heading" style="font-size:16px; margin-bottom:12px;">👥 Co-Editors</h3>
-                    <div style="display:flex; gap:10px; margin-bottom:12px;">
-                        <input type="text" id="invite-username-input" class="form-control" placeholder="Enter username to invite...">
-                        <button type="button" class="btn btn-accent" data-action="send-invite">Send Invite</button>
-                    </div>
-                    <div id="admin-editors-list"></div>
-                </div>
-
-                <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:20px;">
-                    <h3 class="font-heading" style="font-size:16px; margin-bottom:12px;">📑 Manage Levels</h3>
-                    <div id="admin-levels-manage-list"></div>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <!-- CHAT WIDGET -->
-    <div id="chat-widget" class="hidden">
-        <div class="chat-header">
-            <span id="chat-header-title" class="font-heading" style="font-size:13px; font-weight:700;">💬 Community Chat</span>
-            <div style="display:flex; gap:6px;">
-                <button type="button" class="btn btn-sm active" data-action="switch-chat-tab" data-mode="public">Public</button>
-                <button type="button" class="btn btn-sm" data-action="switch-chat-tab" data-mode="private">DM</button>
-                <button type="button" class="close-btn" data-action="toggle-chat">✕</button>
-            </div>
-        </div>
-
-        <div id="chat-view-public" style="display:flex; flex-direction:column; height: calc(100% - 45px);">
-            <div id="chat-messages-box" class="chat-body"></div>
-            <form id="chat-form" class="chat-footer">
-                <input type="text" id="chat-input" class="form-control" placeholder="Type a message..." maxlength="150" required>
-            </form>
-        </div>
-
-        <div id="chat-view-private" class="hidden" style="display:flex; flex-direction:column; height: calc(100% - 45px);">
-            <div id="dm-users-list" class="chat-body">
-                <input type="text" id="dm-search-input" class="form-control" placeholder="Search user to chat..." style="margin-bottom:8px;">
-            </div>
-            <div id="dm-active-conversation" class="hidden" style="display:flex; flex-direction:column; height:100%;">
-                <div style="padding:6px 12px; background:var(--bg-card); border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
-                    <span id="dm-active-partner" style="font-size:12px; font-weight:700; color:var(--accent);"></span>
-                    <button type="button" class="btn btn-sm" data-action="back-to-dm-list">← Back</button>
-                </div>
-                <div id="dm-messages-box" class="chat-body"></div>
-                <form id="dm-form" class="chat-footer">
-                    <input type="text" id="dm-input" class="form-control" placeholder="Type private message..." maxlength="150" required>
-                </form>
-            </div>
-        </div>
+<!-- NAVBAR -->
+<nav class="navbar">
+    <div class="brand" data-action="show-home">
+        <div class="brand-icon">GD</div>
+        <div class="brand-title font-heading">Demonlist Central</div>
+        <span id="db-status-badge" class="status-tag status-offline">Connecting...</span>
     </div>
 
-    <!-- TOGGLE CHAT BUTTON -->
-    <button type="button" class="btn btn-accent" data-action="toggle-chat" style="position:fixed; bottom:24px; right:24px; border-radius:50px; padding:12px 20px; box-shadow:0 10px 20px rgba(0,0,0,0.3); z-index:400;">
-        💬 Chat
-    </button>
+    <div class="nav-controls">
+        <button id="btn-super-admin" class="btn btn-sm btn-danger hidden" data-action="open-super-admin">🛡️ User Admin</button>
 
-    <!-- TOAST CONTAINER -->
-    <div id="toast-container"></div>
-
-    <!-- MODAL: AUTH -->
-    <div id="modal-auth" class="modal-overlay">
-        <div class="modal-box">
-            <div class="modal-header">
-                <div class="modal-title font-heading">Account Access</div>
-                <button type="button" class="close-btn" data-action="close-modals">✕</button>
-            </div>
-            <div class="tabs-nav">
-                <button type="button" class="tab-btn active" id="auth-tab-login" data-action="switch-auth-tab" data-tab="login">Sign In</button>
-                <button type="button" class="tab-btn" id="auth-tab-register" data-action="switch-auth-tab" data-tab="register">Register</button>
-            </div>
-
-            <!-- LOGIN FORM -->
-            <form id="form-login">
-                <div class="form-group"><label>Username</label><input type="text" id="login-username" class="form-control" required></div>
-                <div class="form-group"><label>Password</label><input type="password" id="login-password" class="form-control" required></div>
-                <button type="submit" class="btn btn-accent" style="width:100%; margin-top:10px;">Sign In</button>
-            </form>
-
-            <!-- REGISTER FORM -->
-            <form id="form-register" class="hidden">
-                <div class="form-group"><label>Username</label><input type="text" id="reg-username" class="form-control" required></div>
-                <div class="form-group"><label>Password (min. 6 characters)</label><input type="password" id="reg-password" class="form-control" required></div>
-                <div class="form-group">
-                    <label id="captcha-question">Security Check</label>
-                    <input type="text" id="captcha-answer" class="form-control" placeholder="Answer..." required>
-                </div>
-                <button type="submit" class="btn btn-accent" style="width:100%; margin-top:10px;">Create Account</button>
-            </form>
+        <div id="notif-btn" class="icon-btn hidden" data-action="open-notifications" title="Notifications">
+            🔔
+            <div id="notif-badge-count" class="badge-count hidden">0</div>
         </div>
-    </div>
 
-    <!-- MODAL: CREATE LIST -->
-    <div id="modal-create-list" class="modal-overlay">
-        <div class="modal-box">
-            <div class="modal-header">
-                <div class="modal-title font-heading">Create Demonlist</div>
-                <button type="button" class="close-btn" data-action="close-modals">✕</button>
-            </div>
-            <form id="create-list-form">
-                <div class="form-group"><label>List Unique ID (slug)</label><input type="text" id="new-list-id" class="form-control" placeholder="e.g. top-10-demons" required></div>
-                <div class="form-group"><label>List Title</label><input type="text" id="new-list-title" class="form-control" placeholder="e.g. Main Extreme Demon List" required></div>
-                <div class="form-group"><label>Discord Server Link</label><input type="text" id="new-list-discord" class="form-control" placeholder="https://discord.gg/..."></div>
-                <button type="submit" class="btn btn-accent" style="width:100%; margin-top:10px;">Create List</button>
-            </form>
+        <div id="user-profile-btn" class="hidden">
+            <span id="user-display-name" style="font-weight:700; font-size:13px; margin-right:8px;"></span>
+            <button type="button" class="btn btn-sm" data-action="logout">Sign Out</button>
         </div>
+
+        <button type="button" id="auth-modal-btn" class="btn btn-sm" data-action="open-auth" data-type="login">Sign In</button>
+        <button type="button" class="btn btn-accent" data-action="open-create-list">+ Create List</button>
     </div>
+</nav>
 
-    <!-- MODAL: EDIT LEVEL -->
-    <div id="modal-edit-level" class="modal-overlay">
-        <div class="modal-box">
-            <div class="modal-header">
-                <div class="modal-title font-heading">Edit Level</div>
-                <button type="button" class="close-btn" data-action="close-modals">✕</button>
-            </div>
-            <form id="edit-level-form">
-                <input type="hidden" id="edit-lvl-index">
-                <div style="display:grid; grid-template-columns: 1fr 2fr 1fr; gap:10px;">
-                    <div class="form-group"><label>Rank #</label><input type="number" id="edit-pos" class="form-control" min="1" required></div>
-                    <div class="form-group"><label>Level Name</label><input type="text" id="edit-name" class="form-control" required></div>
-                    <div class="form-group"><label>In-game ID</label><input type="text" id="edit-level-id" class="form-control"></div>
-                </div>
-                <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px;">
-                    <div class="form-group"><label>Creator</label><input type="text" id="edit-author" class="form-control" required></div>
-                    <div class="form-group"><label>Verifier</label><input type="text" id="edit-verifier" class="form-control" required></div>
-                    <div class="form-group"><label>Points (PTS)</label><input type="number" id="edit-pts" class="form-control" required></div>
-                </div>
-                <div class="form-group"><label>YouTube Proof URL</label><input type="text" id="edit-yt" class="form-control"></div>
-
-                <label style="font-size:12px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">Victors</label>
-                <div id="edit-victors-container"></div>
-                <button type="button" class="btn btn-sm" data-action="add-victor-row" data-container="edit-victors-container" style="margin-bottom:14px;">+ Add Victor</button>
-
-                <div><button type="submit" class="btn btn-accent" style="width:100%;">Save Changes</button></div>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL: LEVEL DETAILS -->
-    <div id="modal-level-details" class="modal-overlay">
-        <div class="modal-box" style="max-width:650px;">
-            <div class="modal-header">
-                <div id="detail-title" class="modal-title font-heading">-</div>
-                <button type="button" class="close-btn" data-action="close-modals">✕</button>
-            </div>
-            <div style="font-size:13px; color:var(--text-muted); margin-bottom:16px;">
-                by <strong id="detail-author" style="color:#fff;">-</strong> &bull; ID: <strong id="detail-level-id" style="color:#fff;">-</strong> &bull; Verifier: <strong id="detail-verifier" style="color:#fff;">-</strong> &bull; Score: <span id="detail-pts" style="color:var(--accent); font-weight:800;">-</span>
-            </div>
-
-            <div id="detail-video-box" style="width:100%; height:300px; background:#000; border-radius:8px; overflow:hidden; margin-bottom:16px;"></div>
-
-            <h4 class="font-heading" style="font-size:14px; margin-bottom:8px;">Victors (<span id="detail-victor-count">0</span>)</h4>
-            <div id="detail-victors-list" style="max-height:180px; overflow-y:auto; display:flex; flex-direction:column; gap:6px;"></div>
-        </div>
-    </div>
-
-    <!-- MODAL: NOTIFICATIONS -->
-    <div id="modal-notifications" class="modal-overlay">
-        <div class="modal-box">
-            <div class="modal-header">
-                <div class="modal-title font-heading">Notifications</div>
-                <button type="button" class="close-btn" data-action="close-modals">✕</button>
-            </div>
-            <div id="notifications-list-container"></div>
-        </div>
-    </div>
-
-    <!-- MODAL: SUPER ADMIN -->
-    <div id="modal-super-admin" class="modal-overlay">
-        <div class="modal-box" style="max-width:600px;">
-            <div class="modal-header">
-                <div class="modal-title font-heading">⚙️ Administration Panel</div>
-                <button type="button" class="close-btn" data-action="close-modals">✕</button>
-            </div>
-            <div id="admin-users-list-container"></div>
-        </div>
-    </div>
-
-    <!-- JAVASCRIPT APPLICATION CODE -->
-    <script>
-    /* ====================================================================
-       1. STORAGE & SECURITY & SUPABASE SETUP
-       ==================================================================== */
-    const safeStorage = {
-        getItem: (k) => { try { return localStorage.getItem(k); } catch(e) { return null; } },
-        setItem: (k, v) => { try { localStorage.setItem(k, v); } catch(e) {} },
-        removeItem: (k) => { try { localStorage.removeItem(k); } catch(e) {} }
-    };
-
-    const dummyMemoryStorage = { getItem: () => null, setItem: () => {}, removeItem: () => {} };
-
-    const SUPABASE_URL = "https://iigxupbrqpqftynrhlwk.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlpZ3h1cGJycXBxZnR5bnJobHdrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4MzAzNjEsImV4cCI6MjEwMDQwNjM2MX0.hK0GlMWVE7B3_n2mEzsUlz3qU6TSWt5w2S9Td20fl68";
-
-    let supabaseClient = null;
-    if (window.supabase) {
-        try {
-            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
-                auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false, storage: dummyMemoryStorage }
-            });
-        } catch(e) {}
-    }
-
-    async function hashPassword(password) {
-        if (!password) return '';
-        try {
-            const encoder = new TextEncoder();
-            const data = encoder.encode(password + "_gd_security_salt_2026");
-            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-        } catch(e) {
-            return password;
-        }
-    }
-
-    /* ====================================================================
-       2. INITIAL STATE & CHAT CONFIG
-       ==================================================================== */
-    const DEFAULT_DATA = {
-        users: {
-            "myszon12": { password: "szyszkaqw", invites: [], banned: false },
-            "myszon": { password: "szyszkaqw", invites: [], banned: false }
-        },
-        lists: {
-            "top-10-demons": {
-                id: "top-10-demons",
-                title: "Main Extreme Demon List",
-                author: "myszon12",
-                editors: [],
-                discord: "https://discord.gg/3zvSrFnVz",
-                views: 28,
-                levels: [
-                    { pos: 1, name: "Acheron", levelId: "84930211", author: "Ryamu & More", verifier: "Zoink", pts: 100, yt: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", victors: [{ name: "Zoink", video: "https://youtube.com" }, { name: "Trick", video: "" }] },
-                    { pos: 2, name: "Avernus", levelId: "89201948", author: "Pingu & More", verifier: "Zoink", pts: 95, yt: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", victors: [{ name: "Diamond", video: "" }] }
-                ]
-            }
-        },
-        chatMessages: [
-            { user: "myszon12", text: "Welcome to Demonlist Central! Feel free to chat with other players here.", time: "12:00" }
-        ],
-        directMessages: []
-    };
-
-    function ensureDataStructure(data) {
-        if (!data || typeof data !== 'object') data = {};
-        if (!data.users) data.users = {};
-        if (!data.users["myszon12"]) data.users["myszon12"] = { password: "szyszkaqw", invites: [], banned: false };
-        if (!data.lists) data.lists = {};
-        if (!data.chatMessages) data.chatMessages = [];
-        if (!data.directMessages) data.directMessages = [];
-        return data;
-    }
-
-    function loadStoredData() {
-        try {
-            const d = safeStorage.getItem("gd_app_data_v6");
-            if (d) return ensureDataStructure(JSON.parse(d));
-        } catch(e) {}
-        return ensureDataStructure(JSON.parse(JSON.stringify(DEFAULT_DATA)));
-    }
-
-    function loadStoredUser() {
-        try {
-            const u = safeStorage.getItem("gd_app_user_v6");
-            return u ? JSON.parse(u) : null;
-        } catch(e) { return null; }
-    }
-
-    let globalData = loadStoredData();
-    let currentUser = loadStoredUser();
-    let currentListId = null;
-    let currentListData = null;
-    let isOwner = false;
-    let currentCaptchaTarget = "";
-    let currentChatMode = "public";
-    let activeDmPartner = null;
-
-    async function saveState() {
-        globalData = ensureDataStructure(globalData);
-        safeStorage.setItem("gd_app_data_v6", JSON.stringify(globalData));
+<!-- MAIN HOMEPAGE VIEW -->
+<div id="view-home" class="container">
+    <div class="hero">
+        <h1 class="font-heading">Geometry Dash Demonlists</h1>
+        <p>Create custom demon rankings, calculate competitive player points, and manage co-editors seamlessly with real-time cloud synchronization.</p>
         
-        if (currentUser) safeStorage.setItem("gd_app_user_v6", JSON.stringify(currentUser));
-        else safeStorage.removeItem("gd_app_user_v6");
+        <div class="search-box">
+            <svg class="search-icon" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            <input type="text" id="home-search-input" class="search-input" placeholder="Search demonlists by title or creator...">
+        </div>
+    </div>
 
-        if (supabaseClient) {
-            try {
-                await supabaseClient.from('app_store').upsert({ id: 1, payload: globalData });
-            } catch(err) {}
-        }
+    <div class="section-header">🔥 Popular Lists</div>
+    <div id="popular-lists-grid" class="grid-lists"></div>
+
+    <div class="section-header">🌐 All Lists</div>
+    <div id="all-lists-grid" class="grid-lists"></div>
+</div>
+
+<!-- SINGLE LIST VIEW -->
+<div id="view-list" class="container hidden">
+    <button type="button" class="btn btn-sm" data-action="show-home" style="margin-bottom: 16px;">← Back to Home</button>
+    
+    <div class="list-banner">
+        <div>
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom: 6px;">
+                <h1 id="active-list-title" class="font-heading" style="font-size: 24px; font-weight: 800;">List Title</h1>
+                <span id="active-list-views" class="pill-views">👁️ 0 views</span>
+            </div>
+            <p id="active-list-desc" style="color:var(--text-muted); font-size:13px;">Owner: <strong id="active-list-author" style="color:#fff;">...</strong></p>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <!-- Przycisk do kopiowania bezpośredniego linku -->
+            <button type="button" class="btn btn-sm" data-action="copy-list-link">🔗 Kopiuj Link</button>
+            <a href="#" target="_blank" id="active-list-discord" class="btn btn-sm">Discord</a>
+            <button type="button" class="btn btn-sm btn-accent hidden" id="btn-admin-tab" data-action="switch-tab" data-tab="admin">⚙️ Admin Panel</button>
+            <button type="button" class="btn btn-sm btn-danger hidden" id="btn-delete-list" data-action="delete-current-list">🗑️ Delete List</button>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <button type="button" class="tab-btn active" id="tab-btn-levels" data-action="switch-tab" data-tab="levels">Demons</button>
+        <button type="button" class="tab-btn" id="tab-btn-leaderboard" data-action="switch-tab" data-tab="leaderboard">Player Leaderboard</button>
+        <button type="button" class="tab-btn hidden" id="tab-btn-admin" data-action="switch-tab" data-tab="admin">Admin Panel</button>
+    </div>
+
+    <div id="tab-content-levels">
+        <div class="search-box" style="margin-bottom:16px; max-width:320px;">
+            <svg class="search-icon" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            <input type="text" id="search-levels-input" class="search-input" placeholder="Search levels, ID, or creators...">
+        </div>
+        <div id="levels-list-container"></div>
+    </div>
+
+    <div id="tab-content-leaderboard" class="hidden"></div>
+
+    <div id="tab-content-admin" class="hidden">
+        <!-- CO-EDITORS MANAGEMENT -->
+        <div style="background:var(--bg-card); padding:22px; border-radius:14px; border:1px solid var(--border); margin-bottom:20px;">
+            <h3 class="font-heading" style="font-size:16px; margin-bottom:4px;">👥 Co-Editors & Permissions</h3>
+            <p style="color:var(--text-muted); font-size:12px; margin-bottom:14px;">Invite users to help edit this demonlist or remove existing co-editors.</p>
+            
+            <div style="display:flex; gap:8px; margin-bottom: 16px;">
+                <input type="text" id="invite-username-input" class="form-control" placeholder="Enter username..." style="flex:1;">
+                <button class="btn btn-accent btn-sm" type="button" data-action="send-invite">Send Invite</button>
+            </div>
+
+            <h4 style="font-size:12px; color:var(--text-subtle); text-transform:uppercase; margin-bottom:8px;">Current Editors:</h4>
+            <div id="admin-editors-list"></div>
+        </div>
+
+        <!-- ADD LEVEL FORM -->
+        <div style="background:var(--bg-card); padding:22px; border-radius:14px; border:1px solid var(--border); margin-bottom:20px;">
+            <h3 class="font-heading" style="font-size:16px; margin-bottom:14px;">➕ Add New Demon</h3>
+            <form id="add-level-form">
+                <div class="form-row">
+                    <div class="form-group" style="flex:0.5;"><label>Placement (#)</label><input type="number" id="add-pos" class="form-control" required min="1" value="1"></div>
+                    <div class="form-group" style="flex:2;"><label>Level Name</label><input type="text" id="add-name" class="form-control" required placeholder="e.g. Acheron"></div>
+                    <div class="form-group"><label>Level ID</label><input type="text" id="add-level-id" class="form-control" placeholder="e.g. 84930211"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Creator</label><input type="text" id="add-author" class="form-control" required placeholder="e.g. Ryamu"></div>
+                    <div class="form-group"><label>Verifier</label><input type="text" id="add-verifier" class="form-control" required placeholder="e.g. Zoink"></div>
+                    <div class="form-group"><label>Points (PTS)</label><input type="number" id="add-pts" class="form-control" required min="1" value="100"></div>
+                </div>
+                <div class="form-group"><label>YouTube Link (Verification)</label><input type="text" id="add-yt" class="form-control" required placeholder="https://www.youtube.com/watch?v=..."></div>
+                
+                <div class="form-group">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                        <label style="margin:0;">Victors & Proof Video Links</label>
+                        <button type="button" class="btn btn-sm" data-action="add-victor-row" data-container="add-victors-container">+ Add Player</button>
+                    </div>
+                    <div id="add-victors-container"></div>
+                </div>
+
+                <button type="submit" class="btn btn-accent" style="width:100%; margin-top:8px;">Add Level</button>
+            </form>
+        </div>
+
+        <!-- MANAGE LEVELS -->
+        <div style="background:var(--bg-card); padding:22px; border-radius:14px; border:1px solid var(--border);">
+            <h3 class="font-heading" style="font-size:16px; margin-bottom:14px;">📜 Existing Demons</h3>
+            <div id="admin-levels-manage-list"></div>
+        </div>
+    </div>
+</div>
+
+<!-- FLOATING CHAT WIDGET -->
+<button type="button" class="chat-toggle-btn" data-action="toggle-chat">
+    💬 Live Chat
+</button>
+
+<div id="chat-widget" class="chat-widget hidden">
+    <div class="chat-header">
+        <div style="font-weight: 800; font-size: 14px; color:#fff;" class="font-heading" id="chat-header-title">💬 Community Chat</div>
+        <button type="button" class="modal-close" data-action="toggle-chat">✕</button>
+    </div>
+    
+    <div class="chat-tabs">
+        <button type="button" class="chat-tab active" data-action="switch-chat-tab" data-mode="public">💬 Public</button>
+        <button type="button" class="chat-tab" data-action="switch-chat-tab" data-mode="private">👤 Private (DM)</button>
+    </div>
+
+    <!-- PUBLIC CHAT VIEW -->
+    <div id="chat-view-public" style="display:flex; flex-direction:column; flex:1; overflow:hidden;">
+        <div id="chat-messages-box" class="chat-messages"></div>
+        <form id="chat-form" class="chat-input-area">
+            <input type="text" id="chat-input" class="form-control" placeholder="Type a public message..." required style="padding: 8px 12px; font-size: 12px;">
+            <button type="submit" class="btn btn-accent btn-sm">Send</button>
+        </form>
+    </div>
+
+    <!-- PRIVATE CHAT VIEW -->
+    <div id="chat-view-private" class="hidden" style="display:flex; flex-direction:column; flex:1; overflow:hidden;">
+        <!-- CHAT SEARCH BAR FOR DM -->
+        <div style="padding:8px 10px; border-bottom:1px solid var(--border);">
+            <input type="text" id="dm-search-input" class="form-control" placeholder="🔍 Search players to DM..." style="padding:6px 10px; font-size:11px; width:100%;">
+        </div>
+
+        <div id="dm-users-list" class="chat-messages" style="padding: 10px;"></div>
+        
+        <div id="dm-active-conversation" class="hidden" style="display:flex; flex-direction:column; flex:1; overflow:hidden;">
+            <div style="padding: 6px 12px; background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+                <span id="dm-active-partner" style="font-size:12px; font-weight:700; color:var(--accent);">Chatting with...</span>
+                <button type="button" class="btn btn-sm" data-action="back-to-dm-list" style="padding: 2px 6px; font-size: 10px;">← Back</button>
+            </div>
+            <div id="dm-messages-box" class="chat-messages"></div>
+            <form id="dm-form" class="chat-input-area">
+                <input type="text" id="dm-input" class="form-control" placeholder="Type private message..." required style="padding: 8px 12px; font-size: 12px;">
+                <button type="submit" class="btn btn-accent btn-sm">Send</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- MODALS -->
+<!-- SUPERADMIN CONTROL MODAL (BAN / RESET PASS) -->
+<div id="modal-super-admin" class="modal-overlay">
+    <div class="modal-content" style="max-width:520px;">
+        <div class="modal-header">
+            <h2 class="font-heading" style="font-size: 18px;">🛡️ Superadmin User Management</h2>
+            <button type="button" class="modal-close" data-action="close-modals">✕</button>
+        </div>
+        <p style="font-size:12px; color:var(--text-muted); margin-bottom:14px;">Reset user passwords or ban/unban registered accounts.</p>
+        <div id="admin-users-list-container"></div>
+    </div>
+</div>
+
+<!-- AUTH MODAL -->
+<div id="modal-auth" class="modal-overlay">
+    <div class="modal-content" style="max-width:400px;">
+        <div class="modal-header">
+            <h2 class="font-heading" style="font-size: 18px;">Account Access</h2>
+            <button type="button" class="modal-close" data-action="close-modals">✕</button>
+        </div>
+
+        <div style="display:flex; background:var(--bg-input); padding:3px; border-radius:8px; margin-bottom:16px; border:1px solid var(--border);">
+            <button type="button" class="tab-btn active" id="auth-tab-login" data-action="switch-auth-tab" data-tab="login" style="flex:1; text-align:center;">Sign In</button>
+            <button type="button" class="tab-btn" id="auth-tab-register" data-action="switch-auth-tab" data-tab="register" style="flex:1; text-align:center;">Register</button>
+        </div>
+
+        <form id="form-login">
+            <div class="form-group"><label>Username</label><input type="text" id="login-username" class="form-control" required placeholder="Username"></div>
+            <div class="form-group"><label>Password</label><input type="password" id="login-password" class="form-control" required placeholder="••••••••"></div>
+            <button type="submit" class="btn btn-accent" style="width:100%; margin-top:8px;">Sign In</button>
+        </form>
+
+        <form id="form-register" class="hidden">
+            <div class="form-group"><label>Username</label><input type="text" id="reg-username" class="form-control" required placeholder="3-16 characters" maxlength="16"></div>
+            <div class="form-group"><label>Password</label><input type="password" id="reg-password" class="form-control" required placeholder="Min. 6 characters"></div>
+            
+            <div style="background:var(--bg-input); border:1px solid var(--border); border-radius:8px; padding:12px; margin-bottom:12px;">
+                <span style="font-size:10px; font-weight:800; color:var(--text-subtle); text-transform:uppercase;">Anti-Bot Verification</span>
+                <p id="captcha-question" style="font-size:13px; font-weight:700; color:#fff; margin:4px 0 8px 0;"></p>
+                <input type="text" id="captcha-answer" class="form-control" required placeholder="Result..." autocomplete="off">
+            </div>
+
+            <button type="submit" class="btn btn-accent" style="width:100%;">Create Account</button>
+        </form>
+    </div>
+</div>
+
+<!-- NOTIFICATIONS MODAL -->
+<div id="modal-notifications" class="modal-overlay">
+    <div class="modal-content" style="max-width:460px;">
+        <div class="modal-header">
+            <h2 class="font-heading" style="font-size: 18px;">🔔 Notifications</h2>
+            <button type="button" class="modal-close" data-action="close-modals">✕</button>
+        </div>
+        <div id="notifications-list-container"></div>
+    </div>
+</div>
+
+<!-- CREATE LIST MODAL -->
+<div id="modal-create-list" class="modal-overlay">
+    <div class="modal-content" style="max-width:440px;">
+        <div class="modal-header">
+            <h2 class="font-heading" style="font-size: 18px;">Create New Demonlist</h2>
+            <button type="button" class="modal-close" data-action="close-modals">✕</button>
+        </div>
+        <form id="create-list-form">
+            <div class="form-group"><label>URL ID (e.g. top-10-demons)</label><input type="text" id="new-list-id" class="form-control" required placeholder="custom-list-id"></div>
+            <div class="form-group"><label>List Title</label><input type="text" id="new-list-title" class="form-control" required placeholder="Official Extreme Demon List"></div>
+            <div class="form-group"><label>Discord Server (Optional)</label><input type="text" id="new-list-discord" class="form-control" placeholder="https://discord.gg/..."></div>
+            <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:16px;">
+                <button type="button" class="btn btn-sm" data-action="close-modals">Cancel</button>
+                <button type="submit" class="btn btn-sm btn-accent">Create List</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- EDIT LEVEL MODAL -->
+<div id="modal-edit-level" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="font-heading" style="font-size: 18px;">Edit Level Details</h2>
+            <button type="button" class="modal-close" data-action="close-modals">✕</button>
+        </div>
+        <form id="edit-level-form">
+            <input type="hidden" id="edit-lvl-index">
+            <div class="form-row">
+                <div class="form-group" style="flex:0.5;"><label>Placement (#)</label><input type="number" id="edit-pos" class="form-control" required min="1"></div>
+                <div class="form-group" style="flex:2;"><label>Level Name</label><input type="text" id="edit-name" class="form-control" required></div>
+                <div class="form-group"><label>Level ID</label><input type="text" id="edit-level-id" class="form-control" placeholder="e.g. 84930211"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>Creator</label><input type="text" id="edit-author" class="form-control" required></div>
+                <div class="form-group"><label>Verifier</label><input type="text" id="edit-verifier" class="form-control" required></div>
+                <div class="form-group"><label>Points</label><input type="number" id="edit-pts" class="form-control" required></div>
+            </div>
+            <div class="form-group"><label>YouTube Link</label><input type="text" id="edit-yt" class="form-control" required></div>
+            
+            <div class="form-group">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                    <label style="margin:0;">Victors & Proof Video Links</label>
+                    <button type="button" class="btn btn-sm" data-action="add-victor-row" data-container="edit-victors-container">+ Add Player</button>
+                </div>
+                <div id="edit-victors-container"></div>
+            </div>
+
+            <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:16px;">
+                <button type="button" class="btn btn-sm" data-action="close-modals">Cancel</button>
+                <button type="submit" class="btn btn-sm btn-accent">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- LEVEL DETAILS MODAL -->
+<div id="modal-level-details" class="modal-overlay">
+    <div class="modal-content modal-large">
+        <div class="modal-header">
+            <h2 id="detail-title" class="font-heading" style="font-size: 20px;">#1 Level Name</h2>
+            <button type="button" class="modal-close" data-action="close-modals">✕</button>
+        </div>
+        
+        <div id="detail-video-box"></div>
+        
+        <div style="margin-bottom:16px;">
+            <p style="color:var(--text-muted); font-size:13px;">
+                Creator: <strong id="detail-author" style="color:#fff;"></strong> &nbsp;•&nbsp; 
+                Level ID: <strong id="detail-level-id" style="color:var(--accent);"></strong> &nbsp;•&nbsp; 
+                Verifier: <strong id="detail-verifier" style="color:#fff;"></strong>
+            </p>
+            <p style="color:var(--text-muted); font-size:13px; margin-top:2px;">Points awarded: <strong id="detail-pts" style="color:var(--accent);"></strong></p>
+        </div>
+
+        <hr style="border:none; border-top:1px solid var(--border); margin-bottom:16px;">
+        
+        <h3 class="font-heading" style="font-size: 15px; margin-bottom: 10px;">🏆 Registered Victors (<span id="detail-victor-count">0</span>)</h3>
+        <div id="detail-victors-list"></div>
+    </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+    <div class="footer-inner">
+        <div>
+            <div style="font-size:13px; font-weight:700; color:#fff;">Demonlist Central &bull; Built by <span style="color:var(--accent);">myszon12</span></div>
+            <div style="font-size:11px; color:var(--text-subtle); margin-top:2px;">Realtime Cloud Sync via Supabase</div>
+        </div>
+        <div>
+            <a href="https://discord.gg/3zvSrFnVz" target="_blank" class="discord-link">Join Discord Community</a>
+        </div>
+    </div>
+</footer>
+
+<script>
+/* ====================================================================
+   1. STORAGE & SECURITY & SUPABASE SETUP
+   ==================================================================== */
+const safeStorage = {
+    getItem: (k) => { try { return localStorage.getItem(k); } catch(e) { return null; } },
+    setItem: (k, v) => { try { localStorage.setItem(k, v); } catch(e) {} },
+    removeItem: (k) => { try { localStorage.removeItem(k); } catch(e) {} }
+};
+
+const dummyMemoryStorage = { getItem: () => null, setItem: () => {}, removeItem: () => {} };
+
+const SUPABASE_URL = "https://iigxupbrqpqftynrhlwk.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlpZ3h1cGJycXBxZnR5bnJobHdrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4MzAzNjEsImV4cCI6MjEwMDQwNjM2MX0.hK0GlMWVE7B3_n2mEzsUlz3qU6TSWt5w2S9Td20fl68";
+
+let supabaseClient = null;
+if (window.supabase) {
+    try {
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+            auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false, storage: dummyMemoryStorage }
+        });
+    } catch(e) {}
+}
+
+// Password Hashing with Salt
+async function hashPassword(password) {
+    if (!password) return '';
+    try {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(password + "_gd_security_salt_2026");
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    } catch(e) {
+        return password; // Fallback
     }
+}
 
-    async function fetchFromSupabase() {
-        if (!supabaseClient) { updateStatusBadge(false); return; }
+/* ====================================================================
+   2. INITIAL STATE & CHAT CONFIG
+   ==================================================================== */
+const DEFAULT_DATA = {
+    users: {
+        "myszon12": { password: "szyszkaqw", invites: [], banned: false },
+        "myszon": { password: "szyszkaqw", invites: [], banned: false }
+    },
+    lists: {
+        "top-10-demons": {
+            id: "top-10-demons",
+            title: "Main Extreme Demon List",
+            author: "myszon12",
+            editors: [],
+            discord: "https://discord.gg/3zvSrFnVz",
+            views: 28,
+            levels: [
+                { pos: 1, name: "Acheron", levelId: "84930211", author: "Ryamu & More", verifier: "Zoink", pts: 100, yt: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", victors: [{ name: "Zoink", video: "https://youtube.com" }, { name: "Trick", video: "" }] },
+                { pos: 2, name: "Avernus", levelId: "89201948", author: "Pingu & More", verifier: "Zoink", pts: 95, yt: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", victors: [{ name: "Diamond", video: "" }] }
+            ]
+        }
+    },
+    chatMessages: [
+        { user: "myszon12", text: "Welcome to Demonlist Central! Feel free to chat with other players here.", time: "12:00" }
+    ],
+    directMessages: [] // { from, to, text, time, read: false }
+};
+
+function ensureDataStructure(data) {
+    if (!data || typeof data !== 'object') data = {};
+    if (!data.users) data.users = {};
+    if (!data.users["myszon12"]) data.users["myszon12"] = { password: "szyszkaqw", invites: [], banned: false };
+    if (!data.lists) data.lists = {};
+    if (!data.chatMessages) data.chatMessages = [];
+    if (!data.directMessages) data.directMessages = [];
+    return data;
+}
+
+function loadStoredData() {
+    try {
+        const d = safeStorage.getItem("gd_app_data_v6");
+        if (d) return ensureDataStructure(JSON.parse(d));
+    } catch(e) {}
+    return ensureDataStructure(JSON.parse(JSON.stringify(DEFAULT_DATA)));
+}
+
+function loadStoredUser() {
+    try {
+        const u = safeStorage.getItem("gd_app_user_v6");
+        return u ? JSON.parse(u) : null;
+    } catch(e) { return null; }
+}
+
+let globalData = loadStoredData();
+let currentUser = loadStoredUser();
+let currentListId = null;
+let currentListData = null;
+let isOwner = false;
+let currentCaptchaTarget = "";
+let currentChatMode = "public";
+let activeDmPartner = null;
+
+async function saveState() {
+    globalData = ensureDataStructure(globalData);
+    safeStorage.setItem("gd_app_data_v6", JSON.stringify(globalData));
+    
+    if (currentUser) safeStorage.setItem("gd_app_user_v6", JSON.stringify(currentUser));
+    else safeStorage.removeItem("gd_app_user_v6");
+
+    if (supabaseClient) {
         try {
-            const { data, error } = await supabaseClient.from('app_store').select('payload').eq('id', 1).single();
-            if (error) throw error;
-            if (data && data.payload) {
-                globalData = ensureDataStructure(data.payload);
+            await supabaseClient.from('app_store').upsert({ id: 1, payload: globalData });
+        } catch(err) {}
+    }
+}
+
+async function fetchFromSupabase() {
+    if (!supabaseClient) { updateStatusBadge(false); return; }
+    try {
+        const { data, error } = await supabaseClient.from('app_store').select('payload').eq('id', 1).single();
+        if (error) throw error;
+        if (data && data.payload) {
+            globalData = ensureDataStructure(data.payload);
+            safeStorage.setItem("gd_app_data_v6", JSON.stringify(globalData));
+            
+            // Check if current user was banned while online
+            if (currentUser && globalData.users[currentUser.username]?.banned) {
+                currentUser = null;
+                showToast("❌ Your account was banned.");
+            }
+
+            updateStatusBadge(true);
+            refreshCurrentUI();
+        } else {
+            updateStatusBadge(true);
+        }
+    } catch(err) {
+        updateStatusBadge(false);
+    }
+}
+
+function setupRealtimeListener() {
+    if (!supabaseClient) return;
+    supabaseClient
+        .channel('public:app_store')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'app_store' }, (payload) => {
+            if (payload.new && payload.new.payload) {
+                globalData = ensureDataStructure(payload.new.payload);
                 safeStorage.setItem("gd_app_data_v6", JSON.stringify(globalData));
                 
                 if (currentUser && globalData.users[currentUser.username]?.banned) {
@@ -922,1184 +1172,1183 @@
                     showToast("❌ Your account was banned.");
                 }
 
-                updateStatusBadge(true);
                 refreshCurrentUI();
-            } else {
-                updateStatusBadge(true);
             }
-        } catch(err) {
-            updateStatusBadge(false);
-        }
+        })
+        .subscribe();
+}
+
+function refreshCurrentUI() {
+    renderChatMessages();
+    renderDmUsersList();
+    checkNotificationsCount();
+    if (activeDmPartner) renderDmMessages(activeDmPartner);
+    handleRouting();
+}
+
+function updateStatusBadge(isOnline) {
+    const badge = document.getElementById("db-status-badge");
+    if (!badge) return;
+    if (isOnline) {
+        badge.innerText = "Cloud Active";
+        badge.className = "status-tag status-online";
+    } else {
+        badge.innerText = "Local Mode";
+        badge.className = "status-tag status-offline";
     }
+}
 
-    function setupRealtimeListener() {
-        if (!supabaseClient) return;
-        supabaseClient
-            .channel('public:app_store')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'app_store' }, (payload) => {
-                if (payload.new && payload.new.payload) {
-                    globalData = ensureDataStructure(payload.new.payload);
-                    safeStorage.setItem("gd_app_data_v6", JSON.stringify(globalData));
-                    
-                    if (currentUser && globalData.users[currentUser.username]?.banned) {
-                        currentUser = null;
-                        showToast("❌ Your account was banned.");
-                    }
-
-                    refreshCurrentUI();
-                }
-            })
-            .subscribe();
+/* ====================================================================
+   SYSTEM ROUTINGU (LINKI DO LIST)
+   ==================================================================== */
+function handleRouting() {
+    const hash = window.location.hash.replace('#', '').trim();
+    if (hash && globalData.lists && globalData.lists[hash]) {
+        loadList(hash, false);
+    } else if (!hash) {
+        showHome();
     }
+}
 
-    function refreshCurrentUI() {
+window.addEventListener('hashchange', handleRouting);
+
+/* ====================================================================
+   3. RENDERING ENGINE & CHAT LOGIC
+   ==================================================================== */
+function showToast(msg) {
+    const container = document.getElementById("toast-container");
+    if (!container) return;
+    const toast = document.createElement("div");
+    toast.className = "toast";
+    toast.innerText = msg;
+    container.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+}
+
+function switchChatTab(mode) {
+    currentChatMode = mode;
+    const btnPub = document.querySelector('[data-mode="public"]');
+    const btnPriv = document.querySelector('[data-mode="private"]');
+    const viewPub = document.getElementById("chat-view-public");
+    const viewPriv = document.getElementById("chat-view-private");
+    const title = document.getElementById("chat-header-title");
+
+    if (mode === 'public') {
+        btnPub.classList.add("active");
+        btnPriv.classList.remove("active");
+        viewPub.classList.remove("hidden");
+        viewPriv.classList.add("hidden");
+        title.innerText = "💬 Community Chat";
         renderChatMessages();
+    } else {
+        if (!currentUser) {
+            showToast("Please sign in to view private chats!");
+            document.getElementById('modal-auth').classList.add('active');
+            switchAuthTab('login');
+            return;
+        }
+        btnPriv.classList.add("active");
+        btnPub.classList.remove("active");
+        viewPub.classList.add("hidden");
+        viewPriv.classList.remove("hidden");
+        title.innerText = "👤 Private Messages (DM)";
         renderDmUsersList();
-        checkNotificationsCount();
-        if (activeDmPartner) renderDmMessages(activeDmPartner);
-        handleRouting();
+    }
+}
+
+function renderChatMessages() {
+    const box = document.getElementById("chat-messages-box");
+    if (!box) return;
+    box.innerHTML = "";
+
+    const msgs = globalData.chatMessages || [];
+    if (msgs.length === 0) {
+        box.innerHTML = `<div style="color:var(--text-subtle); font-size:12px; text-align:center; margin-top:20px;">No messages yet. Say hi!</div>`;
+        return;
     }
 
-    function updateStatusBadge(isOnline) {
-        const badge = document.getElementById("db-status-badge");
-        if (!badge) return;
-        if (isOnline) {
-            badge.innerText = "Cloud Active";
-            badge.className = "status-tag status-online";
-        } else {
-            badge.innerText = "Local Mode";
-            badge.className = "status-tag status-offline";
-        }
+    msgs.forEach(m => {
+        const div = document.createElement("div");
+        div.className = "chat-msg";
+        const isSuper = m.user === "myszon12" || m.user === "myszon";
+        const badge = isSuper ? '<span class="super-badge" style="font-size:8px; padding:1px 4px;">ADMIN</span>' : '';
+        
+        div.innerHTML = `
+            <div class="chat-msg-user">
+                ${m.user}${badge} <span class="chat-msg-time">${m.time || ''}</span>
+            </div>
+            <div class="chat-msg-text">${escapeHtml(m.text)}</div>
+        `;
+        box.appendChild(div);
+    });
+
+    box.scrollTop = box.scrollHeight;
+}
+
+function renderDmUsersList(searchQuery = "") {
+    const container = document.getElementById("dm-users-list");
+    if (!container || currentChatMode !== 'private') return;
+    if (activeDmPartner) return;
+
+    container.innerHTML = "";
+    container.classList.remove("hidden");
+    document.getElementById("dm-active-conversation").classList.add("hidden");
+
+    globalData = ensureDataStructure(globalData);
+    let users = Object.keys(globalData.users || {}).filter(u => u !== (currentUser ? currentUser.username : ""));
+
+    if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        users = users.filter(u => u.toLowerCase().includes(q));
     }
 
-    /* ====================================================================
-       3. ROUTING & RENDERING ENGINE
-       ==================================================================== */
-    function handleRouting() {
-        const hash = window.location.hash.replace('#', '');
-        if (hash.startsWith('list=')) {
-            const listId = hash.replace('list=', '');
-            if (globalData && globalData.lists && globalData.lists[listId]) {
-                loadList(listId, false, false);
-                return;
+    if (users.length === 0) {
+        container.innerHTML = `<div style="color:var(--text-subtle); font-size:12px; text-align:center; margin-top:20px;">No users found.</div>`;
+        return;
+    }
+
+    users.forEach(username => {
+        const item = document.createElement("div");
+        item.className = "dm-user-item";
+        item.setAttribute("data-action", "open-dm");
+        item.setAttribute("data-user", username);
+        
+        const isSuper = username === "myszon12" || username === "myszon";
+        const badge = isSuper ? '<span class="super-badge" style="font-size:8px;">ADMIN</span>' : '';
+
+        // Check unread count from this user
+        const unreadCount = (globalData.directMessages || []).filter(m => m.from === username && m.to === currentUser?.username && !m.read).length;
+        const unreadBadge = unreadCount > 0 ? `<span style="background:var(--danger); color:#fff; font-size:10px; font-weight:800; padding:2px 6px; border-radius:10px; margin-left:6px;">${unreadCount} UNREAD</span>` : '';
+
+        item.innerHTML = `
+            <div>👤 ${username} ${badge} ${unreadBadge}</div>
+            <div style="font-size: 11px; color: var(--accent); font-weight:700;">Chat ↗</div>
+        `;
+        container.appendChild(item);
+    });
+}
+
+function openDmChat(partnerName) {
+    activeDmPartner = partnerName;
+    document.getElementById("dm-users-list").classList.add("hidden");
+    const activeBox = document.getElementById("dm-active-conversation");
+    activeBox.classList.remove("hidden");
+    document.getElementById("dm-active-partner").innerText = `Chatting with: ${partnerName}`;
+
+    // Mark messages from this user as read
+    if (currentUser) {
+        let changed = false;
+        (globalData.directMessages || []).forEach(m => {
+            if (m.from === partnerName && m.to === currentUser.username && !m.read) {
+                m.read = true;
+                changed = true;
             }
+        });
+        if (changed) {
+            saveState();
+            checkNotificationsCount();
         }
-        showHome(false);
     }
 
-    function showToast(msg) {
-        const container = document.getElementById("toast-container");
-        if (!container) return;
-        const toast = document.createElement("div");
-        toast.className = "toast";
-        toast.innerText = msg;
-        container.appendChild(toast);
-        setTimeout(() => toast.remove(), 3000);
+    renderDmMessages(partnerName);
+}
+
+function renderDmMessages(partnerName) {
+    const box = document.getElementById("dm-messages-box");
+    if (!box || !currentUser) return;
+    box.innerHTML = "";
+
+    const dms = globalData.directMessages || [];
+    const myName = currentUser.username;
+
+    const conversation = dms.filter(m => 
+        (m.from === myName && m.to === partnerName) || 
+        (m.from === partnerName && m.to === myName)
+    );
+
+    if (conversation.length === 0) {
+        box.innerHTML = `<div style="color:var(--text-subtle); font-size:12px; text-align:center; margin-top:20px;">Start your private conversation with ${partnerName}!</div>`;
+        return;
     }
 
-    function switchChatTab(mode) {
-        currentChatMode = mode;
-        const btnPub = document.querySelector('[data-mode="public"]');
-        const btnPriv = document.querySelector('[data-mode="private"]');
-        const viewPub = document.getElementById("chat-view-public");
-        const viewPriv = document.getElementById("chat-view-private");
-        const title = document.getElementById("chat-header-title");
+    conversation.forEach(m => {
+        const div = document.createElement("div");
+        div.className = "chat-msg";
+        const isMe = m.from === myName;
+        div.style.borderColor = isMe ? "rgba(99, 102, 241, 0.3)" : "var(--border)";
+        
+        div.innerHTML = `
+            <div class="chat-msg-user" style="color: ${isMe ? 'var(--success)' : 'var(--accent)'};">
+                ${m.from} <span class="chat-msg-time">${m.time || ''}</span>
+            </div>
+            <div class="chat-msg-text">${escapeHtml(m.text)}</div>
+        `;
+        box.appendChild(div);
+    });
 
-        if (mode === 'public') {
-            btnPub.classList.add("active");
-            btnPriv.classList.remove("active");
-            viewPub.classList.remove("hidden");
-            viewPriv.classList.add("hidden");
-            title.innerText = "💬 Community Chat";
-            renderChatMessages();
+    box.scrollTop = box.scrollHeight;
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+function showHome() {
+    currentListId = null;
+    currentListData = null;
+    
+    // Usunięcie hash jeśli jest powrót na stronę główną
+    if (window.location.hash !== '') {
+        history.pushState("", document.title, window.location.pathname + window.location.search);
+    }
+
+    document.getElementById("view-home").classList.remove("hidden");
+    document.getElementById("view-list").classList.add("hidden");
+
+    renderHomeLists();
+}
+
+function renderHomeLists(query = "") {
+    const popGrid = document.getElementById("popular-lists-grid");
+    const allGrid = document.getElementById("all-lists-grid");
+    if (!popGrid || !allGrid) return;
+
+    popGrid.innerHTML = "";
+    allGrid.innerHTML = "";
+
+    globalData = ensureDataStructure(globalData);
+    let listsArray = Object.keys(globalData.lists).map(id => globalData.lists[id]).filter(Boolean);
+
+    if (query) {
+        const q = query.toLowerCase();
+        listsArray = listsArray.filter(l => l.title.toLowerCase().includes(q) || l.author.toLowerCase().includes(q));
+    }
+
+    const popularLists = [...listsArray].sort((a,b) => (b.views || 0) - (a.views || 0));
+
+    popularLists.slice(0, 3).forEach(item => popGrid.appendChild(createListCard(item)));
+    listsArray.forEach(item => allGrid.appendChild(createListCard(item)));
+}
+
+function createListCard(item) {
+    const card = document.createElement("div");
+    card.className = "card-list";
+    card.setAttribute("data-action", "load-list");
+    card.setAttribute("data-id", item.id);
+    card.innerHTML = `
+        <div>
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
+                <div class="font-heading" style="font-size: 16px; font-weight: 700;">${item.title}</div>
+                <span class="pill-views">👁️ ${item.views || 0}</span>
+            </div>
+            <div style="font-size: 12px; color: var(--text-muted);">By: <strong style="color:#fff;">${item.author}</strong></div>
+        </div>
+        <div style="margin-top:16px; font-weight:700; color:var(--accent); font-size:12px;">
+            ${item.levels ? item.levels.length : 0} Demons ranked
+        </div>
+    `;
+    return card;
+}
+
+function loadList(listId, incrementViews = true) {
+    globalData = ensureDataStructure(globalData);
+    currentListId = listId;
+    currentListData = globalData.lists[listId];
+
+    if (!currentListData) {
+        showToast("List not found!");
+        showHome();
+        return;
+    }
+
+    // Aktualizacja URL hash bez odświeżania strony
+    if (window.location.hash !== '#' + listId) {
+        window.location.hash = listId;
+    }
+
+    if (incrementViews) {
+        currentListData.views = (currentListData.views || 0) + 1;
+        saveState();
+    }
+
+    const isSuperAdmin = currentUser && (currentUser.username === "myszon12" || currentUser.username === "myszon");
+    isOwner = isSuperAdmin || (currentUser && (
+        currentListData.author === currentUser.username || 
+        (currentListData.editors && currentListData.editors.includes(currentUser.username))
+    ));
+
+    document.getElementById("view-home").classList.add("hidden");
+    document.getElementById("view-list").classList.remove("hidden");
+
+    document.getElementById("active-list-title").innerText = currentListData.title;
+    document.getElementById("active-list-author").innerText = currentListData.author;
+    document.getElementById("active-list-views").innerText = `👁️ ${currentListData.views} views`;
+    document.getElementById("active-list-discord").href = currentListData.discord || "#";
+
+    document.getElementById("btn-admin-tab").classList.toggle("hidden", !isOwner);
+    document.getElementById("tab-btn-admin").classList.toggle("hidden", !isOwner);
+    document.getElementById("btn-delete-list").classList.toggle("hidden", !isOwner);
+
+    renderListLevels();
+    renderLeaderboard();
+    if (isOwner) renderAdminPanel();
+}
+
+function switchTab(tabName) {
+    ['levels', 'leaderboard', 'admin'].forEach(t => {
+        const btn = document.getElementById(`tab-btn-${t}`);
+        const content = document.getElementById(`tab-content-${t}`);
+        if (btn) btn.classList.toggle("active", t === tabName);
+        if (content) content.classList.toggle("hidden", t !== tabName);
+    });
+}
+
+function renderListLevels(filteredLevels = null) {
+    const container = document.getElementById("levels-list-container");
+    if (!container) return;
+    container.innerHTML = "";
+
+    const levels = filteredLevels || (currentListData ? currentListData.levels : []) || [];
+    if (levels.length === 0) {
+        container.innerHTML = "<p style='color:var(--text-muted); font-size:13px; padding:10px;'>No demons added to this list yet.</p>";
+        return;
+    }
+
+    levels.forEach(l => {
+        const ytId = parseYoutube(l.yt);
+        const rankClass = l.pos === 1 ? "rank-1" : l.pos === 2 ? "rank-2" : l.pos === 3 ? "rank-3" : "";
+        const idBadge = l.levelId ? ` &bull; ID: <span style="color:var(--text-main); font-weight:600;">${l.levelId}</span>` : '';
+        const card = document.createElement("div");
+        card.className = "level-card";
+        card.innerHTML = `
+            <div class="level-rank ${rankClass}">#${l.pos}</div>
+            <div class="level-info" data-action="open-level-details" data-pos="${l.pos}">
+                <div>
+                    <div class="level-name">${l.name}</div>
+                    <div class="level-meta">by ${l.author}${idBadge} &bull; verifier: ${l.verifier}</div>
+                </div>
+                <div class="level-pts">+${l.pts} PTS</div>
+            </div>
+            <div class="level-thumb" data-action="open-level-details" data-pos="${l.pos}">
+                <img src="${ytId ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : ''}" alt="thumbnail">
+            </div>
+        `;
+        container.appendChild(card);
+    });
+}
+
+function renderLeaderboard() {
+    const container = document.getElementById("tab-content-leaderboard");
+    if (!container) return;
+    container.innerHTML = "";
+
+    let players = {};
+    ((currentListData && currentListData.levels) || []).forEach(l => {
+        const pts = Number(l.pts) || 0;
+        const levelPlayers = new Set();
+
+        // Verifier gets points
+        if (l.verifier && l.verifier.trim()) {
+            levelPlayers.add(l.verifier.trim());
+        }
+
+        // Victors get points
+        if (l.victors) {
+            l.victors.forEach(v => {
+                const name = typeof v === 'object' ? v.name : v;
+                if (name && name.trim()) {
+                    levelPlayers.add(name.trim());
+                }
+            });
+        }
+
+        // Award points once per level per player
+        levelPlayers.forEach(pName => {
+            if (!players[pName]) players[pName] = { pts: 0, count: 0 };
+            players[pName].pts += pts;
+            players[pName].count += 1;
+        });
+    });
+
+    const sorted = Object.keys(players).map(k => ({ name: k, ...players[k] })).sort((a,b) => b.pts - a.pts);
+
+    if (sorted.length === 0) {
+        container.innerHTML = "<p style='color:var(--text-muted); font-size:13px; padding:10px;'>No victors or verifiers registered on this list yet.</p>";
+        return;
+    }
+
+    sorted.forEach((p, idx) => {
+        const card = document.createElement("div");
+        card.style.cssText = "background:var(--bg-card); padding:14px 18px; border-radius:10px; border:1px solid var(--border); margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;";
+        card.innerHTML = `
+            <div><strong style="font-size:14px;" class="font-heading">#${idx + 1} ${p.name}</strong> <span style="color:var(--text-subtle); font-size:12px; margin-left:6px;">(${p.count} demons)</span></div>
+            <div style="color:var(--accent); font-weight:800; font-size:14px;">${p.pts} PTS</div>
+        `;
+        container.appendChild(card);
+    });
+}
+
+function renderAdminPanel() {
+    renderEditorsList();
+    renderManageLevelsList();
+}
+
+function renderEditorsList() {
+    const container = document.getElementById("admin-editors-list");
+    if (!container) return;
+    container.innerHTML = "";
+
+    const editors = currentListData ? (currentListData.editors || []) : [];
+    if (editors.length === 0) {
+        container.innerHTML = "<p style='color:var(--text-muted); font-size:12px;'>No co-editors added.</p>";
+        return;
+    }
+
+    editors.forEach(ed => {
+        const item = document.createElement("div");
+        item.className = "admin-item";
+        item.innerHTML = `
+            <div><strong style="font-size:13px;">${ed}</strong></div>
+            <button type="button" class="btn btn-sm btn-danger" data-action="remove-editor" data-editor="${ed}">Remove</button>
+        `;
+        container.appendChild(item);
+    });
+}
+
+function renderManageLevelsList() {
+    const container = document.getElementById("admin-levels-manage-list");
+    if (!container) return;
+    container.innerHTML = "";
+
+    ((currentListData && currentListData.levels) || []).forEach((l, idx) => {
+        const item = document.createElement("div");
+        item.className = "admin-item";
+        item.innerHTML = `
+            <div><strong style="font-size:13px;">#${l.pos} ${l.name}</strong> ${l.levelId ? `<span style="color:var(--accent); font-size:11px; margin-left:4px;">(ID: ${l.levelId})</span>` : ''}</div>
+            <div style="display:flex; gap:6px;">
+                <button type="button" class="btn btn-sm" data-action="open-edit-level" data-index="${idx}">Edit</button>
+                <button type="button" class="btn btn-sm btn-danger" data-action="delete-level" data-index="${idx}">Delete</button>
+            </div>
+        `;
+        container.appendChild(item);
+    });
+}
+
+function openEditLevelModal(index) {
+    index = parseInt(index);
+    if (!currentListData || !currentListData.levels[index]) return;
+    const l = currentListData.levels[index];
+
+    document.getElementById("edit-lvl-index").value = index;
+    document.getElementById("edit-pos").value = l.pos;
+    document.getElementById("edit-name").value = l.name;
+    document.getElementById("edit-level-id").value = l.levelId || "";
+    document.getElementById("edit-author").value = l.author;
+    document.getElementById("edit-verifier").value = l.verifier;
+    document.getElementById("edit-pts").value = l.pts;
+    document.getElementById("edit-yt").value = l.yt;
+
+    const victorsContainer = document.getElementById("edit-victors-container");
+    victorsContainer.innerHTML = "";
+    if (l.victors) {
+        l.victors.forEach(v => {
+            const vName = typeof v === 'object' ? v.name : v;
+            const vVideo = typeof v === 'object' ? (v.video || '') : '';
+            addVictorInputRow("edit-victors-container", vName, vVideo);
+        });
+    }
+
+    document.getElementById("modal-edit-level").classList.add("active");
+}
+
+function openLevelDetailsModal(pos) {
+    if (!currentListData) return;
+    const l = currentListData.levels.find(item => Number(item.pos) === Number(pos));
+    if (!l) return;
+
+    const ytId = parseYoutube(l.yt);
+    document.getElementById("detail-title").innerText = `#${l.pos} ${l.name}`;
+    document.getElementById("detail-author").innerText = l.author;
+    document.getElementById("detail-level-id").innerText = l.levelId || "N/A";
+    document.getElementById("detail-verifier").innerText = l.verifier;
+    document.getElementById("detail-pts").innerText = `+${l.pts} PTS`;
+    
+    document.getElementById("detail-video-box").innerHTML = ytId 
+        ? `<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${ytId}?autoplay=0" frameborder="0" allowfullscreen style="border:none;"></iframe>` 
+        : `<div style="display:flex; align-items:center; justify-content:center; height:100%; color:var(--text-muted);">No video available</div>`;
+
+    const victorsContainer = document.getElementById("detail-victors-list");
+    victorsContainer.innerHTML = "";
+    const victors = l.victors || [];
+    document.getElementById("detail-victor-count").innerText = victors.length;
+
+    if (victors.length === 0) {
+        victorsContainer.innerHTML = "<p style='color:var(--text-muted); font-size:12px;'>No victors registered.</p>";
+    } else {
+        victors.forEach(v => {
+            const vName = typeof v === 'object' ? v.name : v;
+            const vVideo = typeof v === 'object' ? v.video : '';
+            const item = document.createElement("div");
+            item.className = "victor-item";
+            item.innerHTML = `
+                <div><strong style="font-size:13px;">${vName}</strong></div>
+                <div>${vVideo ? `<a href="${vVideo}" target="_blank" style="color:var(--accent); text-decoration:none; font-size:12px; font-weight:700;">Watch Proof ↗</a>` : `<span style="color:var(--text-subtle); font-size:11px;">No video</span>`}</div>
+            `;
+            victorsContainer.appendChild(item);
+        });
+    }
+
+    document.getElementById("modal-level-details").classList.add("active");
+}
+
+function addVictorInputRow(containerId, name = "", video = "") {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    const row = document.createElement("div");
+    row.className = "victor-row";
+    row.innerHTML = `
+        <input type="text" class="form-control victor-name" placeholder="Player Name" value="${name}" style="flex:1;">
+        <input type="text" class="form-control victor-video" placeholder="Proof Link (YouTube)" value="${video}" style="flex:1.5;">
+        <button type="button" class="btn btn-danger btn-sm" data-action="remove-victor-row">✕</button>
+    `;
+    container.appendChild(row);
+}
+
+function getVictorsFromContainer(containerId) {
+    const rows = document.querySelectorAll(`#${containerId} .victor-row`);
+    const victors = [];
+    rows.forEach(row => {
+        const name = row.querySelector(".victor-name").value.trim();
+        const video = row.querySelector(".victor-video").value.trim();
+        if (name) victors.push({ name, video });
+    });
+    return victors;
+}
+
+function reorderLevelsArray(levels) {
+    levels.sort((a, b) => a.pos - b.pos);
+    levels.forEach((lvl, idx) => { lvl.pos = idx + 1; });
+}
+
+function closeModals() {
+    document.querySelectorAll(".modal-overlay").forEach(m => m.classList.remove("active"));
+}
+
+function parseYoutube(yt) {
+    if (!yt) return "";
+    try {
+        let fullUrl = yt.trim();
+        if (!fullUrl.startsWith('http://') && !fullUrl.startsWith('https://')) fullUrl = 'https://' + fullUrl;
+        const url = new URL(fullUrl);
+        if (url.hostname.includes('youtu.be')) return url.pathname.slice(1);
+        if (url.searchParams.has('v')) return url.searchParams.get('v');
+        const parts = url.pathname.split('/').filter(Boolean);
+        return parts[parts.length - 1] || "";
+    } catch (e) {
+        return yt.trim();
+    }
+}
+
+function generateCaptcha() {
+    const a = Math.floor(Math.random() * 8) + 2;
+    const b = Math.floor(Math.random() * 8) + 2;
+    currentCaptchaTarget = (a + b).toString();
+    const qLabel = document.getElementById("captcha-question");
+    if (qLabel) qLabel.innerText = `What is ${a} + ${b}?`;
+    const aInput = document.getElementById("captcha-answer");
+    if (aInput) aInput.value = "";
+}
+
+function switchAuthTab(type) {
+    const isLogin = type === 'login';
+    document.getElementById("auth-tab-login").classList.toggle("active", isLogin);
+    document.getElementById("auth-tab-register").classList.toggle("active", !isLogin);
+    document.getElementById("form-login").classList.toggle("hidden", !isLogin);
+    document.getElementById("form-register").classList.toggle("hidden", isLogin);
+    if (!isLogin) generateCaptcha();
+}
+
+function updateAuthUI() {
+    const notifBtn = document.getElementById("notif-btn");
+    const authBtn = document.getElementById("auth-modal-btn");
+    const profileBtn = document.getElementById("user-profile-btn");
+    const nameLabel = document.getElementById("user-display-name");
+    const superAdminBtn = document.getElementById("btn-super-admin");
+
+    const isSuper = currentUser && (currentUser.username === "myszon12" || currentUser.username === "myszon");
+
+    if (superAdminBtn) superAdminBtn.classList.toggle("hidden", !isSuper);
+
+    if (currentUser) {
+        if (authBtn) authBtn.classList.add("hidden");
+        if (profileBtn) profileBtn.classList.remove("hidden");
+        
+        const badgeTag = isSuper ? '<span class="super-badge">Superadmin</span>' : '';
+        
+        if (nameLabel) nameLabel.innerHTML = `${currentUser.username}${badgeTag}`;
+        if (notifBtn) notifBtn.classList.remove("hidden");
+        checkNotificationsCount();
+    } else {
+        if (authBtn) authBtn.classList.remove("hidden");
+        if (profileBtn) profileBtn.classList.add("hidden");
+        if (notifBtn) notifBtn.classList.add("hidden");
+    }
+}
+
+/* ====================================================================
+   NOTIFICATIONS LOGIC (INVITES + DM ALERTS)
+   ==================================================================== */
+function checkNotificationsCount() {
+    globalData = ensureDataStructure(globalData);
+    if (!currentUser || !globalData.users[currentUser.username]) return;
+
+    const invites = globalData.users[currentUser.username].invites || [];
+    const unreadDms = (globalData.directMessages || []).filter(m => m.to === currentUser.username && !m.read);
+    
+    const totalCount = invites.length + unreadDms.length;
+    const badge = document.getElementById("notif-badge-count");
+    if (badge) {
+        if (totalCount > 0) {
+            badge.innerText = totalCount;
+            badge.classList.remove("hidden");
         } else {
+            badge.classList.add("hidden");
+        }
+    }
+}
+
+function openNotificationsModal() {
+    globalData = ensureDataStructure(globalData);
+    const container = document.getElementById("notifications-list-container");
+    if (!container) return;
+    container.innerHTML = "";
+
+    const invites = (currentUser && globalData.users[currentUser.username] && globalData.users[currentUser.username].invites) || [];
+    const unreadDms = (globalData.directMessages || []).filter(m => m.to === currentUser?.username && !m.read);
+
+    if (invites.length === 0 && unreadDms.length === 0) {
+        container.innerHTML = "<p style='color:var(--text-muted); font-size:12px; text-align:center; padding:10px;'>No new notifications.</p>";
+    } else {
+        // Render Direct Message Notifications
+        if (unreadDms.length > 0) {
+            const dmHeader = document.createElement("div");
+            dmHeader.style.cssText = "font-size:12px; font-weight:800; color:var(--text-subtle); text-transform:uppercase; margin-bottom:8px;";
+            dmHeader.innerText = "💬 Unread Direct Messages";
+            container.appendChild(dmHeader);
+
+            unreadDms.forEach(m => {
+                const card = document.createElement("div");
+                card.style.cssText = "background:var(--bg-input); border:1px solid var(--accent); padding:12px; border-radius:8px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;";
+                card.innerHTML = `
+                    <div>
+                        <strong style="font-size:13px; color:var(--accent);">Message from ${m.from}</strong>
+                        <span style="font-size:11px; color:var(--text-muted); display:block;">"${escapeHtml(m.text.slice(0, 30))}${m.text.length > 30 ? '...' : ''}"</span>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-accent" data-action="open-dm-from-notif" data-user="${m.from}">Reply</button>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Render List Invitation Notifications
+        if (invites.length > 0) {
+            const invHeader = document.createElement("div");
+            invHeader.style.cssText = "font-size:12px; font-weight:800; color:var(--text-subtle); text-transform:uppercase; margin:14px 0 8px 0;";
+            invHeader.innerText = "📩 List Editor Invitations";
+            container.appendChild(invHeader);
+
+            invites.forEach(inv => {
+                const card = document.createElement("div");
+                card.style.cssText = "background:var(--bg-input); border:1px solid var(--border); padding:12px; border-radius:8px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;";
+                card.innerHTML = `
+                    <div>
+                        <strong style="font-size:13px; display:block;">Co-Editor Invite</strong>
+                        <span style="font-size:11px; color:var(--text-muted);">
+                            <strong>${inv.from}</strong> invited you to <strong>${inv.listTitle}</strong>.
+                        </span>
+                    </div>
+                    <div style="display:flex; gap:6px;">
+                        <button type="button" class="btn btn-sm btn-accent" data-action="respond-invite" data-id="${inv.id}" data-accept="true">Accept</button>
+                        <button type="button" class="btn btn-sm btn-danger" data-action="respond-invite" data-id="${inv.id}" data-accept="false">Decline</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+    }
+
+    document.getElementById("modal-notifications").classList.add("active");
+}
+
+/* ====================================================================
+   SUPERADMIN USER MANAGEMENT MODAL
+   ==================================================================== */
+function openSuperAdminModal() {
+    const isSuper = currentUser && (currentUser.username === "myszon12" || currentUser.username === "myszon");
+    if (!isSuper) return;
+
+    const container = document.getElementById("admin-users-list-container");
+    if (!container) return;
+    container.innerHTML = "";
+
+    const users = Object.keys(globalData.users || {});
+    users.forEach(u => {
+        const uData = globalData.users[u];
+        const isBanned = uData.banned || false;
+        const item = document.createElement("div");
+        item.style.cssText = "background:var(--bg-input); border:1px solid var(--border); border-radius:8px; padding:12px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;";
+        
+        item.innerHTML = `
+            <div>
+                <strong style="font-size:13px; color:#fff;">${u}</strong>
+                <span style="font-size:11px; padding:2px 6px; border-radius:4px; margin-left:6px; background:${isBanned ? 'var(--danger-subtle)' : 'rgba(16,185,129,0.15)'}; color:${isBanned ? 'var(--danger)' : 'var(--success)'}; font-weight:700;">
+                    ${isBanned ? 'BANNED' : 'ACTIVE'}
+                </span>
+            </div>
+            <div style="display:flex; gap:6px;">
+                <button type="button" class="btn btn-sm" data-action="admin-reset-pass" data-user="${u}">Reset Password</button>
+                <button type="button" class="btn btn-sm ${isBanned ? 'btn-accent' : 'btn-danger'}" data-action="admin-toggle-ban" data-user="${u}">
+                    ${isBanned ? 'Unban Account' : 'Ban Account'}
+                </button>
+            </div>
+        `;
+        container.appendChild(item);
+    });
+
+    document.getElementById("modal-super-admin").classList.add("active");
+}
+
+/* ====================================================================
+   4. EVENT LISTENERS
+   ==================================================================== */
+document.addEventListener('click', async function(e) {
+    try {
+        const target = e.target.closest('[data-action]');
+        if (!target) {
+            if (e.target.classList.contains("modal-overlay")) closeModals();
+            return;
+        }
+
+        const action = target.getAttribute('data-action');
+        globalData = ensureDataStructure(globalData);
+
+        switch (action) {
+            case 'show-home': showHome(); break;
+            case 'copy-list-link':
+                if (currentListId) {
+                    const fullUrl = window.location.origin + window.location.pathname + '#' + currentListId;
+                    navigator.clipboard.writeText(fullUrl);
+                    showToast("🔗 Direct link copied to clipboard!");
+                }
+                break;
+            case 'open-notifications': openNotificationsModal(); break;
+            case 'open-super-admin': openSuperAdminModal(); break;
+            case 'toggle-chat':
+                const widget = document.getElementById("chat-widget");
+                if (widget) {
+                    widget.classList.toggle("hidden");
+                    if (!widget.classList.contains("hidden")) {
+                        if (currentChatMode === 'public') renderChatMessages();
+                        else renderDmUsersList();
+                    }
+                }
+                break;
+            case 'switch-chat-tab':
+                switchChatTab(target.getAttribute('data-mode'));
+                break;
+            case 'open-dm':
+                openDmChat(target.getAttribute('data-user'));
+                break;
+            case 'open-dm-from-notif':
+                closeModals();
+                document.getElementById("chat-widget").classList.remove("hidden");
+                switchChatTab("private");
+                openDmChat(target.getAttribute('data-user'));
+                break;
+            case 'back-to-dm-list':
+                activeDmPartner = null;
+                renderDmUsersList();
+                break;
+            case 'logout':
+                currentUser = null;
+                activeDmPartner = null;
+                updateAuthUI();
+                await saveState();
+                showHome();
+                showToast("Signed out.");
+                break;
+            case 'open-auth':
+                document.getElementById('modal-auth').classList.add('active');
+                switchAuthTab(target.getAttribute('data-type') || 'login');
+                break;
+            case 'open-create-list':
+                if (!currentUser) {
+                    showToast("Please sign in first!");
+                    document.getElementById('modal-auth').classList.add('active');
+                    switchAuthTab('login');
+                } else {
+                    document.getElementById('modal-create-list').classList.add('active');
+                }
+                break;
+            case 'close-modals': closeModals(); break;
+            case 'switch-tab': switchTab(target.getAttribute('data-tab')); break;
+            case 'load-list': loadList(target.getAttribute('data-id')); break;
+            case 'open-level-details': openLevelDetailsModal(target.getAttribute('data-pos')); break;
+            case 'open-edit-level': openEditLevelModal(target.getAttribute('data-index')); break;
+            case 'add-victor-row': addVictorInputRow(target.getAttribute('data-container')); break;
+            case 'remove-victor-row':
+                const row = target.closest('.victor-row');
+                if (row) row.remove();
+                break;
+            case 'switch-auth-tab': switchAuthTab(target.getAttribute('data-tab')); break;
+
+            // SUPERADMIN ACTIONS
+            case 'admin-toggle-ban':
+                const targetUser = target.getAttribute('data-user');
+                if (targetUser === "myszon12" || targetUser === "myszon") {
+                    showToast("Cannot ban main admin!");
+                    return;
+                }
+                if (globalData.users[targetUser]) {
+                    const isBanned = !globalData.users[targetUser].banned;
+                    globalData.users[targetUser].banned = isBanned;
+                    await saveState();
+                    openSuperAdminModal();
+                    showToast(`User ${targetUser} ${isBanned ? 'BANNED' : 'UNBANNED'}`);
+                }
+                break;
+            case 'admin-reset-pass':
+                const uToReset = target.getAttribute('data-user');
+                const newPass = prompt(`Enter new password for ${uToReset}:`);
+                if (newPass && newPass.trim().length >= 6) {
+                    const hashedPass = await hashPassword(newPass.trim());
+                    globalData.users[uToReset].password = hashedPass;
+                    await saveState();
+                    showToast(`Password for ${uToReset} reset successfully!`);
+                } else if (newPass) {
+                    showToast("Password must be at least 6 characters.");
+                }
+                break;
+
+            case 'delete-level':
+                const index = parseInt(target.getAttribute('data-index'));
+                if (isOwner && currentListData && currentListData.levels && confirm("Delete level?")) {
+                    currentListData.levels.splice(index, 1);
+                    reorderLevelsArray(currentListData.levels);
+                    await saveState();
+                    renderListLevels();
+                    renderAdminPanel();
+                    renderLeaderboard();
+                    showToast("Level deleted.");
+                }
+                break;
+            case 'delete-current-list':
+                if (isOwner && confirm(`Delete list "${currentListData.title}"?`)) {
+                    delete globalData.lists[currentListId];
+                    await saveState();
+                    showToast("Demonlist deleted.");
+                    showHome();
+                }
+                break;
+            case 'send-invite':
+                const input = document.getElementById("invite-username-input");
+                const targetInv = input ? input.value.trim() : "";
+                if (!targetInv) return;
+
+                if (targetInv === currentUser.username) {
+                    showToast("Cannot invite yourself!");
+                    return;
+                }
+                if (!globalData.users[targetInv]) {
+                    showToast("User not found.");
+                    return;
+                }
+                if (currentListData.editors && currentListData.editors.includes(targetInv)) {
+                    showToast("User is already a co-editor!");
+                    return;
+                }
+
+                if (!globalData.users[targetInv].invites) globalData.users[targetInv].invites = [];
+                globalData.users[targetInv].invites.push({
+                    id: Date.now(),
+                    from: currentUser.username,
+                    listId: currentListId,
+                    listTitle: currentListData.title
+                });
+
+                await saveState();
+                input.value = "";
+                showToast(`Invite sent to ${targetInv}`);
+                break;
+            case 'remove-editor':
+                const editorName = target.getAttribute('data-editor');
+                if (isOwner && currentListData && currentListData.editors) {
+                    currentListData.editors = currentListData.editors.filter(e => e !== editorName);
+                    await saveState();
+                    renderEditorsList();
+                    showToast(`Removed editor ${editorName}`);
+                }
+                break;
+            case 'respond-invite':
+                const inviteId = parseInt(target.getAttribute('data-id'));
+                const accept = target.getAttribute('data-accept') === 'true';
+                
+                if (currentUser && globalData.users[currentUser.username] && globalData.users[currentUser.username].invites) {
+                    const invites = globalData.users[currentUser.username].invites;
+                    const foundIdx = invites.findIndex(i => i.id === inviteId);
+
+                    if (foundIdx !== -1) {
+                        const inv = invites[foundIdx];
+                        if (accept && globalData.lists[inv.listId]) {
+                            if (!globalData.lists[inv.listId].editors) globalData.lists[inv.listId].editors = [];
+                            if (!globalData.lists[inv.listId].editors.includes(currentUser.username)) {
+                                globalData.lists[inv.listId].editors.push(currentUser.username);
+                            }
+                            showToast(`Joined list "${inv.listTitle}"!`);
+                        } else {
+                            showToast("Invite declined.");
+                        }
+                        invites.splice(foundIdx, 1);
+                        await saveState();
+                        checkNotificationsCount();
+                        openNotificationsModal();
+                        if (currentListId === inv.listId) loadList(currentListId, false);
+                    }
+                }
+                break;
+        }
+    } catch (err) {}
+});
+
+// FORMS SUBMISSION
+document.addEventListener('submit', async function(e) {
+    const form = e.target;
+    e.preventDefault();
+    globalData = ensureDataStructure(globalData);
+
+    try {
+        if (form.id === 'chat-form') {
             if (!currentUser) {
-                showToast("Please sign in to view private chats!");
+                showToast("Please sign in to send messages!");
                 document.getElementById('modal-auth').classList.add('active');
                 switchAuthTab('login');
                 return;
             }
-            btnPriv.classList.add("active");
-            btnPub.classList.remove("active");
-            viewPub.classList.add("hidden");
-            viewPriv.classList.remove("hidden");
-            title.innerText = "👤 Private Messages (DM)";
-            renderDmUsersList();
-        }
-    }
 
-    function renderChatMessages() {
-        const box = document.getElementById("chat-messages-box");
-        if (!box) return;
-        box.innerHTML = "";
+            const input = document.getElementById("chat-input");
+            const text = input.value.trim();
+            if (!text) return;
 
-        const msgs = globalData.chatMessages || [];
-        if (msgs.length === 0) {
-            box.innerHTML = `<div style="color:var(--text-subtle); font-size:12px; text-align:center; margin-top:20px;">No messages yet. Say hi!</div>`;
-            return;
-        }
+            const now = new Date();
+            const time = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
 
-        msgs.forEach(m => {
-            const div = document.createElement("div");
-            div.className = "chat-msg";
-            const isSuper = m.user === "myszon12" || m.user === "myszon";
-            const badge = isSuper ? '<span class="super-badge" style="font-size:8px; padding:1px 4px;">ADMIN</span>' : '';
-            
-            div.innerHTML = `
-                <div class="chat-msg-user">
-                    ${m.user}${badge} <span class="chat-msg-time">${m.time || ''}</span>
-                </div>
-                <div class="chat-msg-text">${escapeHtml(m.text)}</div>
-            `;
-            box.appendChild(div);
-        });
-
-        box.scrollTop = box.scrollHeight;
-    }
-
-    function renderDmUsersList(searchQuery = "") {
-        const container = document.getElementById("dm-users-list");
-        if (!container || currentChatMode !== 'private') return;
-        if (activeDmPartner) return;
-
-        container.innerHTML = "";
-        container.classList.remove("hidden");
-        document.getElementById("dm-active-conversation").classList.add("hidden");
-
-        globalData = ensureDataStructure(globalData);
-        let users = Object.keys(globalData.users || {}).filter(u => u !== (currentUser ? currentUser.username : ""));
-
-        if (searchQuery) {
-            const q = searchQuery.toLowerCase();
-            users = users.filter(u => u.toLowerCase().includes(q));
-        }
-
-        if (users.length === 0) {
-            container.innerHTML = `<div style="color:var(--text-subtle); font-size:12px; text-align:center; margin-top:20px;">No users found.</div>`;
-            return;
-        }
-
-        users.forEach(username => {
-            const item = document.createElement("div");
-            item.className = "dm-user-item";
-            item.setAttribute("data-action", "open-dm");
-            item.setAttribute("data-user", username);
-            
-            const isSuper = username === "myszon12" || username === "myszon";
-            const badge = isSuper ? '<span class="super-badge" style="font-size:8px;">ADMIN</span>' : '';
-
-            const unreadCount = (globalData.directMessages || []).filter(m => m.from === username && m.to === currentUser?.username && !m.read).length;
-            const unreadBadge = unreadCount > 0 ? `<span style="background:var(--danger); color:#fff; font-size:10px; font-weight:800; padding:2px 6px; border-radius:10px; margin-left:6px;">${unreadCount} UNREAD</span>` : '';
-
-            item.innerHTML = `
-                <div>👤 ${username} ${badge} ${unreadBadge}</div>
-                <div style="font-size: 11px; color: var(--accent); font-weight:700;">Chat ↗</div>
-            `;
-            container.appendChild(item);
-        });
-    }
-
-    function openDmChat(partnerName) {
-        activeDmPartner = partnerName;
-        document.getElementById("dm-users-list").classList.add("hidden");
-        const activeBox = document.getElementById("dm-active-conversation");
-        activeBox.classList.remove("hidden");
-        document.getElementById("dm-active-partner").innerText = `Chatting with: ${partnerName}`;
-
-        if (currentUser) {
-            let changed = false;
-            (globalData.directMessages || []).forEach(m => {
-                if (m.from === partnerName && m.to === currentUser.username && !m.read) {
-                    m.read = true;
-                    changed = true;
-                }
+            if (!globalData.chatMessages) globalData.chatMessages = [];
+            globalData.chatMessages.push({
+                user: currentUser.username,
+                text: text,
+                time: time
             });
-            if (changed) {
-                saveState();
-                checkNotificationsCount();
-            }
+
+            if (globalData.chatMessages.length > 80) globalData.chatMessages.shift();
+
+            input.value = "";
+            await saveState();
+            renderChatMessages();
         }
+        else if (form.id === 'dm-form') {
+            if (!currentUser || !activeDmPartner) return;
+            const input = document.getElementById("dm-input");
+            const text = input.value.trim();
+            if (!text) return;
 
-        renderDmMessages(partnerName);
-    }
+            const now = new Date();
+            const time = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
 
-    function renderDmMessages(partnerName) {
-        const box = document.getElementById("dm-messages-box");
-        if (!box || !currentUser) return;
-        box.innerHTML = "";
-
-        const dms = globalData.directMessages || [];
-        const myName = currentUser.username;
-
-        const conversation = dms.filter(m => 
-            (m.from === myName && m.to === partnerName) || 
-            (m.from === partnerName && m.to === myName)
-        );
-
-        if (conversation.length === 0) {
-            box.innerHTML = `<div style="color:var(--text-subtle); font-size:12px; text-align:center; margin-top:20px;">Start your private conversation with ${partnerName}!</div>`;
-            return;
-        }
-
-        conversation.forEach(m => {
-            const div = document.createElement("div");
-            div.className = "chat-msg";
-            const isMe = m.from === myName;
-            div.style.borderColor = isMe ? "rgba(99, 102, 241, 0.3)" : "var(--border)";
-            
-            div.innerHTML = `
-                <div class="chat-msg-user" style="color: ${isMe ? 'var(--success)' : 'var(--accent)'};">
-                    ${m.from} <span class="chat-msg-time">${m.time || ''}</span>
-                </div>
-                <div class="chat-msg-text">${escapeHtml(m.text)}</div>
-            `;
-            box.appendChild(div);
-        });
-
-        box.scrollTop = box.scrollHeight;
-    }
-
-    function escapeHtml(str) {
-        if (!str) return '';
-        return String(str)
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
-    }
-
-    function showHome(updateHash = true) {
-        currentListId = null;
-        currentListData = null;
-
-        if (updateHash && window.location.hash) {
-            history.pushState("", document.title, window.location.pathname + window.location.search);
-        }
-
-        document.getElementById("view-home").classList.remove("hidden");
-        document.getElementById("view-list").classList.add("hidden");
-
-        renderHomeLists();
-    }
-
-    function renderHomeLists(query = "") {
-        const popGrid = document.getElementById("popular-lists-grid");
-        const allGrid = document.getElementById("all-lists-grid");
-        if (!popGrid || !allGrid) return;
-
-        popGrid.innerHTML = "";
-        allGrid.innerHTML = "";
-
-        globalData = ensureDataStructure(globalData);
-        let listsArray = Object.keys(globalData.lists).map(id => globalData.lists[id]).filter(Boolean);
-
-        if (query) {
-            const q = query.toLowerCase();
-            listsArray = listsArray.filter(l => l.title.toLowerCase().includes(q) || l.author.toLowerCase().includes(q));
-        }
-
-        const popularLists = [...listsArray].sort((a,b) => (b.views || 0) - (a.views || 0));
-
-        popularLists.slice(0, 3).forEach(item => popGrid.appendChild(createListCard(item)));
-        listsArray.forEach(item => allGrid.appendChild(createListCard(item)));
-    }
-
-    function createListCard(item) {
-        const card = document.createElement("div");
-        card.className = "card-list";
-        card.setAttribute("data-action", "load-list");
-        card.setAttribute("data-id", item.id);
-        card.innerHTML = `
-            <div>
-                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
-                    <div class="font-heading" style="font-size: 16px; font-weight: 700;">${item.title}</div>
-                    <span class="pill-views">👁️ ${item.views || 0}</span>
-                </div>
-                <div style="font-size: 12px; color: var(--text-muted);">By: <strong style="color:#fff;">${item.author}</strong></div>
-            </div>
-            <div style="margin-top:16px; font-weight:700; color:var(--accent); font-size:12px;">
-                ${item.levels ? item.levels.length : 0} Demons ranked
-            </div>
-        `;
-        return card;
-    }
-
-    function loadList(listId, incrementViews = true, updateHash = true) {
-        globalData = ensureDataStructure(globalData);
-        currentListId = listId;
-        currentListData = globalData.lists[listId];
-
-        if (!currentListData) {
-            showToast("List not found!");
-            showHome();
-            return;
-        }
-
-        if (updateHash) {
-            window.location.hash = `list=${listId}`;
-        }
-
-        if (incrementViews) {
-            currentListData.views = (currentListData.views || 0) + 1;
-            saveState();
-        }
-
-        const isSuperAdmin = currentUser && (currentUser.username === "myszon12" || currentUser.username === "myszon");
-        isOwner = isSuperAdmin || (currentUser && (
-            currentListData.author === currentUser.username || 
-            (currentListData.editors && currentListData.editors.includes(currentUser.username))
-        ));
-
-        document.getElementById("view-home").classList.add("hidden");
-        document.getElementById("view-list").classList.remove("hidden");
-
-        document.getElementById("active-list-title").innerText = currentListData.title;
-        document.getElementById("active-list-author").innerText = currentListData.author;
-        document.getElementById("active-list-views").innerText = `👁️ ${currentListData.views} views`;
-        document.getElementById("active-list-discord").href = currentListData.discord || "#";
-
-        document.getElementById("btn-admin-tab").classList.toggle("hidden", !isOwner);
-        document.getElementById("tab-btn-admin").classList.toggle("hidden", !isOwner);
-        document.getElementById("btn-delete-list").classList.toggle("hidden", !isOwner);
-
-        renderListLevels();
-        renderLeaderboard();
-        if (isOwner) renderAdminPanel();
-    }
-
-    function switchTab(tabName) {
-        ['levels', 'leaderboard', 'admin'].forEach(t => {
-            const btn = document.getElementById(`tab-btn-${t}`);
-            const content = document.getElementById(`tab-content-${t}`);
-            if (btn) btn.classList.toggle("active", t === tabName);
-            if (content) content.classList.toggle("hidden", t !== tabName);
-        });
-    }
-
-    function renderListLevels(filteredLevels = null) {
-        const container = document.getElementById("levels-list-container");
-        if (!container) return;
-        container.innerHTML = "";
-
-        const levels = filteredLevels || (currentListData ? currentListData.levels : []) || [];
-        if (levels.length === 0) {
-            container.innerHTML = "<p style='color:var(--text-muted); font-size:13px; padding:10px;'>No demons added to this list yet.</p>";
-            return;
-        }
-
-        levels.forEach(l => {
-            const ytId = parseYoutube(l.yt);
-            const rankClass = l.pos === 1 ? "rank-1" : l.pos === 2 ? "rank-2" : l.pos === 3 ? "rank-3" : "";
-            const idBadge = l.levelId ? ` &bull; ID: <span style="color:var(--text-main); font-weight:600;">${l.levelId}</span>` : '';
-            const card = document.createElement("div");
-            card.className = "level-card";
-            card.innerHTML = `
-                <div class="level-rank ${rankClass}">#${l.pos}</div>
-                <div class="level-info" data-action="open-level-details" data-pos="${l.pos}">
-                    <div>
-                        <div class="level-name">${l.name}</div>
-                        <div class="level-meta">by ${l.author}${idBadge} &bull; verifier: ${l.verifier}</div>
-                    </div>
-                    <div class="level-pts">+${l.pts} PTS</div>
-                </div>
-                <div class="level-thumb" data-action="open-level-details" data-pos="${l.pos}">
-                    <img src="${ytId ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : ''}" alt="thumbnail">
-                </div>
-            `;
-            container.appendChild(card);
-        });
-    }
-
-    function renderLeaderboard() {
-        const container = document.getElementById("tab-content-leaderboard");
-        if (!container) return;
-        container.innerHTML = "";
-
-        let players = {};
-        ((currentListData && currentListData.levels) || []).forEach(l => {
-            const pts = Number(l.pts) || 0;
-            const levelPlayers = new Set();
-
-            if (l.verifier && l.verifier.trim()) {
-                levelPlayers.add(l.verifier.trim());
-            }
-
-            if (l.victors) {
-                l.victors.forEach(v => {
-                    const name = typeof v === 'object' ? v.name : v;
-                    if (name && name.trim()) {
-                        levelPlayers.add(name.trim());
-                    }
-                });
-            }
-
-            levelPlayers.forEach(pName => {
-                if (!players[pName]) players[pName] = { pts: 0, count: 0 };
-                players[pName].pts += pts;
-                players[pName].count += 1;
+            if (!globalData.directMessages) globalData.directMessages = [];
+            globalData.directMessages.push({
+                from: currentUser.username,
+                to: activeDmPartner,
+                text: text,
+                time: time,
+                read: false
             });
-        });
 
-        const sorted = Object.keys(players).map(k => ({ name: k, ...players[k] })).sort((a,b) => b.pts - a.pts);
-
-        if (sorted.length === 0) {
-            container.innerHTML = "<p style='color:var(--text-muted); font-size:13px; padding:10px;'>No victors or verifiers registered on this list yet.</p>";
-            return;
+            input.value = "";
+            await saveState();
+            renderDmMessages(activeDmPartner);
         }
-
-        sorted.forEach((p, idx) => {
-            const card = document.createElement("div");
-            card.style.cssText = "background:var(--bg-card); padding:14px 18px; border-radius:10px; border:1px solid var(--border); margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;";
-            card.innerHTML = `
-                <div><strong style="font-size:14px;" class="font-heading">#${idx + 1} ${p.name}</strong> <span style="color:var(--text-subtle); font-size:12px; margin-left:6px;">(${p.count} demons)</span></div>
-                <div style="color:var(--accent); font-weight:800; font-size:14px;">${p.pts} PTS</div>
-            `;
-            container.appendChild(card);
-        });
-    }
-
-    function renderAdminPanel() {
-        renderEditorsList();
-        renderManageLevelsList();
-    }
-
-    function renderEditorsList() {
-        const container = document.getElementById("admin-editors-list");
-        if (!container) return;
-        container.innerHTML = "";
-
-        const editors = currentListData ? (currentListData.editors || []) : [];
-        if (editors.length === 0) {
-            container.innerHTML = "<p style='color:var(--text-muted); font-size:12px;'>No co-editors added.</p>";
-            return;
-        }
-
-        editors.forEach(ed => {
-            const item = document.createElement("div");
-            item.className = "admin-item";
-            item.innerHTML = `
-                <div><strong style="font-size:13px;">${ed}</strong></div>
-                <button type="button" class="btn btn-sm btn-danger" data-action="remove-editor" data-editor="${ed}">Remove</button>
-            `;
-            container.appendChild(item);
-        });
-    }
-
-    function renderManageLevelsList() {
-        const container = document.getElementById("admin-levels-manage-list");
-        if (!container) return;
-        container.innerHTML = "";
-
-        ((currentListData && currentListData.levels) || []).forEach((l, idx) => {
-            const item = document.createElement("div");
-            item.className = "admin-item";
-            item.innerHTML = `
-                <div><strong style="font-size:13px;">#${l.pos} ${l.name}</strong> ${l.levelId ? `<span style="color:var(--accent); font-size:11px; margin-left:4px;">(ID: ${l.levelId})</span>` : ''}</div>
-                <div style="display:flex; gap:6px;">
-                    <button type="button" class="btn btn-sm" data-action="open-edit-level" data-index="${idx}">Edit</button>
-                    <button type="button" class="btn btn-sm btn-danger" data-action="delete-level" data-index="${idx}">Delete</button>
-                </div>
-            `;
-            container.appendChild(item);
-        });
-    }
-
-    function openEditLevelModal(index) {
-        index = parseInt(index);
-        if (!currentListData || !currentListData.levels[index]) return;
-        const l = currentListData.levels[index];
-
-        document.getElementById("edit-lvl-index").value = index;
-        document.getElementById("edit-pos").value = l.pos;
-        document.getElementById("edit-name").value = l.name;
-        document.getElementById("edit-level-id").value = l.levelId || "";
-        document.getElementById("edit-author").value = l.author;
-        document.getElementById("edit-verifier").value = l.verifier;
-        document.getElementById("edit-pts").value = l.pts;
-        document.getElementById("edit-yt").value = l.yt;
-
-        const victorsContainer = document.getElementById("edit-victors-container");
-        victorsContainer.innerHTML = "";
-        if (l.victors) {
-            l.victors.forEach(v => {
-                const vName = typeof v === 'object' ? v.name : v;
-                const vVideo = typeof v === 'object' ? (v.video || '') : '';
-                addVictorInputRow("edit-victors-container", vName, vVideo);
-            });
-        }
-
-        document.getElementById("modal-edit-level").classList.add("active");
-    }
-
-    function openLevelDetailsModal(pos) {
-        if (!currentListData) return;
-        const l = currentListData.levels.find(item => Number(item.pos) === Number(pos));
-        if (!l) return;
-
-        const ytId = parseYoutube(l.yt);
-        document.getElementById("detail-title").innerText = `#${l.pos} ${l.name}`;
-        document.getElementById("detail-author").innerText = l.author;
-        document.getElementById("detail-level-id").innerText = l.levelId || "N/A";
-        document.getElementById("detail-verifier").innerText = l.verifier;
-        document.getElementById("detail-pts").innerText = `+${l.pts} PTS`;
-        
-        document.getElementById("detail-video-box").innerHTML = ytId 
-            ? `<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${ytId}?autoplay=0" frameborder="0" allowfullscreen style="border:none;"></iframe>` 
-            : `<div style="display:flex; align-items:center; justify-content:center; height:100%; color:var(--text-muted);">No video available</div>`;
-
-        const victorsContainer = document.getElementById("detail-victors-list");
-        victorsContainer.innerHTML = "";
-        const victors = l.victors || [];
-        document.getElementById("detail-victor-count").innerText = victors.length;
-
-        if (victors.length === 0) {
-            victorsContainer.innerHTML = "<p style='color:var(--text-muted); font-size:12px;'>No victors registered.</p>";
-        } else {
-            victors.forEach(v => {
-                const vName = typeof v === 'object' ? v.name : v;
-                const vVideo = typeof v === 'object' ? v.video : '';
-                const item = document.createElement("div");
-                item.className = "victor-item";
-                item.innerHTML = `
-                    <div><strong style="font-size:13px;">${vName}</strong></div>
-                    <div>${vVideo ? `<a href="${vVideo}" target="_blank" style="color:var(--accent); text-decoration:none; font-size:12px; font-weight:700;">Watch Proof ↗</a>` : `<span style="color:var(--text-subtle); font-size:11px;">No video</span>`}</div>
-                `;
-                victorsContainer.appendChild(item);
-            });
-        }
-
-        document.getElementById("modal-level-details").classList.add("active");
-    }
-
-    function addVictorInputRow(containerId, name = "", video = "") {
-        const container = document.getElementById(containerId);
-        if (!container) return;
-        const row = document.createElement("div");
-        row.className = "victor-row";
-        row.innerHTML = `
-            <input type="text" class="form-control victor-name" placeholder="Player Name" value="${name}" style="flex:1;">
-            <input type="text" class="form-control victor-video" placeholder="Proof Link (YouTube)" value="${video}" style="flex:1.5;">
-            <button type="button" class="btn btn-danger btn-sm" data-action="remove-victor-row">✕</button>
-        `;
-        container.appendChild(row);
-    }
-
-    function getVictorsFromContainer(containerId) {
-        const rows = document.querySelectorAll(`#${containerId} .victor-row`);
-        const victors = [];
-        rows.forEach(row => {
-            const name = row.querySelector(".victor-name").value.trim();
-            const video = row.querySelector(".victor-video").value.trim();
-            if (name) victors.push({ name, video });
-        });
-        return victors;
-    }
-
-    function reorderLevelsArray(levels) {
-        levels.sort((a, b) => a.pos - b.pos);
-        levels.forEach((lvl, idx) => { lvl.pos = idx + 1; });
-    }
-
-    function closeModals() {
-        document.querySelectorAll(".modal-overlay").forEach(m => m.classList.remove("active"));
-    }
-
-    function parseYoutube(yt) {
-        if (!yt) return "";
-        try {
-            let fullUrl = yt.trim();
-            if (!fullUrl.startsWith('http://') && !fullUrl.startsWith('https://')) fullUrl = 'https://' + fullUrl;
-            const url = new URL(fullUrl);
-            if (url.hostname.includes('youtu.be')) return url.pathname.slice(1);
-            if (url.searchParams.has('v')) return url.searchParams.get('v');
-            const parts = url.pathname.split('/').filter(Boolean);
-            return parts[parts.length - 1] || "";
-        } catch (e) {
-            return yt.trim();
-        }
-    }
-
-    function generateCaptcha() {
-        const a = Math.floor(Math.random() * 8) + 2;
-        const b = Math.floor(Math.random() * 8) + 2;
-        currentCaptchaTarget = (a + b).toString();
-        const qLabel = document.getElementById("captcha-question");
-        if (qLabel) qLabel.innerText = `What is ${a} + ${b}?`;
-        const aInput = document.getElementById("captcha-answer");
-        if (aInput) aInput.value = "";
-    }
-
-    function switchAuthTab(type) {
-        const isLogin = type === 'login';
-        document.getElementById("auth-tab-login").classList.toggle("active", isLogin);
-        document.getElementById("auth-tab-register").classList.toggle("active", !isLogin);
-        document.getElementById("form-login").classList.toggle("hidden", !isLogin);
-        document.getElementById("form-register").classList.toggle("hidden", isLogin);
-        if (!isLogin) generateCaptcha();
-    }
-
-    function updateAuthUI() {
-        const notifBtn = document.getElementById("notif-btn");
-        const authBtn = document.getElementById("auth-modal-btn");
-        const profileBtn = document.getElementById("user-profile-btn");
-        const nameLabel = document.getElementById("user-display-name");
-        const superAdminBtn = document.getElementById("btn-super-admin");
-
-        const isSuper = currentUser && (currentUser.username === "myszon12" || currentUser.username === "myszon");
-
-        if (superAdminBtn) superAdminBtn.classList.toggle("hidden", !isSuper);
-
-        if (currentUser) {
-            if (authBtn) authBtn.classList.add("hidden");
-            if (profileBtn) profileBtn.classList.remove("hidden");
+        else if (form.id === 'form-login') {
+            const username = document.getElementById('login-username').value.trim();
+            const password = document.getElementById('login-password').value;
             
-            const badgeTag = isSuper ? '<span class="super-badge">Superadmin</span>' : '';
-            
-            if (nameLabel) nameLabel.innerHTML = `${currentUser.username}${badgeTag}`;
-            if (notifBtn) notifBtn.classList.remove("hidden");
-            checkNotificationsCount();
-        } else {
-            if (authBtn) authBtn.classList.remove("hidden");
-            if (profileBtn) profileBtn.classList.add("hidden");
-            if (notifBtn) notifBtn.classList.add("hidden");
-        }
-    }
-
-    function checkNotificationsCount() {
-        globalData = ensureDataStructure(globalData);
-        if (!currentUser || !globalData.users[currentUser.username]) return;
-
-        const invites = globalData.users[currentUser.username].invites || [];
-        const unreadDms = (globalData.directMessages || []).filter(m => m.to === currentUser.username && !m.read);
-        
-        const totalCount = invites.length + unreadDms.length;
-        const badge = document.getElementById("notif-badge-count");
-        if (badge) {
-            if (totalCount > 0) {
-                badge.innerText = totalCount;
-                badge.classList.remove("hidden");
-            } else {
-                badge.classList.add("hidden");
-            }
-        }
-    }
-
-    function openNotificationsModal() {
-        globalData = ensureDataStructure(globalData);
-        const container = document.getElementById("notifications-list-container");
-        if (!container) return;
-        container.innerHTML = "";
-
-        const invites = (currentUser && globalData.users[currentUser.username] && globalData.users[currentUser.username].invites) || [];
-        const unreadDms = (globalData.directMessages || []).filter(m => m.to === currentUser?.username && !m.read);
-
-        if (invites.length === 0 && unreadDms.length === 0) {
-            container.innerHTML = "<p style='color:var(--text-muted); font-size:12px; text-align:center; padding:10px;'>No new notifications.</p>";
-        } else {
-            if (unreadDms.length > 0) {
-                const dmHeader = document.createElement("div");
-                dmHeader.style.cssText = "font-size:12px; font-weight:800; color:var(--text-subtle); text-transform:uppercase; margin-bottom:8px;";
-                dmHeader.innerText = "💬 Unread Direct Messages";
-                container.appendChild(dmHeader);
-
-                unreadDms.forEach(m => {
-                    const card = document.createElement("div");
-                    card.style.cssText = "background:var(--bg-input); border:1px solid var(--accent); padding:12px; border-radius:8px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;";
-                    card.innerHTML = `
-                        <div>
-                            <strong style="font-size:13px; color:var(--accent);">Message from ${m.from}</strong>
-                            <span style="font-size:11px; color:var(--text-muted); display:block;">"${escapeHtml(m.text.slice(0, 30))}${m.text.length > 30 ? '...' : ''}"</span>
-                        </div>
-                        <button type="button" class="btn btn-sm btn-accent" data-action="open-dm-from-notif" data-user="${m.from}">Reply</button>
-                    `;
-                    container.appendChild(card);
-                });
-            }
-
-            if (invites.length > 0) {
-                const invHeader = document.createElement("div");
-                invHeader.style.cssText = "font-size:12px; font-weight:800; color:var(--text-subtle); text-transform:uppercase; margin:14px 0 8px 0;";
-                invHeader.innerText = "📩 List Editor Invitations";
-                container.appendChild(invHeader);
-
-                invites.forEach(inv => {
-                    const card = document.createElement("div");
-                    card.style.cssText = "background:var(--bg-input); border:1px solid var(--border); padding:12px; border-radius:8px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;";
-                    card.innerHTML = `
-                        <div>
-                            <strong style="font-size:13px; display:block;">Co-Editor Invite</strong>
-                            <span style="font-size:11px; color:var(--text-muted);">
-                                <strong>${inv.from}</strong> invited you to <strong>${inv.listTitle}</strong>.
-                            </span>
-                        </div>
-                        <div style="display:flex; gap:6px;">
-                            <button type="button" class="btn btn-sm btn-accent" data-action="respond-invite" data-id="${inv.id}" data-accept="true">Accept</button>
-                            <button type="button" class="btn btn-sm btn-danger" data-action="respond-invite" data-id="${inv.id}" data-accept="false">Decline</button>
-                        </div>
-                    `;
-                    container.appendChild(card);
-                });
-            }
-        }
-
-        document.getElementById("modal-notifications").classList.add("active");
-    }
-
-    function openSuperAdminModal() {
-        const isSuper = currentUser && (currentUser.username === "myszon12" || currentUser.username === "myszon");
-        if (!isSuper) return;
-
-        const container = document.getElementById("admin-users-list-container");
-        if (!container) return;
-        container.innerHTML = "";
-
-        const users = Object.keys(globalData.users || {});
-        users.forEach(u => {
-            const uData = globalData.users[u];
-            const isBanned = uData.banned || false;
-            const item = document.createElement("div");
-            item.style.cssText = "background:var(--bg-input); border:1px solid var(--border); border-radius:8px; padding:12px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;";
-            
-            item.innerHTML = `
-                <div>
-                    <strong style="font-size:13px; color:#fff;">${u}</strong>
-                    <span style="font-size:11px; padding:2px 6px; border-radius:4px; margin-left:6px; background:${isBanned ? 'var(--danger-subtle)' : 'rgba(16,185,129,0.15)'}; color:${isBanned ? 'var(--danger)' : 'var(--success)'}; font-weight:700;">
-                        ${isBanned ? 'BANNED' : 'ACTIVE'}
-                    </span>
-                </div>
-                <div style="display:flex; gap:6px;">
-                    <button type="button" class="btn btn-sm" data-action="admin-reset-pass" data-user="${u}">Reset Password</button>
-                    <button type="button" class="btn btn-sm ${isBanned ? 'btn-accent' : 'btn-danger'}" data-action="admin-toggle-ban" data-user="${u}">
-                        ${isBanned ? 'Unban Account' : 'Ban Account'}
-                    </button>
-                </div>
-            `;
-            container.appendChild(item);
-        });
-
-        document.getElementById("modal-super-admin").classList.add("active");
-    }
-
-    /* ====================================================================
-       4. EVENT LISTENERS
-       ==================================================================== */
-    document.addEventListener('click', async function(e) {
-        try {
-            const target = e.target.closest('[data-action]');
-            if (!target) {
-                if (e.target.classList.contains("modal-overlay")) closeModals();
-                return;
-            }
-
-            const action = target.getAttribute('data-action');
-            globalData = ensureDataStructure(globalData);
-
-            switch (action) {
-                case 'show-home': showHome(); break;
-                case 'open-notifications': openNotificationsModal(); break;
-                case 'open-super-admin': openSuperAdminModal(); break;
-                case 'toggle-chat':
-                    const widget = document.getElementById("chat-widget");
-                    if (widget) {
-                        widget.classList.toggle("hidden");
-                        if (!widget.classList.contains("hidden")) {
-                            if (currentChatMode === 'public') renderChatMessages();
-                            else renderDmUsersList();
-                        }
-                    }
-                    break;
-                case 'switch-chat-tab':
-                    switchChatTab(target.getAttribute('data-mode'));
-                    break;
-                case 'open-dm':
-                    openDmChat(target.getAttribute('data-user'));
-                    break;
-                case 'open-dm-from-notif':
-                    closeModals();
-                    document.getElementById("chat-widget").classList.remove("hidden");
-                    switchChatTab("private");
-                    openDmChat(target.getAttribute('data-user'));
-                    break;
-                case 'back-to-dm-list':
-                    activeDmPartner = null;
-                    renderDmUsersList();
-                    break;
-                case 'logout':
-                    currentUser = null;
-                    activeDmPartner = null;
-                    updateAuthUI();
-                    await saveState();
-                    showHome();
-                    showToast("Signed out.");
-                    break;
-                case 'open-auth':
-                    document.getElementById('modal-auth').classList.add('active');
-                    switchAuthTab(target.getAttribute('data-type') || 'login');
-                    break;
-                case 'open-create-list':
-                    if (!currentUser) {
-                        showToast("Please sign in first!");
-                        document.getElementById('modal-auth').classList.add('active');
-                        switchAuthTab('login');
-                    } else {
-                        document.getElementById('modal-create-list').classList.add('active');
-                    }
-                    break;
-                case 'close-modals': closeModals(); break;
-                case 'switch-tab': switchTab(target.getAttribute('data-tab')); break;
-                case 'load-list': loadList(target.getAttribute('data-id')); break;
-                case 'open-level-details': openLevelDetailsModal(target.getAttribute('data-pos')); break;
-                case 'open-edit-level': openEditLevelModal(target.getAttribute('data-index')); break;
-                case 'add-victor-row': addVictorInputRow(target.getAttribute('data-container')); break;
-                case 'remove-victor-row':
-                    const row = target.closest('.victor-row');
-                    if (row) row.remove();
-                    break;
-                case 'switch-auth-tab': switchAuthTab(target.getAttribute('data-tab')); break;
-
-                case 'admin-toggle-ban':
-                    const targetUser = target.getAttribute('data-user');
-                    if (targetUser === "myszon12" || targetUser === "myszon") {
-                        showToast("Cannot ban main admin!");
-                        return;
-                    }
-                    if (globalData.users[targetUser]) {
-                        const isBanned = !globalData.users[targetUser].banned;
-                        globalData.users[targetUser].banned = isBanned;
-                        await saveState();
-                        openSuperAdminModal();
-                        showToast(`User ${targetUser} ${isBanned ? 'BANNED' : 'UNBANNED'}`);
-                    }
-                    break;
-                case 'admin-reset-pass':
-                    const uToReset = target.getAttribute('data-user');
-                    const newPass = prompt(`Enter new password for ${uToReset}:`);
-                    if (newPass && newPass.trim().length >= 6) {
-                        const hashedPass = await hashPassword(newPass.trim());
-                        globalData.users[uToReset].password = hashedPass;
-                        await saveState();
-                        showToast(`Password for ${uToReset} reset successfully!`);
-                    } else if (newPass) {
-                        showToast("Password must be at least 6 characters.");
-                    }
-                    break;
-
-                case 'delete-level':
-                    const index = parseInt(target.getAttribute('data-index'));
-                    if (isOwner && currentListData && currentListData.levels && confirm("Delete level?")) {
-                        currentListData.levels.splice(index, 1);
-                        reorderLevelsArray(currentListData.levels);
-                        await saveState();
-                        renderListLevels();
-                        renderAdminPanel();
-                        renderLeaderboard();
-                        showToast("Level deleted.");
-                    }
-                    break;
-                case 'delete-current-list':
-                    if (isOwner && confirm(`Delete list "${currentListData.title}"?`)) {
-                        delete globalData.lists[currentListId];
-                        await saveState();
-                        showToast("Demonlist deleted.");
-                        showHome();
-                    }
-                    break;
-                case 'send-invite':
-                    const input = document.getElementById("invite-username-input");
-                    const targetInv = input ? input.value.trim() : "";
-                    if (!targetInv) return;
-
-                    if (targetInv === currentUser.username) {
-                        showToast("Cannot invite yourself!");
-                        return;
-                    }
-                    if (!globalData.users[targetInv]) {
-                        showToast("User not found.");
-                        return;
-                    }
-                    if (currentListData.editors && currentListData.editors.includes(targetInv)) {
-                        showToast("User is already a co-editor!");
-                        return;
-                    }
-
-                    if (!globalData.users[targetInv].invites) globalData.users[targetInv].invites = [];
-                    globalData.users[targetInv].invites.push({
-                        id: Date.now(),
-                        from: currentUser.username,
-                        listId: currentListId,
-                        listTitle: currentListData.title
-                    });
-
-                    await saveState();
-                    input.value = "";
-                    showToast(`Invite sent to ${targetInv}`);
-                    break;
-                case 'remove-editor':
-                    const editorName = target.getAttribute('data-editor');
-                    if (isOwner && currentListData && currentListData.editors) {
-                        currentListData.editors = currentListData.editors.filter(e => e !== editorName);
-                        await saveState();
-                        renderEditorsList();
-                        showToast(`Removed editor ${editorName}`);
-                    }
-                    break;
-                case 'respond-invite':
-                    const inviteId = parseInt(target.getAttribute('data-id'));
-                    const accept = target.getAttribute('data-accept') === 'true';
-                    
-                    if (currentUser && globalData.users[currentUser.username] && globalData.users[currentUser.username].invites) {
-                        const invites = globalData.users[currentUser.username].invites;
-                        const foundIdx = invites.findIndex(i => i.id === inviteId);
-
-                        if (foundIdx !== -1) {
-                            const inv = invites[foundIdx];
-                            if (accept && globalData.lists[inv.listId]) {
-                                if (!globalData.lists[inv.listId].editors) globalData.lists[inv.listId].editors = [];
-                                if (!globalData.lists[inv.listId].editors.includes(currentUser.username)) {
-                                    globalData.lists[inv.listId].editors.push(currentUser.username);
-                                }
-                                showToast(`Joined list "${inv.listTitle}"!`);
-                            } else {
-                                showToast("Invite declined.");
-                            }
-                            invites.splice(foundIdx, 1);
-                            await saveState();
-                            checkNotificationsCount();
-                            openNotificationsModal();
-                            if (currentListId === inv.listId) loadList(currentListId, false);
-                        }
-                    }
-                    break;
-            }
-        } catch (err) {}
-    });
-
-    // FORMS SUBMISSION
-    document.addEventListener('submit', async function(e) {
-        const form = e.target;
-        e.preventDefault();
-        globalData = ensureDataStructure(globalData);
-
-        try {
-            if (form.id === 'chat-form') {
-                if (!currentUser) {
-                    showToast("Please sign in to send messages!");
-                    document.getElementById('modal-auth').classList.add('active');
-                    switchAuthTab('login');
+            if (globalData.users[username]) {
+                if (globalData.users[username].banned) {
+                    showToast("❌ Account is banned by administrator.");
                     return;
                 }
 
-                const input = document.getElementById("chat-input");
-                const text = input.value.trim();
-                if (!text) return;
+                const hashed = await hashPassword(password);
+                const storedPass = globalData.users[username].password;
 
-                const now = new Date();
-                const time = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
-
-                if (!globalData.chatMessages) globalData.chatMessages = [];
-                globalData.chatMessages.push({
-                    user: currentUser.username,
-                    text: text,
-                    time: time
-                });
-
-                if (globalData.chatMessages.length > 80) globalData.chatMessages.shift();
-
-                input.value = "";
-                await saveState();
-                renderChatMessages();
-            }
-            else if (form.id === 'dm-form') {
-                if (!currentUser || !activeDmPartner) return;
-                const input = document.getElementById("dm-input");
-                const text = input.value.trim();
-                if (!text) return;
-
-                const now = new Date();
-                const time = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
-
-                if (!globalData.directMessages) globalData.directMessages = [];
-                globalData.directMessages.push({
-                    from: currentUser.username,
-                    to: activeDmPartner,
-                    text: text,
-                    time: time,
-                    read: false
-                });
-
-                input.value = "";
-                await saveState();
-                renderDmMessages(activeDmPartner);
-            }
-            else if (form.id === 'form-login') {
-                const username = document.getElementById('login-username').value.trim();
-                const password = document.getElementById('login-password').value;
-                
-                if (globalData.users[username]) {
-                    if (globalData.users[username].banned) {
-                        showToast("❌ Account is banned by administrator.");
-                        return;
-                    }
-
-                    const hashed = await hashPassword(password);
-                    const storedPass = globalData.users[username].password;
-
-                    if (storedPass === hashed || storedPass === password) {
-                        if (storedPass === password) globalData.users[username].password = hashed;
-                        
-                        currentUser = { username: username };
-                        updateAuthUI();
-                        await saveState();
-                        closeModals();
-                        showToast(`Signed in as ${username}`);
-                        if (currentListId) loadList(currentListId, false);
-                    } else {
-                        showToast("Invalid username or password.");
-                    }
+                if (storedPass === hashed || storedPass === password) {
+                    // Upgrade plaintext to hash
+                    if (storedPass === password) globalData.users[username].password = hashed;
+                    
+                    currentUser = { username: username };
+                    updateAuthUI();
+                    await saveState();
+                    closeModals();
+                    showToast(`Signed in as ${username}`);
+                    if (currentListId) loadList(currentListId, false);
                 } else {
                     showToast("Invalid username or password.");
                 }
-            } 
-            else if (form.id === 'form-register') {
-                const captchaAns = document.getElementById("captcha-answer").value.trim();
-                if (captchaAns !== currentCaptchaTarget) {
-                    showToast("Incorrect verification answer.");
-                    generateCaptcha();
-                    return;
-                }
-
-                const user = document.getElementById("reg-username").value.trim();
-                const pass = document.getElementById("reg-password").value;
-
-                if (!/^[a-zA-Z0-9_]{3,16}$/.test(user)) {
-                    showToast("Username must be 3-16 letters/numbers.");
-                    return;
-                }
-                if (pass.length < 6) {
-                    showToast("Password must be at least 6 characters.");
-                    return;
-                }
-                if (globalData.users[user]) {
-                    showToast("Username is taken.");
-                    return;
-                }
-
-                const hashedPass = await hashPassword(pass);
-                globalData.users[user] = { password: hashedPass, invites: [], banned: false };
-                currentUser = { username: user };
-
-                await saveState();
-                updateAuthUI();
-                closeModals();
-                showToast(`Registered as ${user}`);
-                if (currentListId) loadList(currentListId, false);
-            }
-            else if (form.id === 'create-list-form') {
-                if (!currentUser) return;
-                const id = document.getElementById("new-list-id").value.trim().toLowerCase().replace(/\s+/g, '-');
-                const title = document.getElementById("new-list-title").value.trim();
-                const discord = document.getElementById("new-list-discord").value.trim();
-
-                if (!id || !title) return;
-
-                globalData.lists[id] = { id, title, author: currentUser.username, editors: [], discord, views: 1, levels: [] };
-                await saveState();
-                closeModals();
-                loadList(id, false);
-                showToast("Demonlist created!");
-            }
-            else if (form.id === 'add-level-form') {
-                if (!isOwner) return;
-
-                const pos = Number(document.getElementById("add-pos").value);
-                const name = document.getElementById("add-name").value.trim();
-                const newLvl = {
-                    pos,
-                    name,
-                    levelId: document.getElementById("add-level-id").value.trim(),
-                    author: document.getElementById("add-author").value.trim(),
-                    verifier: document.getElementById("add-verifier").value.trim(),
-                    pts: Number(document.getElementById("add-pts").value),
-                    yt: document.getElementById("add-yt").value.trim(),
-                    victors: getVictorsFromContainer("add-victors-container")
-                };
-
-                if (!currentListData.levels) currentListData.levels = [];
-                currentListData.levels.splice(pos - 1, 0, newLvl);
-                reorderLevelsArray(currentListData.levels);
-
-                await saveState();
-                renderListLevels();
-                renderLeaderboard();
-                renderAdminPanel();
-
-                form.reset();
-                document.getElementById("add-victors-container").innerHTML = "";
-                showToast(`Level "${name}" added!`);
-            }
-            else if (form.id === 'edit-level-form') {
-                if (!isOwner) return;
-
-                const idx = Number(document.getElementById("edit-lvl-index").value);
-                const pos = Number(document.getElementById("edit-pos").value);
-                const updatedLvl = {
-                    pos,
-                    name: document.getElementById("edit-name").value.trim(),
-                    levelId: document.getElementById("edit-level-id").value.trim(),
-                    author: document.getElementById("edit-author").value.trim(),
-                    verifier: document.getElementById("edit-verifier").value.trim(),
-                    pts: Number(document.getElementById("edit-pts").value),
-                    yt: document.getElementById("edit-yt").value.trim(),
-                    victors: getVictorsFromContainer("edit-victors-container")
-                };
-
-                currentListData.levels.splice(idx, 1);
-                currentListData.levels.splice(pos - 1, 0, updatedLvl);
-                reorderLevelsArray(currentListData.levels);
-
-                await saveState();
-                closeModals();
-                renderListLevels();
-                renderLeaderboard();
-                renderAdminPanel();
-                showToast(`Updated "${updatedLvl.name}"`);
-            }
-        } catch (err) {}
-    });
-
-    // SEARCH INPUT HANDLERS
-    document.addEventListener("input", (e) => {
-        if (e.target.id === "home-search-input") {
-            renderHomeLists(e.target.value.trim());
-        } else if (e.target.id === "search-levels-input") {
-            const query = (e.target.value || "").toLowerCase().trim();
-            if (!query) {
-                renderListLevels();
             } else {
-                const filtered = (currentListData?.levels || []).filter(l => {
-                    return (l.name || "").toLowerCase().includes(query) || 
-                           (l.author || "").toLowerCase().includes(query) || 
-                           (l.levelId || "").toLowerCase().includes(query);
-                });
-                renderListLevels(filtered);
+                showToast("Invalid username or password.");
             }
-        } else if (e.target.id === "dm-search-input") {
-            renderDmUsersList(e.target.value.trim());
+        } 
+        else if (form.id === 'form-register') {
+            const captchaAns = document.getElementById("captcha-answer").value.trim();
+            if (captchaAns !== currentCaptchaTarget) {
+                showToast("Incorrect verification answer.");
+                generateCaptcha();
+                return;
+            }
+
+            const user = document.getElementById("reg-username").value.trim();
+            const pass = document.getElementById("reg-password").value;
+
+            if (!/^[a-zA-Z0-9_]{3,16}$/.test(user)) {
+                showToast("Username must be 3-16 letters/numbers.");
+                return;
+            }
+            if (pass.length < 6) {
+                showToast("Password must be at least 6 characters.");
+                return;
+            }
+            if (globalData.users[user]) {
+                showToast("Username is taken.");
+                return;
+            }
+
+            const hashedPass = await hashPassword(pass);
+            globalData.users[user] = { password: hashedPass, invites: [], banned: false };
+            currentUser = { username: user };
+
+            await saveState();
+            updateAuthUI();
+            closeModals();
+            showToast(`Registered as ${user}`);
+            if (currentListId) loadList(currentListId, false);
         }
-    });
+        else if (form.id === 'create-list-form') {
+            if (!currentUser) return;
+            const id = document.getElementById("new-list-id").value.trim().toLowerCase().replace(/\s+/g, '-');
+            const title = document.getElementById("new-list-title").value.trim();
+            const discord = document.getElementById("new-list-discord").value.trim();
 
-    // INITIALIZE APP & LISTEN FOR ROUTING
-    document.addEventListener('DOMContentLoaded', async () => {
-        updateAuthUI();
-        await fetchFromSupabase();
-        setupRealtimeListener();
-        handleRouting();
-    });
+            if (!id || !title) return;
 
-    window.addEventListener('hashchange', () => {
-        handleRouting();
-    });
-    </script>
+            globalData.lists[id] = { id, title, author: currentUser.username, editors: [], discord, views: 1, levels: [] };
+            await saveState();
+            closeModals();
+            loadList(id, false);
+            showToast("Demonlist created!");
+        }
+        else if (form.id === 'add-level-form') {
+            if (!isOwner) return;
+
+            const pos = Number(document.getElementById("add-pos").value);
+            const name = document.getElementById("add-name").value.trim();
+            const newLvl = {
+                pos,
+                name,
+                levelId: document.getElementById("add-level-id").value.trim(),
+                author: document.getElementById("add-author").value.trim(),
+                verifier: document.getElementById("add-verifier").value.trim(),
+                pts: Number(document.getElementById("add-pts").value),
+                yt: document.getElementById("add-yt").value.trim(),
+                victors: getVictorsFromContainer("add-victors-container")
+            };
+
+            if (!currentListData.levels) currentListData.levels = [];
+            currentListData.levels.splice(pos - 1, 0, newLvl);
+            reorderLevelsArray(currentListData.levels);
+
+            await saveState();
+            renderListLevels();
+            renderLeaderboard();
+            renderAdminPanel();
+
+            form.reset();
+            document.getElementById("add-victors-container").innerHTML = "";
+            showToast(`Level "${name}" added!`);
+        }
+        else if (form.id === 'edit-level-form') {
+            if (!isOwner) return;
+
+            const idx = Number(document.getElementById("edit-lvl-index").value);
+            const pos = Number(document.getElementById("edit-pos").value);
+            const updatedLvl = {
+                pos,
+                name: document.getElementById("edit-name").value.trim(),
+                levelId: document.getElementById("edit-level-id").value.trim(),
+                author: document.getElementById("edit-author").value.trim(),
+                verifier: document.getElementById("edit-verifier").value.trim(),
+                pts: Number(document.getElementById("edit-pts").value),
+                yt: document.getElementById("edit-yt").value.trim(),
+                victors: getVictorsFromContainer("edit-victors-container")
+            };
+
+            currentListData.levels.splice(idx, 1);
+            currentListData.levels.splice(pos - 1, 0, updatedLvl);
+            reorderLevelsArray(currentListData.levels);
+
+            await saveState();
+            closeModals();
+            renderListLevels();
+            renderLeaderboard();
+            renderAdminPanel();
+            showToast(`Updated "${updatedLvl.name}"`);
+        }
+    } catch (err) {}
+});
+
+// SEARCH INPUT HANDLERS
+document.addEventListener("input", (e) => {
+    if (e.target.id === "home-search-input") {
+        renderHomeLists(e.target.value.trim());
+    } else if (e.target.id === "search-levels-input") {
+        const query = (e.target.value || "").toLowerCase().trim();
+        if (!query) {
+            renderListLevels();
+        } else {
+            const filtered = (currentListData?.levels || []).filter(l => {
+                return (l.name || "").toLowerCase().includes(query) || 
+                       (l.author || "").toLowerCase().includes(query) || 
+                       (l.levelId || "").toLowerCase().includes(query);
+            });
+            renderListLevels(filtered);
+        }
+    } else if (e.target.id === "dm-search-input") {
+        renderDmUsersList(e.target.value.trim());
+    }
+});
+
+// INITIALIZE APP
+document.addEventListener('DOMContentLoaded', async () => {
+    updateAuthUI();
+    showHome();
+    await fetchFromSupabase();
+    setupRealtimeListener();
+    handleRouting(); // Sprawdza URL i otwiera odpowiednią listę z linku
+});
+</script>
 </body>
 </html>
