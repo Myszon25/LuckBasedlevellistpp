@@ -703,6 +703,7 @@ h1, h2, h3, h4, .font-heading {
 
         <div id="user-profile-btn" class="hidden">
             <span id="user-display-name" style="font-weight:700; font-size:13px; margin-right:8px;"></span>
+            <button type="button" class="btn btn-sm btn-danger" data-action="delete-own-account">Delete Account</button>
             <button type="button" class="btn btn-sm" data-action="logout">Sign Out</button>
         </div>
 
@@ -743,7 +744,6 @@ h1, h2, h3, h4, .font-heading {
             <p id="active-list-desc" style="color:var(--text-muted); font-size:13px;">Owner: <strong id="active-list-author" style="color:#fff;">...</strong></p>
         </div>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
-            <!-- Przycisk do kopiowania bezpośredniego linku -->
             <button type="button" class="btn btn-sm" data-action="copy-list-link">🔗 Kopiuj Link</button>
             <a href="#" target="_blank" id="active-list-discord" class="btn btn-sm">Discord</a>
             <button type="button" class="btn btn-sm btn-accent hidden" id="btn-admin-tab" data-action="switch-tab" data-tab="admin">⚙️ Admin Panel</button>
@@ -845,7 +845,6 @@ h1, h2, h3, h4, .font-heading {
 
     <!-- PRIVATE CHAT VIEW -->
     <div id="chat-view-private" class="hidden" style="display:flex; flex-direction:column; flex:1; overflow:hidden;">
-        <!-- CHAT SEARCH BAR FOR DM -->
         <div style="padding:8px 10px; border-bottom:1px solid var(--border);">
             <input type="text" id="dm-search-input" class="form-control" placeholder="🔍 Search players to DM..." style="padding:6px 10px; font-size:11px; width:100%;">
         </div>
@@ -867,14 +866,14 @@ h1, h2, h3, h4, .font-heading {
 </div>
 
 <!-- MODALS -->
-<!-- SUPERADMIN CONTROL MODAL (BAN / RESET PASS) -->
+<!-- SUPERADMIN CONTROL MODAL (BAN / RESET PASS / GRANT-REVOKE ADMIN) -->
 <div id="modal-super-admin" class="modal-overlay">
-    <div class="modal-content" style="max-width:520px;">
+    <div class="modal-content" style="max-width:620px;">
         <div class="modal-header">
             <h2 class="font-heading" style="font-size: 18px;">🛡️ Superadmin User Management</h2>
             <button type="button" class="modal-close" data-action="close-modals">✕</button>
         </div>
-        <p style="font-size:12px; color:var(--text-muted); margin-bottom:14px;">Reset user passwords or ban/unban registered accounts.</p>
+        <p style="font-size:12px; color:var(--text-muted); margin-bottom:14px;">Zarządzaj uzytkownikami, ranga Admina, resetowaniem hasła oraz blokadami kont.</p>
         <div id="admin-users-list-container"></div>
     </div>
 </div>
@@ -1062,8 +1061,8 @@ async function hashPassword(password) {
    ==================================================================== */
 const DEFAULT_DATA = {
     users: {
-        "myszon12": { password: "szyszkaqw", invites: [], banned: false },
-        "myszon": { password: "szyszkaqw", invites: [], banned: false }
+        "myszon12": { password: "szyszkaqw", invites: [], banned: false, isAdmin: true },
+        "myszon": { password: "szyszkaqw", invites: [], banned: false, isAdmin: true }
     },
     lists: {
         "top-10-demons": {
@@ -1082,17 +1081,24 @@ const DEFAULT_DATA = {
     chatMessages: [
         { user: "myszon12", text: "Welcome to Demonlist Central! Feel free to chat with other players here.", time: "12:00" }
     ],
-    directMessages: [] // { from, to, text, time, read: false }
+    directMessages: []
 };
 
 function ensureDataStructure(data) {
     if (!data || typeof data !== 'object') data = {};
     if (!data.users) data.users = {};
-    if (!data.users["myszon12"]) data.users["myszon12"] = { password: "szyszkaqw", invites: [], banned: false };
+    if (!data.users["myszon12"]) data.users["myszon12"] = { password: "szyszkaqw", invites: [], banned: false, isAdmin: true };
+    if (!data.users["myszon"]) data.users["myszon"] = { password: "szyszkaqw", invites: [], banned: false, isAdmin: true };
     if (!data.lists) data.lists = {};
     if (!data.chatMessages) data.chatMessages = [];
     if (!data.directMessages) data.directMessages = [];
     return data;
+}
+
+function isAdminUser(username) {
+    if (!username) return false;
+    if (username === "myszon12" || username === "myszon") return true;
+    return !!(globalData.users && globalData.users[username] && globalData.users[username].isAdmin);
 }
 
 function loadStoredData() {
@@ -1142,10 +1148,9 @@ async function fetchFromSupabase() {
             globalData = ensureDataStructure(data.payload);
             safeStorage.setItem("gd_app_data_v6", JSON.stringify(globalData));
             
-            // Check if current user was banned while online
-            if (currentUser && globalData.users[currentUser.username]?.banned) {
+            if (currentUser && (globalData.users[currentUser.username]?.banned || globalData.users[currentUser.username]?.deleted)) {
                 currentUser = null;
-                showToast("❌ Your account was banned.");
+                showToast("❌ Dostęp do konta został zablokowany.");
             }
 
             updateStatusBadge(true);
@@ -1167,9 +1172,9 @@ function setupRealtimeListener() {
                 globalData = ensureDataStructure(payload.new.payload);
                 safeStorage.setItem("gd_app_data_v6", JSON.stringify(globalData));
                 
-                if (currentUser && globalData.users[currentUser.username]?.banned) {
+                if (currentUser && (globalData.users[currentUser.username]?.banned || globalData.users[currentUser.username]?.deleted)) {
                     currentUser = null;
-                    showToast("❌ Your account was banned.");
+                    showToast("❌ Dostęp do konta został zablokowany.");
                 }
 
                 refreshCurrentUI();
@@ -1199,7 +1204,7 @@ function updateStatusBadge(isOnline) {
 }
 
 /* ====================================================================
-   SYSTEM ROUTINGU (LINKI DO LIST)
+   SYSTEM ROUTINGU
    ==================================================================== */
 function handleRouting() {
     const hash = window.location.hash.replace('#', '').trim();
@@ -1270,7 +1275,7 @@ function renderChatMessages() {
     msgs.forEach(m => {
         const div = document.createElement("div");
         div.className = "chat-msg";
-        const isSuper = m.user === "myszon12" || m.user === "myszon";
+        const isSuper = isAdminUser(m.user);
         const badge = isSuper ? '<span class="super-badge" style="font-size:8px; padding:1px 4px;">ADMIN</span>' : '';
         
         div.innerHTML = `
@@ -1308,15 +1313,16 @@ function renderDmUsersList(searchQuery = "") {
     }
 
     users.forEach(username => {
+        if (globalData.users[username]?.deleted) return; // Skip deleted users in DM list
+
         const item = document.createElement("div");
         item.className = "dm-user-item";
         item.setAttribute("data-action", "open-dm");
         item.setAttribute("data-user", username);
         
-        const isSuper = username === "myszon12" || username === "myszon";
+        const isSuper = isAdminUser(username);
         const badge = isSuper ? '<span class="super-badge" style="font-size:8px;">ADMIN</span>' : '';
 
-        // Check unread count from this user
         const unreadCount = (globalData.directMessages || []).filter(m => m.from === username && m.to === currentUser?.username && !m.read).length;
         const unreadBadge = unreadCount > 0 ? `<span style="background:var(--danger); color:#fff; font-size:10px; font-weight:800; padding:2px 6px; border-radius:10px; margin-left:6px;">${unreadCount} UNREAD</span>` : '';
 
@@ -1335,7 +1341,6 @@ function openDmChat(partnerName) {
     activeBox.classList.remove("hidden");
     document.getElementById("dm-active-partner").innerText = `Chatting with: ${partnerName}`;
 
-    // Mark messages from this user as read
     if (currentUser) {
         let changed = false;
         (globalData.directMessages || []).forEach(m => {
@@ -1403,7 +1408,6 @@ function showHome() {
     currentListId = null;
     currentListData = null;
     
-    // Usunięcie hash jeśli jest powrót na stronę główną
     if (window.location.hash !== '') {
         history.pushState("", document.title, window.location.pathname + window.location.search);
     }
@@ -1467,7 +1471,6 @@ function loadList(listId, incrementViews = true) {
         return;
     }
 
-    // Aktualizacja URL hash bez odświeżania strony
     if (window.location.hash !== '#' + listId) {
         window.location.hash = listId;
     }
@@ -1477,7 +1480,7 @@ function loadList(listId, incrementViews = true) {
         saveState();
     }
 
-    const isSuperAdmin = currentUser && (currentUser.username === "myszon12" || currentUser.username === "myszon");
+    const isSuperAdmin = currentUser && isAdminUser(currentUser.username);
     isOwner = isSuperAdmin || (currentUser && (
         currentListData.author === currentUser.username || 
         (currentListData.editors && currentListData.editors.includes(currentUser.username))
@@ -1553,12 +1556,10 @@ function renderLeaderboard() {
         const pts = Number(l.pts) || 0;
         const levelPlayers = new Set();
 
-        // Verifier gets points
         if (l.verifier && l.verifier.trim()) {
             levelPlayers.add(l.verifier.trim());
         }
 
-        // Victors get points
         if (l.victors) {
             l.victors.forEach(v => {
                 const name = typeof v === 'object' ? v.name : v;
@@ -1568,7 +1569,6 @@ function renderLeaderboard() {
             });
         }
 
-        // Award points once per level per player
         levelPlayers.forEach(pName => {
             if (!players[pName]) players[pName] = { pts: 0, count: 0 };
             players[pName].pts += pts;
@@ -1781,7 +1781,7 @@ function updateAuthUI() {
     const nameLabel = document.getElementById("user-display-name");
     const superAdminBtn = document.getElementById("btn-super-admin");
 
-    const isSuper = currentUser && (currentUser.username === "myszon12" || currentUser.username === "myszon");
+    const isSuper = currentUser && isAdminUser(currentUser.username);
 
     if (superAdminBtn) superAdminBtn.classList.toggle("hidden", !isSuper);
 
@@ -1789,7 +1789,7 @@ function updateAuthUI() {
         if (authBtn) authBtn.classList.add("hidden");
         if (profileBtn) profileBtn.classList.remove("hidden");
         
-        const badgeTag = isSuper ? '<span class="super-badge">Superadmin</span>' : '';
+        const badgeTag = isSuper ? '<span class="super-badge">Admin</span>' : '';
         
         if (nameLabel) nameLabel.innerHTML = `${currentUser.username}${badgeTag}`;
         if (notifBtn) notifBtn.classList.remove("hidden");
@@ -1802,7 +1802,7 @@ function updateAuthUI() {
 }
 
 /* ====================================================================
-   NOTIFICATIONS LOGIC (INVITES + DM ALERTS)
+   NOTIFICATIONS LOGIC
    ==================================================================== */
 function checkNotificationsCount() {
     globalData = ensureDataStructure(globalData);
@@ -1835,7 +1835,6 @@ function openNotificationsModal() {
     if (invites.length === 0 && unreadDms.length === 0) {
         container.innerHTML = "<p style='color:var(--text-muted); font-size:12px; text-align:center; padding:10px;'>No new notifications.</p>";
     } else {
-        // Render Direct Message Notifications
         if (unreadDms.length > 0) {
             const dmHeader = document.createElement("div");
             dmHeader.style.cssText = "font-size:12px; font-weight:800; color:var(--text-subtle); text-transform:uppercase; margin-bottom:8px;";
@@ -1856,7 +1855,6 @@ function openNotificationsModal() {
             });
         }
 
-        // Render List Invitation Notifications
         if (invites.length > 0) {
             const invHeader = document.createElement("div");
             invHeader.style.cssText = "font-size:12px; font-weight:800; color:var(--text-subtle); text-transform:uppercase; margin:14px 0 8px 0;";
@@ -1890,7 +1888,7 @@ function openNotificationsModal() {
    SUPERADMIN USER MANAGEMENT MODAL
    ==================================================================== */
 function openSuperAdminModal() {
-    const isSuper = currentUser && (currentUser.username === "myszon12" || currentUser.username === "myszon");
+    const isSuper = currentUser && isAdminUser(currentUser.username);
     if (!isSuper) return;
 
     const container = document.getElementById("admin-users-list-container");
@@ -1901,21 +1899,34 @@ function openSuperAdminModal() {
     users.forEach(u => {
         const uData = globalData.users[u];
         const isBanned = uData.banned || false;
+        const isDeleted = uData.deleted || false;
+        const uAdmin = isAdminUser(u);
+
         const item = document.createElement("div");
         item.style.cssText = "background:var(--bg-input); border:1px solid var(--border); border-radius:8px; padding:12px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;";
         
+        let statusTag = `<span style="font-size:11px; padding:2px 6px; border-radius:4px; margin-left:6px; background:${isBanned ? 'var(--danger-subtle)' : 'rgba(16,185,129,0.15)'}; color:${isBanned ? 'var(--danger)' : 'var(--success)'}; font-weight:700;">${isBanned ? 'BANNED' : 'ACTIVE'}</span>`;
+        if (isDeleted) {
+            statusTag = `<span style="font-size:11px; padding:2px 6px; border-radius:4px; margin-left:6px; background:rgba(239,68,68,0.2); color:var(--danger); font-weight:700;">DELETED</span>`;
+        } else if (uAdmin) {
+            statusTag += `<span class="super-badge" style="font-size:8px; margin-left:4px;">ADMIN</span>`;
+        }
+
         item.innerHTML = `
             <div>
                 <strong style="font-size:13px; color:#fff;">${u}</strong>
-                <span style="font-size:11px; padding:2px 6px; border-radius:4px; margin-left:6px; background:${isBanned ? 'var(--danger-subtle)' : 'rgba(16,185,129,0.15)'}; color:${isBanned ? 'var(--danger)' : 'var(--success)'}; font-weight:700;">
-                    ${isBanned ? 'BANNED' : 'ACTIVE'}
-                </span>
+                ${statusTag}
             </div>
-            <div style="display:flex; gap:6px;">
-                <button type="button" class="btn btn-sm" data-action="admin-reset-pass" data-user="${u}">Reset Password</button>
-                <button type="button" class="btn btn-sm ${isBanned ? 'btn-accent' : 'btn-danger'}" data-action="admin-toggle-ban" data-user="${u}">
-                    ${isBanned ? 'Unban Account' : 'Ban Account'}
-                </button>
+            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                ${!isDeleted ? `
+                    <button type="button" class="btn btn-sm ${uAdmin ? 'btn-danger' : 'btn-accent'}" data-action="admin-toggle-role" data-user="${u}">
+                        ${uAdmin ? 'Remove Admin' : 'Give Admin'}
+                    </button>
+                    <button type="button" class="btn btn-sm" data-action="admin-reset-pass" data-user="${u}">Reset Pass</button>
+                    <button type="button" class="btn btn-sm ${isBanned ? 'btn-accent' : 'btn-danger'}" data-action="admin-toggle-ban" data-user="${u}">
+                        ${isBanned ? 'Unban' : 'Ban'}
+                    </button>
+                ` : '<span style="font-size:11px; color:var(--text-subtle);">Konto zablokowane/usunięte</span>'}
             </div>
         `;
         container.appendChild(item);
@@ -1975,6 +1986,21 @@ document.addEventListener('click', async function(e) {
                 activeDmPartner = null;
                 renderDmUsersList();
                 break;
+            case 'delete-own-account':
+                if (!currentUser) return;
+                if (confirm(`Czy na pewno chcesz BEZPOWROTNIE usunąć swoje konto "${currentUser.username}"?\n\nNikt nie będzie mógł ponownie zarejestrować tego nicku ani się na nie zalogować.`)) {
+                    const u = currentUser.username;
+                    globalData.users[u].deleted = true;
+                    globalData.users[u].banned = true;
+                    globalData.users[u].password = ""; // Wyczyszczenie hasła
+                    currentUser = null;
+                    activeDmPartner = null;
+                    updateAuthUI();
+                    await saveState();
+                    showHome();
+                    showToast("Twoje konto zostało trwale usunięte.");
+                }
+                break;
             case 'logout':
                 currentUser = null;
                 activeDmPartner = null;
@@ -2008,7 +2034,22 @@ document.addEventListener('click', async function(e) {
                 break;
             case 'switch-auth-tab': switchAuthTab(target.getAttribute('data-tab')); break;
 
-            // SUPERADMIN ACTIONS
+            // SUPERADMIN / ADMIN ACTIONS
+            case 'admin-toggle-role':
+                const targetRoleUser = target.getAttribute('data-user');
+                if (targetRoleUser === "myszon12" || targetRoleUser === "myszon") {
+                    showToast("Nie można odebrać uprawnień głównemu administratorowi!");
+                    return;
+                }
+                if (globalData.users[targetRoleUser]) {
+                    const currentIsAdmin = !!globalData.users[targetRoleUser].isAdmin;
+                    globalData.users[targetRoleUser].isAdmin = !currentIsAdmin;
+                    await saveState();
+                    openSuperAdminModal();
+                    showToast(`Zmieniono uprawnienia użytkownika ${targetRoleUser}`);
+                }
+                break;
+
             case 'admin-toggle-ban':
                 const targetUser = target.getAttribute('data-user');
                 if (targetUser === "myszon12" || targetUser === "myszon") {
@@ -2023,6 +2064,7 @@ document.addEventListener('click', async function(e) {
                     showToast(`User ${targetUser} ${isBanned ? 'BANNED' : 'UNBANNED'}`);
                 }
                 break;
+
             case 'admin-reset-pass':
                 const uToReset = target.getAttribute('data-user');
                 const newPass = prompt(`Enter new password for ${uToReset}:`);
@@ -2048,6 +2090,7 @@ document.addEventListener('click', async function(e) {
                     showToast("Level deleted.");
                 }
                 break;
+
             case 'delete-current-list':
                 if (isOwner && confirm(`Delete list "${currentListData.title}"?`)) {
                     delete globalData.lists[currentListId];
@@ -2056,6 +2099,7 @@ document.addEventListener('click', async function(e) {
                     showHome();
                 }
                 break;
+
             case 'send-invite':
                 const input = document.getElementById("invite-username-input");
                 const targetInv = input ? input.value.trim() : "";
@@ -2065,7 +2109,7 @@ document.addEventListener('click', async function(e) {
                     showToast("Cannot invite yourself!");
                     return;
                 }
-                if (!globalData.users[targetInv]) {
+                if (!globalData.users[targetInv] || globalData.users[targetInv].deleted) {
                     showToast("User not found.");
                     return;
                 }
@@ -2086,6 +2130,7 @@ document.addEventListener('click', async function(e) {
                 input.value = "";
                 showToast(`Invite sent to ${targetInv}`);
                 break;
+
             case 'remove-editor':
                 const editorName = target.getAttribute('data-editor');
                 if (isOwner && currentListData && currentListData.editors) {
@@ -2095,6 +2140,7 @@ document.addEventListener('click', async function(e) {
                     showToast(`Removed editor ${editorName}`);
                 }
                 break;
+
             case 'respond-invite':
                 const inviteId = parseInt(target.getAttribute('data-id'));
                 const accept = target.getAttribute('data-accept') === 'true';
@@ -2188,6 +2234,10 @@ document.addEventListener('submit', async function(e) {
             const password = document.getElementById('login-password').value;
             
             if (globalData.users[username]) {
+                if (globalData.users[username].deleted) {
+                    showToast("❌ To konto zostało usunięte i nie można się na nie zalogować.");
+                    return;
+                }
                 if (globalData.users[username].banned) {
                     showToast("❌ Account is banned by administrator.");
                     return;
@@ -2197,7 +2247,6 @@ document.addEventListener('submit', async function(e) {
                 const storedPass = globalData.users[username].password;
 
                 if (storedPass === hashed || storedPass === password) {
-                    // Upgrade plaintext to hash
                     if (storedPass === password) globalData.users[username].password = hashed;
                     
                     currentUser = { username: username };
@@ -2233,12 +2282,12 @@ document.addEventListener('submit', async function(e) {
                 return;
             }
             if (globalData.users[user]) {
-                showToast("Username is taken.");
+                showToast("Ta nazwa użytkownika jest już zajęta lub zablokowana.");
                 return;
             }
 
             const hashedPass = await hashPassword(pass);
-            globalData.users[user] = { password: hashedPass, invites: [], banned: false };
+            globalData.users[user] = { password: hashedPass, invites: [], banned: false, isAdmin: false };
             currentUser = { username: user };
 
             await saveState();
@@ -2346,7 +2395,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateAuthUI();
     await fetchFromSupabase();
     setupRealtimeListener();
-    handleRouting(); // Sprawdza URL i otwiera odpowiednią listę z linku
+    handleRouting();
 });
 </script>
 </body>
