@@ -599,8 +599,26 @@ h1, h2, h3, .font-heading {
 
 <script>
 /* ====================================================================
-   1. AUTOMATYCZNA KONFIGURACJA SUPABASE (Z POPRAWIONYM ADRESEM I KLUCZEM)
+   1. BEZPIECZNY STORAGE I BEZPIECZNA INICJALIZACJA SUPABASE
    ==================================================================== */
+const safeStorage = {
+    getItem: (key) => {
+        try { return localStorage.getItem(key); } catch(e) { return null; }
+    },
+    setItem: (key, val) => {
+        try { localStorage.setItem(key, val); } catch(e) {}
+    },
+    removeItem: (key) => {
+        try { localStorage.removeItem(key); } catch(e) {}
+    }
+};
+
+const dummyMemoryStorage = {
+    getItem: () => null,
+    setItem: () => {},
+    removeItem: () => {}
+};
+
 const SUPABASE_URL = "https://iigxupbrqpqftynrhlwk.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlpZ3h1cGJycXBxZnR5bnJobHdrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4MzAzNjEsImV4cCI6MjEwMDQwNjM2MX0.hK0GlMWVE7B3_n2mEzsUlz3qU6TSWt5w2S9Td20fl68";
 
@@ -611,7 +629,9 @@ if (window.supabase) {
         supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
             auth: {
                 persistSession: false,
-                autoRefreshToken: false
+                autoRefreshToken: false,
+                detectSessionInUrl: false,
+                storage: dummyMemoryStorage // Zabezpieczenie przed błędem Tracking Protection
             }
         });
     } catch(e) {
@@ -620,7 +640,7 @@ if (window.supabase) {
 }
 
 /* ====================================================================
-   2. STAN DOMYŚLNY I OBSŁUGA PAMIĘCI
+   2. STAN DOMYŚLNY I OBSŁUGA DANYCH
    ==================================================================== */
 const DEFAULT_DATA = {
     users: {
@@ -643,21 +663,13 @@ const DEFAULT_DATA = {
 };
 
 function loadStoredData() {
-    try {
-        const d = localStorage.getItem("gd_app_data_v3");
-        return d ? JSON.parse(d) : DEFAULT_DATA;
-    } catch(e) {
-        return DEFAULT_DATA;
-    }
+    const d = safeStorage.getItem("gd_app_data_v3");
+    return d ? JSON.parse(d) : DEFAULT_DATA;
 }
 
 function loadStoredUser() {
-    try {
-        const u = localStorage.getItem("gd_app_user_v3");
-        return u ? JSON.parse(u) : null;
-    } catch(e) {
-        return null;
-    }
+    const u = safeStorage.getItem("gd_app_user_v3");
+    return u ? JSON.parse(u) : null;
 }
 
 let globalData = loadStoredData();
@@ -668,15 +680,11 @@ let isOwner = false;
 let currentCaptchaTarget = "";
 
 async function saveState() {
-    try {
-        localStorage.setItem("gd_app_data_v3", JSON.stringify(globalData));
-        if (currentUser) {
-            localStorage.setItem("gd_app_user_v3", JSON.stringify(currentUser));
-        } else {
-            localStorage.removeItem("gd_app_user_v3");
-        }
-    } catch(e) {
-        console.error("Błąd zapisu w localStorage:", e);
+    safeStorage.setItem("gd_app_data_v3", JSON.stringify(globalData));
+    if (currentUser) {
+        safeStorage.setItem("gd_app_user_v3", JSON.stringify(currentUser));
+    } else {
+        safeStorage.removeItem("gd_app_user_v3");
     }
 
     if (supabaseClient) {
@@ -700,7 +708,7 @@ async function fetchFromSupabase() {
 
         if (data && data.payload) {
             globalData = data.payload;
-            localStorage.setItem("gd_app_data_v3", JSON.stringify(globalData));
+            safeStorage.setItem("gd_app_data_v3", JSON.stringify(globalData));
             updateStatusBadge(true);
             showMainMenu();
         } else {
@@ -1126,288 +1134,296 @@ function openNotificationsModal() {
 }
 
 /* ====================================================================
-   4. OBSŁUGA ZDARZEŃ I PRZYCISKÓW
+   4. OBSŁUGA ZDARZEŃ I PRZYCISKÓW (ZABEZPIECZONA PrzeKIEROWANIAMI)
    ==================================================================== */
 document.addEventListener('click', function(e) {
-    const target = e.target.closest('[data-action]');
-    if (!target) {
-        if (e.target.classList.contains("modal-overlay")) closeModals();
-        return;
-    }
+    try {
+        const target = e.target.closest('[data-action]');
+        if (!target) {
+            if (e.target.classList.contains("modal-overlay")) closeModals();
+            return;
+        }
 
-    const action = target.getAttribute('data-action');
+        const action = target.getAttribute('data-action');
 
-    switch (action) {
-        case 'show-main':
-            showMainMenu();
-            break;
-
-        case 'open-notifications':
-            openNotificationsModal();
-            break;
-
-        case 'logout':
-            currentUser = null;
-            updateAuthUI();
-            saveState();
-            showMainMenu();
-            showToast("Zostałeś wylogowany.");
-            break;
-
-        case 'open-auth':
-            document.getElementById('modal-auth').classList.add('active');
-            switchAuthTab(target.getAttribute('data-type') || 'login');
-            break;
-
-        case 'open-create-list':
-            if (!currentUser) {
-                showToast("Najpierw musisz się zalogować!");
-                document.getElementById('modal-auth').classList.add('active');
-                switchAuthTab('login');
-            } else {
-                document.getElementById('modal-create-list').classList.add('active');
-            }
-            break;
-
-        case 'close-modals':
-            closeModals();
-            break;
-
-        case 'switch-tab':
-            switchTab(target.getAttribute('data-tab'));
-            break;
-
-        case 'load-list':
-            loadList(target.getAttribute('data-id'));
-            break;
-
-        case 'open-level-details':
-            openLevelDetailsModal(target.getAttribute('data-pos'));
-            break;
-
-        case 'open-edit-level':
-            openEditLevelModal(target.getAttribute('data-index'));
-            break;
-
-        case 'add-victor-row':
-            addVictorInputRow(target.getAttribute('data-container'));
-            break;
-
-        case 'remove-victor-row':
-            const row = target.closest('.victor-input-row');
-            if (row) row.remove();
-            break;
-
-        case 'switch-auth-tab':
-            switchAuthTab(target.getAttribute('data-tab'));
-            break;
-
-        case 'delete-level':
-            const index = parseInt(target.getAttribute('data-index'));
-            if (isOwner && currentListData && currentListData.levels && confirm("Czy na pewno chcesz usunąć ten poziom?")) {
-                currentListData.levels.splice(index, 1);
-                reorderLevelsArray(currentListData.levels);
-                saveState();
-                updateMaxPosLimits();
-                renderListLevels();
-                renderAdminPanel();
-                renderLeaderboard();
-                showToast("Poziom został usunięty.");
-            }
-            break;
-
-        case 'delete-current-list':
-            if (isOwner && confirm(`Czy na pewno chcesz usunąć całą listę "${currentListData.title}"?`)) {
-                delete globalData.lists[currentListId];
-                saveState();
-                showToast("Lista została usunięta.");
+        switch (action) {
+            case 'show-main':
                 showMainMenu();
-            }
-            break;
+                break;
 
-        case 'send-invite':
-            const input = document.getElementById("invite-username-input");
-            const targetUser = input ? input.value.trim() : "";
-            if (!targetUser) return;
+            case 'open-notifications':
+                openNotificationsModal();
+                break;
 
-            if (targetUser === currentUser.username) {
-                showToast("Nie możesz zaprosić samego siebie!");
-                return;
-            }
-            if (!globalData.users[targetUser]) {
-                showToast("❌ Nie znaleziono takiego użytkownika.");
-                return;
-            }
-            if (currentListData.editors && currentListData.editors.includes(targetUser)) {
-                showToast("Ten użytkownik jest już edytorem!");
-                return;
-            }
+            case 'logout':
+                currentUser = null;
+                updateAuthUI();
+                saveState();
+                showMainMenu();
+                showToast("Zostałeś wylogowany.");
+                break;
 
-            if (!globalData.users[targetUser].invites) globalData.users[targetUser].invites = [];
-            globalData.users[targetUser].invites.push({
-                id: Date.now(),
-                from: currentUser.username,
-                listId: currentListId,
-                listTitle: currentListData.title
-            });
+            case 'open-auth':
+                document.getElementById('modal-auth').classList.add('active');
+                switchAuthTab(target.getAttribute('data-type') || 'login');
+                break;
 
-            saveState();
-            input.value = "";
-            showToast(`Wysłano zaproszenie do ${targetUser}`);
-            break;
-
-        case 'respond-invite':
-            const inviteId = parseInt(target.getAttribute('data-id'));
-            const accept = target.getAttribute('data-accept') === 'true';
-            
-            if (currentUser && globalData.users[currentUser.username] && globalData.users[currentUser.username].invites) {
-                const invites = globalData.users[currentUser.username].invites;
-                const foundIdx = invites.findIndex(i => i.id === inviteId);
-
-                if (foundIdx !== -1) {
-                    const inv = invites[foundIdx];
-                    if (accept && globalData.lists[inv.listId]) {
-                        if (!globalData.lists[inv.listId].editors) globalData.lists[inv.listId].editors = [];
-                        if (!globalData.lists[inv.listId].editors.includes(currentUser.username)) {
-                            globalData.lists[inv.listId].editors.push(currentUser.username);
-                        }
-                        showToast(`Zaakceptowano zaproszenie do "${inv.listTitle}"!`);
-                    } else {
-                        showToast("Zaproszenie odrzucone.");
-                    }
-                    invites.splice(foundIdx, 1);
-                    saveState();
-                    checkNotificationsCount();
-                    openNotificationsModal();
-                    if (currentListId === inv.listId) loadList(currentListId);
+            case 'open-create-list':
+                if (!currentUser) {
+                    showToast("Najpierw musisz się zalogować!");
+                    document.getElementById('modal-auth').classList.add('active');
+                    switchAuthTab('login');
+                } else {
+                    document.getElementById('modal-create-list').classList.add('active');
                 }
-            }
-            break;
+                break;
+
+            case 'close-modals':
+                closeModals();
+                break;
+
+            case 'switch-tab':
+                switchTab(target.getAttribute('data-tab'));
+                break;
+
+            case 'load-list':
+                loadList(target.getAttribute('data-id'));
+                break;
+
+            case 'open-level-details':
+                openLevelDetailsModal(target.getAttribute('data-pos'));
+                break;
+
+            case 'open-edit-level':
+                openEditLevelModal(target.getAttribute('data-index'));
+                break;
+
+            case 'add-victor-row':
+                addVictorInputRow(target.getAttribute('data-container'));
+                break;
+
+            case 'remove-victor-row':
+                const row = target.closest('.victor-input-row');
+                if (row) row.remove();
+                break;
+
+            case 'switch-auth-tab':
+                switchAuthTab(target.getAttribute('data-tab'));
+                break;
+
+            case 'delete-level':
+                const index = parseInt(target.getAttribute('data-index'));
+                if (isOwner && currentListData && currentListData.levels && confirm("Czy na pewno chcesz usunąć ten poziom?")) {
+                    currentListData.levels.splice(index, 1);
+                    reorderLevelsArray(currentListData.levels);
+                    saveState();
+                    updateMaxPosLimits();
+                    renderListLevels();
+                    renderAdminPanel();
+                    renderLeaderboard();
+                    showToast("Poziom został usunięty.");
+                }
+                break;
+
+            case 'delete-current-list':
+                if (isOwner && confirm(`Czy na pewno chcesz usunąć całą listę "${currentListData.title}"?`)) {
+                    delete globalData.lists[currentListId];
+                    saveState();
+                    showToast("Lista została usunięta.");
+                    showMainMenu();
+                }
+                break;
+
+            case 'send-invite':
+                const input = document.getElementById("invite-username-input");
+                const targetUser = input ? input.value.trim() : "";
+                if (!targetUser) return;
+
+                if (targetUser === currentUser.username) {
+                    showToast("Nie możesz zaprosić samego siebie!");
+                    return;
+                }
+                if (!globalData.users[targetUser]) {
+                    showToast("❌ Nie znaleziono takiego użytkownika.");
+                    return;
+                }
+                if (currentListData.editors && currentListData.editors.includes(targetUser)) {
+                    showToast("Ten użytkownik jest już edytorem!");
+                    return;
+                }
+
+                if (!globalData.users[targetUser].invites) globalData.users[targetUser].invites = [];
+                globalData.users[targetUser].invites.push({
+                    id: Date.now(),
+                    from: currentUser.username,
+                    listId: currentListId,
+                    listTitle: currentListData.title
+                });
+
+                saveState();
+                input.value = "";
+                showToast(`Wysłano zaproszenie do ${targetUser}`);
+                break;
+
+            case 'respond-invite':
+                const inviteId = parseInt(target.getAttribute('data-id'));
+                const accept = target.getAttribute('data-accept') === 'true';
+                
+                if (currentUser && globalData.users[currentUser.username] && globalData.users[currentUser.username].invites) {
+                    const invites = globalData.users[currentUser.username].invites;
+                    const foundIdx = invites.findIndex(i => i.id === inviteId);
+
+                    if (foundIdx !== -1) {
+                        const inv = invites[foundIdx];
+                        if (accept && globalData.lists[inv.listId]) {
+                            if (!globalData.lists[inv.listId].editors) globalData.lists[inv.listId].editors = [];
+                            if (!globalData.lists[inv.listId].editors.includes(currentUser.username)) {
+                                globalData.lists[inv.listId].editors.push(currentUser.username);
+                            }
+                            showToast(`Zaakceptowano zaproszenie do "${inv.listTitle}"!`);
+                        } else {
+                            showToast("Zaproszenie odrzucone.");
+                        }
+                        invites.splice(foundIdx, 1);
+                        saveState();
+                        checkNotificationsCount();
+                        openNotificationsModal();
+                        if (currentListId === inv.listId) loadList(currentListId);
+                    }
+                }
+                break;
+        }
+    } catch (err) {
+        console.error("Obsłużony wyjątek kliknięcia:", err);
     }
 });
 
-// FORM SUBMISSIONS
+// SUBMIT FORMS
 document.addEventListener('submit', function(e) {
     const form = e.target;
     e.preventDefault();
 
-    if (form.id === 'form-login') {
-        const username = document.getElementById('login-username').value.trim();
-        const password = document.getElementById('login-password').value;
-        
-        if (globalData.users[username] && globalData.users[username].password === password) {
-            currentUser = { username: username };
+    try {
+        if (form.id === 'form-login') {
+            const username = document.getElementById('login-username').value.trim();
+            const password = document.getElementById('login-password').value;
+            
+            if (globalData.users[username] && globalData.users[username].password === password) {
+                currentUser = { username: username };
+                updateAuthUI();
+                saveState();
+                closeModals();
+                showToast(`Witaj z powrotem, ${username}!`);
+                if (currentListId) loadList(currentListId);
+            } else {
+                showToast("Błędna nazwa użytkownika lub hasło.");
+            }
+        } 
+        else if (form.id === 'form-register') {
+            const captchaAns = document.getElementById("captcha-answer").value.trim();
+            if (captchaAns !== currentCaptchaTarget) {
+                showToast("❌ Nieprawidłowy wynik captcha.");
+                generateCaptcha();
+                return;
+            }
+
+            const user = document.getElementById("reg-username").value.trim();
+            const pass = document.getElementById("reg-password").value;
+
+            if (!/^[a-zA-Z0-9_]{3,16}$/.test(user)) {
+                showToast("❌ Nazwa użytkownika musi mieć 3-16 znaków.");
+                return;
+            }
+
+            if (pass.length < 6) {
+                showToast("❌ Hasło musi mieć co najmniej 6 znaków.");
+                return;
+            }
+
+            if (globalData.users[user]) {
+                showToast("❌ Ta nazwa jest już zajęta.");
+                return;
+            }
+
+            globalData.users[user] = { password: pass, invites: [] };
+            currentUser = { username: user };
+
+            saveState();
             updateAuthUI();
+            closeModals();
+            showToast(`Konto stworzone! Zalogowano jako ${user}`);
+            if (currentListId) loadList(currentListId);
+        }
+        else if (form.id === 'create-list-form') {
+            if (!currentUser) return;
+
+            const id = document.getElementById("new-list-id").value.trim().toLowerCase().replace(/\s+/g, '-');
+            const title = document.getElementById("new-list-title").value.trim();
+            const discord = document.getElementById("new-list-discord").value.trim();
+
+            globalData.lists[id] = { id, title, author: currentUser.username, editors: [], discord, views: 1, levels: [] };
             saveState();
             closeModals();
-            showToast(`Witaj z powrotem, ${username}!`);
-            if (currentListId) loadList(currentListId);
-        } else {
-            showToast("Błędna nazwa użytkownika lub hasło.");
+            loadList(id);
+            showToast("Demonlista została pomyślnie utworzona!");
         }
-    } 
-    else if (form.id === 'form-register') {
-        const captchaAns = document.getElementById("captcha-answer").value.trim();
-        if (captchaAns !== currentCaptchaTarget) {
-            showToast("❌ Nieprawidłowy wynik captcha.");
-            generateCaptcha();
-            return;
+        else if (form.id === 'add-level-form') {
+            if (!isOwner) return;
+
+            const pos = Number(document.getElementById("add-pos").value);
+            const name = document.getElementById("add-name").value.trim();
+            const newLvl = {
+                pos,
+                name,
+                author: document.getElementById("add-author").value.trim(),
+                verifier: document.getElementById("add-verifier").value.trim(),
+                pts: Number(document.getElementById("add-pts").value),
+                yt: document.getElementById("add-yt").value.trim(),
+                victors: getVictorsFromContainer("add-victors-container")
+            };
+
+            if (!currentListData.levels) currentListData.levels = [];
+            currentListData.levels.splice(pos - 1, 0, newLvl);
+            reorderLevelsArray(currentListData.levels);
+
+            saveState();
+            updateMaxPosLimits();
+            renderListLevels();
+            renderLeaderboard();
+            renderAdminPanel();
+
+            form.reset();
+            document.getElementById("add-victors-container").innerHTML = "";
+            showToast(`Poziom "${name}" został dodany na pozycji #${pos}`);
         }
+        else if (form.id === 'edit-level-form') {
+            if (!isOwner) return;
 
-        const user = document.getElementById("reg-username").value.trim();
-        const pass = document.getElementById("reg-password").value;
+            const idx = Number(document.getElementById("edit-lvl-index").value);
+            const pos = Number(document.getElementById("edit-pos").value);
+            const updatedLvl = {
+                pos,
+                name: document.getElementById("edit-name").value.trim(),
+                author: document.getElementById("edit-author").value.trim(),
+                verifier: document.getElementById("edit-verifier").value.trim(),
+                pts: Number(document.getElementById("edit-pts").value),
+                yt: document.getElementById("edit-yt").value.trim(),
+                victors: getVictorsFromContainer("edit-victors-container")
+            };
 
-        if (!/^[a-zA-Z0-9_]{3,16}$/.test(user)) {
-            showToast("❌ Nazwa użytkownika musi mieć 3-16 znaków.");
-            return;
+            currentListData.levels.splice(idx, 1);
+            currentListData.levels.splice(pos - 1, 0, updatedLvl);
+            reorderLevelsArray(currentListData.levels);
+
+            saveState();
+            closeModals();
+            renderListLevels();
+            renderLeaderboard();
+            renderAdminPanel();
+            showToast(`Zapisano zmiany dla "${updatedLvl.name}"`);
         }
-
-        if (pass.length < 6) {
-            showToast("❌ Hasło musi mieć co najmniej 6 znaków.");
-            return;
-        }
-
-        if (globalData.users[user]) {
-            showToast("❌ Ta nazwa jest już zajęta.");
-            return;
-        }
-
-        globalData.users[user] = { password: pass, invites: [] };
-        currentUser = { username: user };
-
-        saveState();
-        updateAuthUI();
-        closeModals();
-        showToast(`Konto stworzone! Zalogowano jako ${user}`);
-        if (currentListId) loadList(currentListId);
-    }
-    else if (form.id === 'create-list-form') {
-        if (!currentUser) return;
-
-        const id = document.getElementById("new-list-id").value.trim().toLowerCase().replace(/\s+/g, '-');
-        const title = document.getElementById("new-list-title").value.trim();
-        const discord = document.getElementById("new-list-discord").value.trim();
-
-        globalData.lists[id] = { id, title, author: currentUser.username, editors: [], discord, views: 1, levels: [] };
-        saveState();
-        closeModals();
-        loadList(id);
-        showToast("Demonlista została pomyślnie utworzona!");
-    }
-    else if (form.id === 'add-level-form') {
-        if (!isOwner) return;
-
-        const pos = Number(document.getElementById("add-pos").value);
-        const name = document.getElementById("add-name").value.trim();
-        const newLvl = {
-            pos,
-            name,
-            author: document.getElementById("add-author").value.trim(),
-            verifier: document.getElementById("add-verifier").value.trim(),
-            pts: Number(document.getElementById("add-pts").value),
-            yt: document.getElementById("add-yt").value.trim(),
-            victors: getVictorsFromContainer("add-victors-container")
-        };
-
-        if (!currentListData.levels) currentListData.levels = [];
-        currentListData.levels.splice(pos - 1, 0, newLvl);
-        reorderLevelsArray(currentListData.levels);
-
-        saveState();
-        updateMaxPosLimits();
-        renderListLevels();
-        renderLeaderboard();
-        renderAdminPanel();
-
-        form.reset();
-        document.getElementById("add-victors-container").innerHTML = "";
-        showToast(`Poziom "${name}" został dodany na pozycji #${pos}`);
-    }
-    else if (form.id === 'edit-level-form') {
-        if (!isOwner) return;
-
-        const idx = Number(document.getElementById("edit-lvl-index").value);
-        const pos = Number(document.getElementById("edit-pos").value);
-        const updatedLvl = {
-            pos,
-            name: document.getElementById("edit-name").value.trim(),
-            author: document.getElementById("edit-author").value.trim(),
-            verifier: document.getElementById("edit-verifier").value.trim(),
-            pts: Number(document.getElementById("edit-pts").value),
-            yt: document.getElementById("edit-yt").value.trim(),
-            victors: getVictorsFromContainer("edit-victors-container")
-        };
-
-        currentListData.levels.splice(idx, 1);
-        currentListData.levels.splice(pos - 1, 0, updatedLvl);
-        reorderLevelsArray(currentListData.levels);
-
-        saveState();
-        closeModals();
-        renderListLevels();
-        renderLeaderboard();
-        renderAdminPanel();
-        showToast(`Zapisano zmiany dla "${updatedLvl.name}"`);
+    } catch (err) {
+        console.error("Obsłużony wyjątek formularza:", err);
     }
 });
 
