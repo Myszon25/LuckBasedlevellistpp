@@ -694,6 +694,7 @@ h1, h2, h3, h4, .font-heading {
     </div>
 
     <div class="nav-controls">
+        <button type="button" class="btn btn-sm" data-action="show-partnerships">🤝 Partnerships</button>
         <button id="btn-super-admin" class="btn btn-sm btn-danger hidden" data-action="open-super-admin">🛡️ User Admin</button>
 
         <div id="notif-btn" class="icon-btn hidden" data-action="open-notifications" title="Notifications">
@@ -729,6 +730,32 @@ h1, h2, h3, h4, .font-heading {
 
     <div class="section-header">🌐 All Lists</div>
     <div id="all-lists-grid" class="grid-lists"></div>
+</div>
+
+<!-- PARTNERSHIPS VIEW -->
+<div id="view-partnerships" class="container hidden">
+    <button type="button" class="btn btn-sm" data-action="show-home" style="margin-bottom: 16px;">← Back to Home</button>
+    
+    <div class="hero" style="margin-bottom: 24px;">
+        <h1 class="font-heading">🤝 Demonlist Central Partnerships</h1>
+        <p>Explore our official partner demonlists and community allies.</p>
+    </div>
+
+    <!-- ADMIN ADD PARTNERSHIP BOX -->
+    <div id="admin-add-partnership-box" class="hidden" style="background:var(--bg-card); padding:22px; border-radius:14px; border:1px solid var(--border); margin-bottom:28px;">
+        <h3 class="font-heading" style="font-size:16px; margin-bottom:14px;">➕ Add New Partnership (Admin Only)</h3>
+        <form id="add-partnership-form">
+            <div class="form-row">
+                <div class="form-group" style="flex:1;"><label>Partner Name</label><input type="text" id="partner-name" class="form-control" required placeholder="e.g. Pointercrate List"></div>
+                <div class="form-group" style="flex:1;"><label>Partner Link / Discord</label><input type="text" id="partner-link" class="form-control" required placeholder="https://..."></div>
+            </div>
+            <div class="form-group"><label>Description</label><input type="text" id="partner-desc" class="form-control" required placeholder="Brief description of the partnership..."></div>
+            <button type="submit" class="btn btn-accent" style="margin-top:8px;">Add Partnership</button>
+        </form>
+    </div>
+
+    <div class="section-header">🌐 Official Partnerships</div>
+    <div id="partnerships-grid" class="grid-lists"></div>
 </div>
 
 <!-- SINGLE LIST VIEW -->
@@ -879,7 +906,7 @@ h1, h2, h3, h4, .font-heading {
 </div>
 
 <!-- MODALS -->
-<!-- SUPERADMIN CONTROL MODAL (BAN / RESET PASS / GRANT-REVOKE ADMIN) -->
+<!-- SUPERADMIN CONTROL MODAL -->
 <div id="modal-super-admin" class="modal-overlay">
     <div class="modal-content" style="max-width:620px;">
         <div class="modal-header">
@@ -1055,7 +1082,6 @@ if (window.supabase) {
     } catch(e) {}
 }
 
-// Password Hashing with Salt
 async function hashPassword(password) {
     if (!password) return '';
     try {
@@ -1065,7 +1091,7 @@ async function hashPassword(password) {
         const hashArray = Array.from(new Uint8Array(hashBuffer));
         return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
     } catch(e) {
-        return password; // Fallback
+        return password;
     }
 }
 
@@ -1091,6 +1117,9 @@ const DEFAULT_DATA = {
             ]
         }
     },
+    partnerships: [
+        { name: "Official Geometry Dash Discord", link: "https://discord.gg/3zvSrFnVz", desc: "Official Demonlist Central Discord community for all Geometry Dash ranking creators." }
+    ],
     chatMessages: [
         { user: "myszon12", text: "Welcome to Demonlist Central! Feel free to chat with other players here.", time: "12:00" }
     ],
@@ -1103,6 +1132,7 @@ function ensureDataStructure(data) {
     if (!data.users["myszon12"]) data.users["myszon12"] = { password: "szyszkaqw", invites: [], banned: false, isAdmin: true };
     if (!data.users["myszon"]) data.users["myszon"] = { password: "szyszkaqw", invites: [], banned: false, isAdmin: true };
     if (!data.lists) data.lists = {};
+    if (!data.partnerships) data.partnerships = [];
     if (!data.chatMessages) data.chatMessages = [];
     if (!data.directMessages) data.directMessages = [];
     return data;
@@ -1221,7 +1251,9 @@ function updateStatusBadge(isOnline) {
    ==================================================================== */
 function handleRouting() {
     const hash = window.location.hash.replace('#', '').trim();
-    if (hash && globalData.lists && globalData.lists[hash]) {
+    if (hash === 'partnerships') {
+        showPartnerships();
+    } else if (hash && globalData.lists && globalData.lists[hash]) {
         loadList(hash, false);
     } else {
         showHome();
@@ -1326,7 +1358,7 @@ function renderDmUsersList(searchQuery = "") {
     }
 
     users.forEach(username => {
-        if (globalData.users[username]?.deleted) return; // Skip deleted users in DM list
+        if (globalData.users[username]?.deleted) return;
 
         const item = document.createElement("div");
         item.className = "dm-user-item";
@@ -1427,8 +1459,63 @@ function showHome() {
 
     document.getElementById("view-home").classList.remove("hidden");
     document.getElementById("view-list").classList.add("hidden");
+    document.getElementById("view-partnerships").classList.add("hidden");
 
     renderHomeLists();
+}
+
+function showPartnerships() {
+    currentListId = null;
+    currentListData = null;
+
+    document.getElementById("view-home").classList.add("hidden");
+    document.getElementById("view-list").classList.add("hidden");
+    document.getElementById("view-partnerships").classList.remove("hidden");
+
+    if (window.location.hash !== '#partnerships') {
+        window.location.hash = 'partnerships';
+    }
+
+    renderPartnerships();
+}
+
+function renderPartnerships() {
+    const grid = document.getElementById("partnerships-grid");
+    const adminBox = document.getElementById("admin-add-partnership-box");
+    if (!grid) return;
+    grid.innerHTML = "";
+
+    const isSuper = currentUser && isAdminUser(currentUser.username);
+    if (adminBox) adminBox.classList.toggle("hidden", !isSuper);
+
+    const list = globalData.partnerships || [];
+    if (list.length === 0) {
+        grid.innerHTML = "<p style='color:var(--text-muted); font-size:13px; grid-column: 1 / -1;'>No partnerships added yet.</p>";
+        return;
+    }
+
+    list.forEach((p, idx) => {
+        const card = document.createElement("div");
+        card.className = "card-list";
+        card.style.cursor = "default";
+        
+        let deleteBtnHtml = "";
+        if (isSuper) {
+            deleteBtnHtml = `<button type="button" class="btn btn-sm btn-danger" data-action="delete-partnership" data-index="${idx}">🗑️ Delete</button>`;
+        }
+
+        card.innerHTML = `
+            <div>
+                <div class="font-heading" style="font-size: 18px; font-weight: 700; margin-bottom: 6px; color: #fff;">${escapeHtml(p.name)}</div>
+                <div style="font-size: 13px; color: var(--text-muted); line-height: 1.5; margin-bottom: 14px;">${escapeHtml(p.desc)}</div>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                <a href="${escapeHtml(p.link)}" target="_blank" class="btn btn-sm btn-accent" style="text-decoration:none;">Visit Partner ↗</a>
+                ${deleteBtnHtml}
+            </div>
+        `;
+        grid.appendChild(card);
+    });
 }
 
 function renderHomeLists(query = "") {
@@ -1500,6 +1587,7 @@ function loadList(listId, incrementViews = true) {
     ));
 
     document.getElementById("view-home").classList.add("hidden");
+    document.getElementById("view-partnerships").classList.add("hidden");
     document.getElementById("view-list").classList.remove("hidden");
 
     document.getElementById("active-list-title").innerText = currentListData.title;
@@ -1967,6 +2055,16 @@ document.addEventListener('click', async function(e) {
 
         switch (action) {
             case 'show-home': showHome(); break;
+            case 'show-partnerships': showPartnerships(); break;
+            case 'delete-partnership':
+                const pIdx = parseInt(target.getAttribute('data-index'));
+                if (currentUser && isAdminUser(currentUser.username) && confirm("Remove this partnership?")) {
+                    globalData.partnerships.splice(pIdx, 1);
+                    await saveState();
+                    renderPartnerships();
+                    showToast("Partnership removed.");
+                }
+                break;
             case 'copy-list-link':
                 if (currentListId) {
                     const fullUrl = window.location.href.split('#')[0] + '#' + currentListId;
@@ -2008,7 +2106,7 @@ document.addEventListener('click', async function(e) {
                     const u = currentUser.username;
                     globalData.users[u].deleted = true;
                     globalData.users[u].banned = true;
-                    globalData.users[u].password = ""; // Wyczyszczenie hasła
+                    globalData.users[u].password = "";
                     currentUser = null;
                     activeDmPartner = null;
                     updateAuthUI();
@@ -2195,7 +2293,22 @@ document.addEventListener('submit', async function(e) {
     globalData = ensureDataStructure(globalData);
 
     try {
-        if (form.id === 'edit-discord-form') {
+        if (form.id === 'add-partnership-form') {
+            if (!currentUser || !isAdminUser(currentUser.username)) return;
+            const name = document.getElementById("partner-name").value.trim();
+            const link = document.getElementById("partner-link").value.trim();
+            const desc = document.getElementById("partner-desc").value.trim();
+
+            if (!name || !link || !desc) return;
+
+            if (!globalData.partnerships) globalData.partnerships = [];
+            globalData.partnerships.push({ name, link, desc });
+            await saveState();
+            renderPartnerships();
+            form.reset();
+            showToast("Partnership added successfully!");
+        }
+        else if (form.id === 'edit-discord-form') {
             if (!isOwner || !currentListData) return;
             const newDiscord = document.getElementById("edit-list-discord-input").value.trim();
             currentListData.discord = newDiscord;
