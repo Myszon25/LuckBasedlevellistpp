@@ -1,39 +1,39 @@
 <!DOCTYPE html>
-<html lang="pl">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Demonlist Central (Supabase Realtime Active)</title>
+<title>Demonlist Central</title>
 
-<!-- Brak błędu 404 dla braku favicony -->
+<!-- Prevent 404 favicon error -->
 <link rel="icon" href="data:,">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
 
 <!-- SUPABASE CLIENT SDK -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 :root {
-    --bg: #090b10;
-    --surface: #11141d;
-    --surface-hover: #181d2a;
-    --panel: #141824;
+    --bg: #0b0f17;
+    --surface: #131b2a;
+    --surface-hover: #1a2538;
+    --panel: #162032;
     --border: rgba(255, 255, 255, 0.08);
     --border-strong: rgba(255, 255, 255, 0.18);
-    --accent: #3b82f6;
-    --accent-hover: #2563eb;
-    --accent-subtle: rgba(59, 130, 246, 0.12);
-    --gold: #fbbf24;
+    --accent: #6366f1;
+    --accent-hover: #4f46e5;
+    --accent-subtle: rgba(99, 102, 241, 0.15);
+    --gold: #f59e0b;
     --silver: #94a3b8;
     --bronze: #d97706;
-    --text-primary: #f3f4f6;
-    --text-secondary: #9ca3af;
-    --text-muted: #6b7280;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
     --danger: #ef4444;
-    --danger-subtle: rgba(239, 68, 68, 0.12);
+    --danger-subtle: rgba(239, 68, 68, 0.15);
     --success: #10b981;
 }
 
@@ -56,17 +56,17 @@ h1, h2, h3, .font-heading {
     letter-spacing: -0.02em;
 }
 
-::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar { width: 8px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 3px; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
 
 .navbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 14px 5vw;
-    background: rgba(11, 14, 21, 0.9);
-    backdrop-filter: blur(12px);
+    padding: 16px 5vw;
+    background: rgba(11, 15, 23, 0.85);
+    backdrop-filter: blur(16px);
     border-bottom: 1px solid var(--border);
     position: sticky;
     top: 0;
@@ -74,58 +74,72 @@ h1, h2, h3, .font-heading {
 }
 
 .brand { display: flex; align-items: center; gap: 12px; cursor: pointer; }
-.brand-logo { width: 34px; height: 34px; background: var(--surface); border: 1px solid var(--border-strong); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; color: var(--accent); }
-.brand-name { font-size: 17px; font-weight: 700; color: var(--text-primary); }
+.brand-logo { 
+    width: 36px; 
+    height: 36px; 
+    background: linear-gradient(135deg, var(--accent), #8b5cf6); 
+    border-radius: 10px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    font-weight: 800; 
+    font-size: 14px; 
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+.brand-name { font-size: 18px; font-weight: 700; color: var(--text-primary); }
 
-.nav-actions { display: flex; align-items: center; gap: 10px; }
+.nav-actions { display: flex; align-items: center; gap: 12px; }
 
 .btn {
     background: var(--surface);
     border: 1px solid var(--border);
     color: var(--text-primary);
-    padding: 8px 14px;
+    padding: 9px 16px;
     border-radius: 8px;
-    font-weight: 500;
+    font-weight: 600;
     font-size: 13px;
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: all 0.2s ease;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     text-decoration: none;
 }
 
-.btn:hover { background: var(--surface-hover); border-color: var(--border-strong); }
-.btn-accent { background: var(--accent); color: #fff; border: 1px solid var(--accent); }
+.btn:hover { background: var(--surface-hover); border-color: var(--border-strong); transform: translateY(-1px); }
+.btn-accent { background: var(--accent); color: #fff; border: 1px solid var(--accent); box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25); }
 .btn-accent:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
-.btn-danger { background: var(--danger-subtle); border: 1px solid rgba(239, 68, 68, 0.2); color: var(--danger); }
+.btn-danger { background: var(--danger-subtle); border: 1px solid rgba(239, 68, 68, 0.3); color: var(--danger); }
 .btn-danger:hover { background: var(--danger); color: #fff; }
-.btn-sm { padding: 5px 10px; font-size: 12px; border-radius: 6px; }
+.btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 6px; }
 
 .notif-bell-btn {
     position: relative;
     background: var(--surface);
     border: 1px solid var(--border);
-    width: 36px;
-    height: 36px;
+    width: 38px;
+    height: 38px;
     border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    font-size: 15px;
+    font-size: 16px;
+    transition: all 0.2s;
 }
+.notif-bell-btn:hover { border-color: var(--border-strong); background: var(--surface-hover); }
 
 .notif-badge {
     position: absolute;
-    top: -3px;
-    right: -3px;
+    top: -4px;
+    right: -4px;
     background: var(--danger);
     color: #fff;
-    font-size: 9px;
+    font-size: 10px;
     font-weight: 700;
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -140,139 +154,139 @@ h1, h2, h3, .font-heading {
     z-index: 99999;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
 }
 
 .toast {
     background: var(--panel);
     border: 1px solid var(--border-strong);
     color: var(--text-primary);
-    padding: 12px 18px;
+    padding: 14px 20px;
     border-radius: 10px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.6);
     font-size: 13px;
-    font-weight: 500;
-    animation: slideIn 0.2s ease-out forwards;
+    font-weight: 600;
+    animation: slideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes slideIn {
-    from { transform: translateY(10px); opacity: 0; }
+    from { transform: translateY(16px); opacity: 0; }
     to { transform: translateY(0); opacity: 1; }
 }
 
-.container { max-width: 1000px; margin: 0 auto; padding: 36px 20px; flex: 1; width: 100%; }
+.container { max-width: 1040px; margin: 0 auto; padding: 40px 20px; flex: 1; width: 100%; }
 .hidden { display: none !important; }
 
-.hero { margin-bottom: 36px; border-bottom: 1px solid var(--border); padding-bottom: 24px; }
-.hero h1 { font-size: 32px; font-weight: 700; margin-bottom: 8px; color: var(--text-primary); }
-.hero p { color: var(--text-secondary); font-size: 14px; max-width: 600px; line-height: 1.5; }
+.hero { margin-bottom: 40px; border-bottom: 1px solid var(--border); padding-bottom: 28px; }
+.hero h1 { font-size: 36px; font-weight: 800; margin-bottom: 10px; color: #fff; }
+.hero p { color: var(--text-secondary); font-size: 15px; max-width: 640px; line-height: 1.6; }
 
 .section-title {
     font-size: 12px;
     font-weight: 700;
     color: var(--text-muted);
     text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-bottom: 14px;
+    letter-spacing: 0.1em;
+    margin-bottom: 16px;
 }
 
 .lists-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 14px;
-    margin-bottom: 36px;
+    grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+    gap: 16px;
+    margin-bottom: 40px;
 }
 
 .list-card {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 20px;
+    border-radius: 14px;
+    padding: 22px;
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: all 0.2s ease;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
 }
 
-.list-card:hover { border-color: var(--border-strong); background: var(--surface-hover); transform: translateY(-2px); }
+.list-card:hover { border-color: var(--border-strong); background: var(--surface-hover); transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
 
 .view-badge {
     background: var(--accent-subtle);
     color: var(--accent);
-    font-size: 11px;
-    font-weight: 600;
-    padding: 3px 8px;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 10px;
     border-radius: 6px;
 }
 
 .list-banner {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 24px;
-    margin-bottom: 24px;
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 28px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
-    gap: 16px;
+    gap: 20px;
 }
 
-.tabs { display: flex; gap: 6px; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
-.tab-btn { background: transparent; border: none; color: var(--text-secondary); font-size: 13px; font-weight: 600; padding: 8px 14px; cursor: pointer; border-radius: 6px; }
+.tabs { display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+.tab-btn { background: transparent; border: none; color: var(--text-secondary); font-size: 14px; font-weight: 600; padding: 10px 16px; cursor: pointer; border-radius: 8px; transition: all 0.15s; }
 .tab-btn.active { background: var(--surface); color: var(--text-primary); border: 1px solid var(--border); }
 
 .level-card {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 12px;
-    margin-bottom: 10px;
+    border-radius: 14px;
+    margin-bottom: 12px;
     display: flex;
     overflow: hidden;
-    height: 100px;
-    transition: all 0.15s ease;
+    height: 108px;
+    transition: all 0.2s ease;
 }
 
-.level-card:hover { border-color: var(--border-strong); background: var(--surface-hover); }
+.level-card:hover { border-color: var(--border-strong); background: var(--surface-hover); transform: translateX(4px); }
 
 .level-rank {
-    width: 60px;
+    width: 70px;
     border-right: 1px solid var(--border);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 700;
-    font-size: 18px;
+    font-weight: 800;
+    font-size: 20px;
     font-family: 'Space Grotesk', sans-serif;
     color: var(--text-secondary);
 }
 
-.rank-1 { color: var(--gold); background: rgba(251, 191, 36, 0.05); }
-.rank-2 { color: var(--silver); background: rgba(148, 163, 184, 0.05); }
-.rank-3 { color: var(--bronze); background: rgba(217, 119, 6, 0.05); }
+.rank-1 { color: var(--gold); background: rgba(245, 158, 11, 0.08); }
+.rank-2 { color: var(--silver); background: rgba(148, 163, 184, 0.08); }
+.rank-3 { color: var(--bronze); background: rgba(217, 119, 6, 0.08); }
 
-.level-details { flex: 1; padding: 14px 18px; display: flex; flex-direction: column; justify-content: center; gap: 4px; cursor: pointer; }
-.level-title { font-size: 15px; font-weight: 700; color: var(--text-primary); }
-.level-author { font-size: 12px; color: var(--text-muted); }
-.level-points { font-size: 12px; font-weight: 600; color: var(--accent); margin-top: 2px; }
+.level-details { flex: 1; padding: 16px 20px; display: flex; flex-direction: column; justify-content: center; gap: 4px; cursor: pointer; }
+.level-title { font-size: 16px; font-weight: 700; color: var(--text-primary); }
+.level-author { font-size: 13px; color: var(--text-muted); }
+.level-points { font-size: 13px; font-weight: 700; color: var(--accent); margin-top: 2px; }
 
-.level-thumb { width: 160px; background: #000; position: relative; cursor: pointer; overflow: hidden; }
-.level-thumb img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; transition: opacity 0.2s; }
+.level-thumb { width: 180px; background: #000; position: relative; cursor: pointer; overflow: hidden; }
+.level-thumb img { width: 100%; height: 100%; object-fit: cover; opacity: 0.85; transition: opacity 0.2s; }
 .level-thumb:hover img { opacity: 1; }
 
 .modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.82);
-    backdrop-filter: blur(6px);
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 10000;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.15s ease;
+    transition: opacity 0.2s ease;
 }
 
 .modal-overlay.active { opacity: 1; pointer-events: all; }
@@ -280,58 +294,76 @@ h1, h2, h3, .font-heading {
 .modal-content {
     background: var(--panel);
     border: 1px solid var(--border-strong);
-    border-radius: 16px;
-    width: min(620px, 92vw);
-    max-height: 88vh;
+    border-radius: 18px;
+    width: min(650px, 92vw);
+    max-height: 90vh;
     overflow-y: auto;
-    padding: 24px;
+    padding: 28px;
     position: relative;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.7);
+    box-shadow: 0 25px 60px rgba(0,0,0,0.8);
 }
 
-.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
-.modal-close { background: transparent; border: none; color: var(--text-muted); width: 28px; height: 28px; border-radius: 6px; cursor: pointer; font-size: 16px; }
+/* WIDER MODAL FOR LEVEL DETAILS FOR BIGGER VIDEO */
+.modal-content-large {
+    width: min(820px, 94vw) !important;
+}
+
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.modal-close { background: transparent; border: none; color: var(--text-muted); width: 32px; height: 32px; border-radius: 8px; cursor: pointer; font-size: 18px; transition: all 0.15s; }
 .modal-close:hover { background: var(--surface); color: var(--text-primary); }
 
-.auth-tabs { display: flex; background: var(--bg); padding: 3px; border-radius: 8px; margin-bottom: 16px; border: 1px solid var(--border); }
-.auth-tab-btn { flex: 1; padding: 8px; border: none; background: transparent; color: var(--text-secondary); font-weight: 600; font-size: 12px; cursor: pointer; border-radius: 6px; }
+.auth-tabs { display: flex; background: var(--bg); padding: 4px; border-radius: 10px; margin-bottom: 20px; border: 1px solid var(--border); }
+.auth-tab-btn { flex: 1; padding: 10px; border: none; background: transparent; color: var(--text-secondary); font-weight: 700; font-size: 13px; cursor: pointer; border-radius: 8px; transition: all 0.15s; }
 .auth-tab-btn.active { background: var(--surface); color: var(--text-primary); }
 
-.form-group { margin-bottom: 14px; display: flex; flex-direction: column; gap: 5px; }
-.form-group label { font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.04em; }
-.form-control { background: var(--bg); border: 1px solid var(--border); padding: 10px 12px; border-radius: 8px; color: var(--text-primary); font-family: inherit; font-size: 13px; outline: none; }
+.form-group { margin-bottom: 16px; display: flex; flex-direction: column; gap: 6px; }
+.form-group label { font-size: 11px; font-weight: 800; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
+.form-control { background: var(--bg); border: 1px solid var(--border); padding: 11px 14px; border-radius: 10px; color: var(--text-primary); font-family: inherit; font-size: 14px; outline: none; transition: border-color 0.2s; }
 .form-control:focus { border-color: var(--accent); }
-.form-row { display: flex; gap: 10px; }
+.form-row { display: flex; gap: 12px; }
 .form-row > div { flex: 1; }
 
-.victor-input-row { display: flex; gap: 8px; margin-bottom: 6px; align-items: center; }
-.victors-list-view { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+.victor-input-row { display: flex; gap: 10px; margin-bottom: 8px; align-items: center; }
+.victors-list-view { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
 
-.victor-item { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; }
-.victor-item a { color: var(--accent); text-decoration: none; font-size: 12px; font-weight: 600; }
+.victor-item { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; }
+.victor-item a { color: var(--accent); text-decoration: none; font-size: 13px; font-weight: 700; }
+.victor-item a:hover { text-decoration: underline; }
 
-.admin-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 8px; }
+.admin-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 10px; }
 
-.captcha-box { background: var(--bg); border: 1px solid var(--border-strong); border-radius: 10px; padding: 14px; margin-bottom: 14px; }
+.captcha-box { background: var(--bg); border: 1px solid var(--border-strong); border-radius: 12px; padding: 16px; margin-bottom: 16px; }
 .captcha-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-.captcha-badge { background: rgba(16, 185, 129, 0.12); color: var(--success); font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; }
+.captcha-badge { background: rgba(16, 185, 129, 0.15); color: var(--success); font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 6px; text-transform: uppercase; }
 
-.invite-card { background: var(--bg); border: 1px solid var(--border); padding: 14px; border-radius: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+.invite-card { background: var(--bg); border: 1px solid var(--border); padding: 16px; border-radius: 12px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
 
-#detail-video-container { width: 100%; height: 320px; background: #000; border-radius: 10px; overflow: hidden; margin-bottom: 16px; border: 1px solid var(--border); }
+/* ENLARGED VIDEO CONTAINER */
+#detail-video-container { 
+    width: 100%; 
+    height: 440px; 
+    background: #000; 
+    border-radius: 14px; 
+    overflow: hidden; 
+    margin-bottom: 20px; 
+    border: 1px solid var(--border); 
+    box-shadow: 0 12px 30px rgba(0,0,0,0.6);
+}
 
-.status-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; margin-left: 10px; }
-.status-online { background: rgba(16, 185, 129, 0.15); color: var(--success); }
-.status-offline { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
+.status-badge { font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 6px; margin-left: 10px; }
+.status-online { background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); }
+.status-offline { background: rgba(239, 68, 68, 0.15); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); }
 
-.footer { background: rgba(11, 14, 21, 0.95); border-top: 1px solid var(--border); padding: 24px 5vw; margin-top: 40px; }
-.footer-content { max-width: 1000px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+.super-badge { background: linear-gradient(135deg, #f59e0b, #ef4444); color: #fff; font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; margin-left: 6px; }
+
+.footer { background: rgba(11, 15, 23, 0.95); border-top: 1px solid var(--border); padding: 28px 5vw; margin-top: 50px; }
+.footer-content { max-width: 1040px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
 .footer-left { display: flex; flex-direction: column; gap: 4px; }
-.footer-credits { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.footer-credits { font-size: 14px; font-weight: 600; color: var(--text-primary); }
 .footer-credits span { color: var(--accent); }
-.footer-sub { font-size: 11px; color: var(--text-muted); }
+.footer-sub { font-size: 12px; color: var(--text-muted); }
 
-.discord-btn { background: #5865F2; color: #fff; font-weight: 600; font-size: 12px; padding: 8px 14px; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: opacity 0.15s; }
+.discord-btn { background: #5865F2; color: #fff; font-weight: 700; font-size: 13px; padding: 10px 18px; border-radius: 10px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: opacity 0.2s; box-shadow: 0 4px 12px rgba(88, 101, 242, 0.3); }
 .discord-btn:hover { opacity: 0.9; }
 </style>
 </head>
@@ -344,21 +376,21 @@ h1, h2, h3, .font-heading {
     <div class="brand" data-action="show-main">
         <div class="brand-logo">GD</div>
         <div class="brand-name font-heading">DEMONLIST CENTRAL</div>
-        <span id="db-status-badge" class="status-badge status-offline">Łączenie z chmurą...</span>
+        <span id="db-status-badge" class="status-badge status-offline">Connecting to Cloud...</span>
     </div>
     <div class="nav-actions">
-        <div id="notif-bell" class="notif-bell-btn hidden" data-action="open-notifications" title="Powiadomienia">
+        <div id="notif-bell" class="notif-bell-btn hidden" data-action="open-notifications" title="Notifications">
             🔔
             <div id="notif-badge-count" class="notif-badge hidden">0</div>
         </div>
 
         <div id="user-profile-btn" class="hidden">
-            <span id="user-display-name" style="font-weight:600; margin-right:8px; font-size:13px; color:var(--text-primary);"></span>
-            <button type="button" class="btn btn-sm" data-action="logout">Wyloguj</button>
+            <span id="user-display-name" style="font-weight:700; margin-right:8px; font-size:13px; color:var(--text-primary);"></span>
+            <button type="button" class="btn btn-sm" data-action="logout">Log Out</button>
         </div>
 
-        <button type="button" id="auth-modal-btn" class="btn btn-sm" data-action="open-auth" data-type="login">Konto / Logowanie</button>
-        <button type="button" class="btn btn-accent" data-action="open-create-list">+ Stwórz Listę</button>
+        <button type="button" id="auth-modal-btn" class="btn btn-sm" data-action="open-auth" data-type="login">Account / Login</button>
+        <button type="button" class="btn btn-accent" data-action="open-create-list">+ Create List</button>
     </div>
 </nav>
 
@@ -366,44 +398,44 @@ h1, h2, h3, .font-heading {
 <div id="view-main-menu" class="container">
     <div class="hero">
         <h1 class="font-heading">Geometry Dash Demonlists</h1>
-        <p>Twórz własne rankingi demonów, śledź punkty graczy i weryfikuj rekordy wideo na żywo.</p>
+        <p>Build custom demon rankings, track player points, manage co-editors, and verify video proof in real-time.</p>
     </div>
 
-    <div class="section-title">🔥 Popularne Listy</div>
+    <div class="section-title">🔥 Featured Lists</div>
     <div id="popular-lists-grid" class="lists-grid"></div>
 
-    <div class="section-title" style="margin-top: 10px;">🌐 Wszystkie Listy</div>
+    <div class="section-title" style="margin-top: 10px;">🌐 All Demonlists</div>
     <div id="all-lists-grid" class="lists-grid"></div>
 </div>
 
 <!-- SINGLE LIST DETAIL VIEW -->
 <div id="view-list-detail" class="container hidden">
-    <button type="button" class="btn btn-sm" data-action="show-main" style="margin-bottom: 16px;">← Powrót do List</button>
+    <button type="button" class="btn btn-sm" data-action="show-main" style="margin-bottom: 20px;">← Back to All Lists</button>
     
     <div class="list-banner">
         <div>
-            <div style="display:flex; align-items:center; gap:10px; margin-bottom: 4px;">
-                <h1 id="active-list-title" class="font-heading" style="font-size: 24px; font-weight: 700;">Tytuł Listy</h1>
-                <span id="active-list-views" class="view-badge">👁️ 0 wyświetleń</span>
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom: 6px;">
+                <h1 id="active-list-title" class="font-heading" style="font-size: 26px; font-weight: 800;">List Title</h1>
+                <span id="active-list-views" class="view-badge">👁️ 0 views</span>
             </div>
-            <p id="active-list-desc" style="color:var(--text-secondary); font-size:13px;">Właściciel: <span id="active-list-author" style="color:var(--text-primary); font-weight:600;">...</span></p>
+            <p id="active-list-desc" style="color:var(--text-secondary); font-size:14px;">Owner: <span id="active-list-author" style="color:var(--text-primary); font-weight:700;">...</span></p>
         </div>
-        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
             <a href="#" target="_blank" id="active-list-discord" class="btn btn-sm">Discord</a>
-            <button type="button" class="btn btn-sm btn-accent hidden" id="btn-admin-tab" data-action="switch-tab" data-tab="admin">⚙️ Panel Admina</button>
-            <button type="button" class="btn btn-sm btn-danger hidden" id="btn-delete-list" data-action="delete-current-list">🗑️ Usuń Listę</button>
+            <button type="button" class="btn btn-sm btn-accent hidden" id="btn-admin-tab" data-action="switch-tab" data-tab="admin">⚙️ Admin Panel</button>
+            <button type="button" class="btn btn-sm btn-danger hidden" id="btn-delete-list" data-action="delete-current-list">🗑️ Delete List</button>
         </div>
     </div>
 
     <div class="tabs">
-        <button type="button" class="tab-btn active" id="tab-btn-levels" data-action="switch-tab" data-tab="levels">Demony / Poziomy</button>
-        <button type="button" class="tab-btn" id="tab-btn-leaderboard" data-action="switch-tab" data-tab="leaderboard">Ranking Graczy</button>
-        <button type="button" class="tab-btn hidden" id="tab-btn-admin" data-action="switch-tab" data-tab="admin">Panel Admina</button>
+        <button type="button" class="tab-btn active" id="tab-btn-levels" data-action="switch-tab" data-tab="levels">Demons / Levels</button>
+        <button type="button" class="tab-btn" id="tab-btn-leaderboard" data-action="switch-tab" data-tab="leaderboard">Player Leaderboard</button>
+        <button type="button" class="tab-btn hidden" id="tab-btn-admin" data-action="switch-tab" data-tab="admin">Admin Panel</button>
     </div>
 
     <div id="tab-content-levels">
-        <div style="margin-bottom:16px;">
-            <input type="text" id="search-levels-input" class="form-control" placeholder="Szukaj poziomu lub twórcy..." style="max-width:320px;">
+        <div style="margin-bottom:20px;">
+            <input type="text" id="search-levels-input" class="form-control" placeholder="Search levels or creators..." style="max-width:340px;">
         </div>
         <div id="levels-list-container"></div>
     </div>
@@ -411,47 +443,54 @@ h1, h2, h3, .font-heading {
     <div id="tab-content-leaderboard" class="hidden"></div>
 
     <div id="tab-content-admin" class="hidden">
-        <div style="background:var(--surface); padding:20px; border-radius:12px; border:1px solid var(--border); margin-bottom:20px;">
-            <h3 class="font-heading" style="font-size: 16px; margin-bottom:4px;">📨 Zaproś Współedytora</h3>
-            <p style="color:var(--text-secondary); font-size:12px; margin-bottom:12px;">Wpisz nazwę użytkownika, aby wysłać mu zaproszenie.</p>
-            <div style="display:flex; gap:8px;">
-                <input type="text" id="invite-username-input" class="form-control" placeholder="Nazwa użytkownika..." style="flex:1;">
-                <button class="btn btn-accent" type="button" data-action="send-invite">Wyślij Zaproszenie</button>
+        <!-- CO-EDITORS SECTION -->
+        <div style="background:var(--surface); padding:24px; border-radius:14px; border:1px solid var(--border); margin-bottom:24px;">
+            <h3 class="font-heading" style="font-size: 17px; margin-bottom:6px;">👥 Co-Editors & Invites</h3>
+            <p style="color:var(--text-secondary); font-size:13px; margin-bottom:16px;">Invite other users to collaborate on this list or manage existing editors.</p>
+            
+            <div style="display:flex; gap:10px; margin-bottom: 20px;">
+                <input type="text" id="invite-username-input" class="form-control" placeholder="Enter username..." style="flex:1;">
+                <button class="btn btn-accent" type="button" data-action="send-invite">Send Invite</button>
             </div>
+
+            <h4 class="font-heading" style="font-size:13px; color:var(--text-muted); text-transform:uppercase; margin-bottom:10px;">Current Editors:</h4>
+            <div id="admin-editors-list"></div>
         </div>
 
-        <div style="background:var(--surface); padding:20px; border-radius:12px; border:1px solid var(--border); margin-bottom:20px;">
-            <h3 class="font-heading" style="font-size: 16px; margin-bottom:14px;">➕ Dodaj Nowy Poziom</h3>
+        <!-- ADD LEVEL FORM -->
+        <div style="background:var(--surface); padding:24px; border-radius:14px; border:1px solid var(--border); margin-bottom:24px;">
+            <h3 class="font-heading" style="font-size: 17px; margin-bottom:16px;">➕ Add New Demon</h3>
             <form id="add-level-form">
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Pozycja na liście (#)</label>
+                        <label>List Position (#)</label>
                         <input type="number" id="add-pos" class="form-control" required min="1" value="1">
-                        <small id="add-pos-hint" style="color:var(--text-muted); font-size:10px;">Maksymalna pozycja: #1</small>
+                        <small id="add-pos-hint" style="color:var(--text-muted); font-size:11px;">Max placement: #1</small>
                     </div>
-                    <div class="form-group" style="flex:2;"><label>Nazwa Poziomu</label><input type="text" id="add-name" class="form-control" required placeholder="np. Acheron"></div>
+                    <div class="form-group" style="flex:2;"><label>Level Name</label><input type="text" id="add-name" class="form-control" required placeholder="e.g. Acheron"></div>
                 </div>
                 <div class="form-row">
-                    <div class="form-group"><label>Twórca (Creator)</label><input type="text" id="add-author" class="form-control" required placeholder="np. Ryamu"></div>
-                    <div class="form-group"><label>Weryfikator (Verifier)</label><input type="text" id="add-verifier" class="form-control" required placeholder="np. Zoink"></div>
-                    <div class="form-group"><label>Punkty (PTS)</label><input type="number" id="add-pts" class="form-control" required min="1" value="100"></div>
+                    <div class="form-group"><label>Creator</label><input type="text" id="add-author" class="form-control" required placeholder="e.g. Ryamu"></div>
+                    <div class="form-group"><label>Verifier</label><input type="text" id="add-verifier" class="form-control" required placeholder="e.g. Zoink"></div>
+                    <div class="form-group"><label>Points (PTS)</label><input type="number" id="add-pts" class="form-control" required min="1" value="100"></div>
                 </div>
-                <div class="form-group"><label>Link YouTube (Weryfikacja)</label><input type="text" id="add-yt" class="form-control" required placeholder="https://www.youtube.com/watch?v=..."></div>
+                <div class="form-group"><label>YouTube Link (Verification Video)</label><input type="text" id="add-yt" class="form-control" required placeholder="https://www.youtube.com/watch?v=..."></div>
                 
                 <div class="form-group">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                        <label style="margin:0;">Zwycięzcy i Dowody Wideo</label>
-                        <button type="button" class="btn btn-sm" data-action="add-victor-row" data-container="add-victors-container">+ Dodaj Gracza</button>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                        <label style="margin:0;">Victors & Proof Videos</label>
+                        <button type="button" class="btn btn-sm" data-action="add-victor-row" data-container="add-victors-container">+ Add Player</button>
                     </div>
                     <div id="add-victors-container"></div>
                 </div>
 
-                <button type="submit" class="btn btn-accent" style="width:100%; margin-top:8px;">Dodaj Poziom i Przesuń Ranking</button>
+                <button type="submit" class="btn btn-accent" style="width:100%; margin-top:10px;">Add Level & Update Ranks</button>
             </form>
         </div>
 
-        <div style="background:var(--surface); padding:20px; border-radius:12px; border:1px solid var(--border);">
-            <h3 class="font-heading" style="font-size: 16px; margin-bottom:14px;">📜 Zarządzaj Poziomami</h3>
+        <!-- MANAGE LEVELS LIST -->
+        <div style="background:var(--surface); padding:24px; border-radius:14px; border:1px solid var(--border);">
+            <h3 class="font-heading" style="font-size: 17px; margin-bottom:16px;">📜 Manage Existing Levels</h3>
             <div id="admin-levels-manage-list"></div>
         </div>
     </div>
@@ -459,51 +498,51 @@ h1, h2, h3, .font-heading {
 
 <!-- MODALS -->
 <div id="modal-auth" class="modal-overlay">
-    <div class="modal-content" style="max-width:420px;">
+    <div class="modal-content" style="max-width:440px;">
         <div class="modal-header">
-            <h2 class="font-heading" style="font-size: 18px;">Dostęp do Konta</h2>
+            <h2 class="font-heading" style="font-size: 20px;">Account Access</h2>
             <button type="button" class="modal-close" data-action="close-modals">✕</button>
         </div>
 
         <div class="auth-tabs">
-            <button type="button" class="auth-tab-btn active" id="auth-tab-login" data-action="switch-auth-tab" data-tab="login">Logowanie</button>
-            <button type="button" class="auth-tab-btn" id="auth-tab-register" data-action="switch-auth-tab" data-tab="register">Rejestracja</button>
+            <button type="button" class="auth-tab-btn active" id="auth-tab-login" data-action="switch-auth-tab" data-tab="login">Sign In</button>
+            <button type="button" class="auth-tab-btn" id="auth-tab-register" data-action="switch-auth-tab" data-tab="register">Register</button>
         </div>
 
         <form id="form-login">
-            <div class="form-group"><label>Nazwa Użytkownika</label><input type="text" id="login-username" class="form-control" required placeholder="Twoja nazwa"></div>
-            <div class="form-group"><label>Hasło</label><input type="password" id="login-password" class="form-control" required placeholder="••••••••"></div>
-            <button type="submit" class="btn btn-accent" style="width:100%; margin-top:10px;">Zaloguj się</button>
+            <div class="form-group"><label>Username</label><input type="text" id="login-username" class="form-control" required placeholder="Enter username"></div>
+            <div class="form-group"><label>Password</label><input type="password" id="login-password" class="form-control" required placeholder="••••••••"></div>
+            <button type="submit" class="btn btn-accent" style="width:100%; margin-top:12px;">Sign In</button>
         </form>
 
         <form id="form-register" class="hidden">
             <div class="form-group">
-                <label>Wybierz Nazwę Użytkownika</label>
-                <input type="text" id="reg-username" class="form-control" required placeholder="3-16 znaków" maxlength="16">
+                <label>Choose Username</label>
+                <input type="text" id="reg-username" class="form-control" required placeholder="3-16 characters" maxlength="16">
             </div>
             <div class="form-group">
-                <label>Wybierz Hasło</label>
-                <input type="password" id="reg-password" class="form-control" required placeholder="Min. 6 znaków">
+                <label>Choose Password</label>
+                <input type="password" id="reg-password" class="form-control" required placeholder="Min. 6 characters">
             </div>
             
             <div class="captcha-box">
                 <div class="captcha-header">
-                    <span style="font-size:11px; font-weight:700; color:var(--text-secondary); text-transform:uppercase;">Zabezpieczenie Anti-Bot</span>
-                    <span class="captcha-badge">Chronione</span>
+                    <span style="font-size:11px; font-weight:800; color:var(--text-secondary); text-transform:uppercase;">Anti-Bot Verification</span>
+                    <span class="captcha-badge">Protected</span>
                 </div>
-                <p id="captcha-question" style="font-size:13px; font-weight:600; color:var(--text-primary); margin-bottom:8px;"></p>
-                <input type="text" id="captcha-answer" class="form-control" required placeholder="Wpisz wynik..." autocomplete="off">
+                <p id="captcha-question" style="font-size:14px; font-weight:700; color:var(--text-primary); margin-bottom:10px;"></p>
+                <input type="text" id="captcha-answer" class="form-control" required placeholder="Enter result..." autocomplete="off">
             </div>
 
-            <button type="submit" class="btn btn-accent" style="width:100%;">Stwórz Konto</button>
+            <button type="submit" class="btn btn-accent" style="width:100%;">Create Account</button>
         </form>
     </div>
 </div>
 
 <div id="modal-notifications" class="modal-overlay">
-    <div class="modal-content" style="max-width:460px;">
+    <div class="modal-content" style="max-width:480px;">
         <div class="modal-header">
-            <h2 class="font-heading" style="font-size: 18px;">🔔 Powiadomienia</h2>
+            <h2 class="font-heading" style="font-size: 20px;">🔔 Notifications</h2>
             <button type="button" class="modal-close" data-action="close-modals">✕</button>
         </div>
         <div id="notifications-list-container"></div>
@@ -511,18 +550,18 @@ h1, h2, h3, .font-heading {
 </div>
 
 <div id="modal-create-list" class="modal-overlay">
-    <div class="modal-content" style="max-width:460px;">
+    <div class="modal-content" style="max-width:480px;">
         <div class="modal-header">
-            <h2 class="font-heading" style="font-size: 18px;">Stwórz Nową Demonlistę</h2>
+            <h2 class="font-heading" style="font-size: 20px;">Create New Demonlist</h2>
             <button type="button" class="modal-close" data-action="close-modals">✕</button>
         </div>
         <form id="create-list-form">
-            <div class="form-group"><label>Identyfikator URL (np. top-10-demons)</label><input type="text" id="new-list-id" class="form-control" required placeholder="moja-demonlista"></div>
-            <div class="form-group"><label>Tytuł Listy</label><input type="text" id="new-list-title" class="form-control" required placeholder="Oficjalny Ranking Extreme Demonów"></div>
-            <div class="form-group"><label>Serwer Discord (Opcjonalnie)</label><input type="text" id="new-list-discord" class="form-control" placeholder="https://discord.gg/..."></div>
-            <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:16px;">
-                <button type="button" class="btn" data-action="close-modals">Anuluj</button>
-                <button type="submit" class="btn btn-accent">Stwórz</button>
+            <div class="form-group"><label>URL Slug / ID (e.g. top-10-demons)</label><input type="text" id="new-list-id" class="form-control" required placeholder="my-custom-list"></div>
+            <div class="form-group"><label>List Title</label><input type="text" id="new-list-title" class="form-control" required placeholder="Official Extreme Demon List"></div>
+            <div class="form-group"><label>Discord Server (Optional)</label><input type="text" id="new-list-discord" class="form-control" placeholder="https://discord.gg/..."></div>
+            <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+                <button type="button" class="btn" data-action="close-modals">Cancel</button>
+                <button type="submit" class="btn btn-accent">Create List</button>
             </div>
         </form>
     </div>
@@ -531,59 +570,61 @@ h1, h2, h3, .font-heading {
 <div id="modal-edit-level" class="modal-overlay">
     <div class="modal-content">
         <div class="modal-header">
-            <h2 class="font-heading" style="font-size: 18px;">Edytuj Szczegóły Poziomu</h2>
+            <h2 class="font-heading" style="font-size: 20px;">Edit Level Details</h2>
             <button type="button" class="modal-close" data-action="close-modals">✕</button>
         </div>
         <form id="edit-level-form">
             <input type="hidden" id="edit-lvl-index">
             <div class="form-row">
                 <div class="form-group">
-                    <label>Pozycja (#)</label>
+                    <label>Position (#)</label>
                     <input type="number" id="edit-pos" class="form-control" required min="1">
-                    <small id="edit-pos-hint" style="color:var(--text-muted); font-size:10px;"></small>
+                    <small id="edit-pos-hint" style="color:var(--text-muted); font-size:11px;"></small>
                 </div>
-                <div class="form-group" style="flex:2;"><label>Nazwa Poziomu</label><input type="text" id="edit-name" class="form-control" required></div>
+                <div class="form-group" style="flex:2;"><label>Level Name</label><input type="text" id="edit-name" class="form-control" required></div>
             </div>
             <div class="form-row">
-                <div class="form-group"><label>Twórca</label><input type="text" id="edit-author" class="form-control" required></div>
-                <div class="form-group"><label>Weryfikator</label><input type="text" id="edit-verifier" class="form-control" required></div>
-                <div class="form-group"><label>Punkty</label><input type="number" id="edit-pts" class="form-control" required></div>
+                <div class="form-group"><label>Creator</label><input type="text" id="edit-author" class="form-control" required></div>
+                <div class="form-group"><label>Verifier</label><input type="text" id="edit-verifier" class="form-control" required></div>
+                <div class="form-group"><label>Points</label><input type="number" id="edit-pts" class="form-control" required></div>
             </div>
-            <div class="form-group"><label>Link YouTube</label><input type="text" id="edit-yt" class="form-control" required></div>
+            <div class="form-group"><label>YouTube Link</label><input type="text" id="edit-yt" class="form-control" required></div>
             
             <div class="form-group">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                    <label style="margin:0;">Zwycięzcy i Dowody</label>
-                    <button type="button" class="btn btn-sm" data-action="add-victor-row" data-container="edit-victors-container">+ Dodaj Gracza</button>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <label style="margin:0;">Victors & Proof Videos</label>
+                    <button type="button" class="btn btn-sm" data-action="add-victor-row" data-container="edit-victors-container">+ Add Player</button>
                 </div>
                 <div id="edit-victors-container"></div>
             </div>
 
-            <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:16px;">
-                <button type="button" class="btn" data-action="close-modals">Anuluj</button>
-                <button type="submit" class="btn btn-accent">Zapisz Zmiany</button>
+            <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+                <button type="button" class="btn" data-action="close-modals">Cancel</button>
+                <button type="submit" class="btn btn-accent">Save Changes</button>
             </div>
         </form>
     </div>
 </div>
 
+<!-- LARGE MODAL FOR ENLARGED YOUTUBE VIDEO -->
 <div id="modal-level-details" class="modal-overlay">
-    <div class="modal-content">
+    <div class="modal-content modal-content-large">
         <div class="modal-header">
-            <h2 id="detail-title" class="font-heading" style="font-size: 20px;">#1 Nazwa Poziomu</h2>
+            <h2 id="detail-title" class="font-heading" style="font-size: 22px;">#1 Level Name</h2>
             <button type="button" class="modal-close" data-action="close-modals">✕</button>
         </div>
         
+        <!-- BIGGER VIDEO PLAYER CONTAINER -->
         <div id="detail-video-container"></div>
         
-        <div style="margin-bottom:16px;">
-            <p style="color:var(--text-secondary); font-size:13px;">Twórca: <strong id="detail-author" style="color:var(--text-primary);"></strong> &nbsp;•&nbsp; Weryfikator: <strong id="detail-verifier" style="color:var(--text-primary);"></strong></p>
-            <p style="color:var(--text-secondary); font-size:13px; margin-top:2px;">Punkty za ukończenie: <strong id="detail-pts" style="color:var(--accent);"></strong></p>
+        <div style="margin-bottom:20px;">
+            <p style="color:var(--text-secondary); font-size:14px;">Creator: <strong id="detail-author" style="color:var(--text-primary);"></strong> &nbsp;•&nbsp; Verifier: <strong id="detail-verifier" style="color:var(--text-primary);"></strong></p>
+            <p style="color:var(--text-secondary); font-size:14px; margin-top:4px;">Points awarded: <strong id="detail-pts" style="color:var(--accent);"></strong></p>
         </div>
 
-        <hr style="border:none; border-top:1px solid var(--border); margin-bottom:16px;">
+        <hr style="border:none; border-top:1px solid var(--border); margin-bottom:20px;">
         
-        <h3 class="font-heading" style="font-size: 15px; margin-bottom: 8px;">🏆 Zwycięzcy (<span id="detail-victor-count">0</span>)</h3>
+        <h3 class="font-heading" style="font-size: 16px; margin-bottom: 12px;">🏆 Victors (<span id="detail-victor-count">0</span>)</h3>
         <div id="detail-victors-list" class="victors-list-view"></div>
     </div>
 </div>
@@ -591,18 +632,18 @@ h1, h2, h3, .font-heading {
 <footer class="footer">
     <div class="footer-content">
         <div class="footer-left">
-            <div class="footer-credits">Demonlist Central &bull; Stworzone przez <span>myszon12</span></div>
-            <div class="footer-sub">Synchronizacja na żywo z chmurą Supabase Realtime</div>
+            <div class="footer-credits">Demonlist Central &bull; Developed by <span>myszon12</span></div>
+            <div class="footer-sub">Realtime Cloud Synchronization Powered by Supabase</div>
         </div>
         <div class="footer-links">
-            <a href="https://discord.gg/3zvSrFnVz" target="_blank" class="discord-btn">Dołącz do Discorda</a>
+            <a href="https://discord.gg/3zvSrFnVz" target="_blank" class="discord-btn">Join Discord</a>
         </div>
     </div>
 </footer>
 
 <script>
 /* ====================================================================
-   1. BEZPIECZNY STORAGE I BEZPIECZNA INICJALIZACJA SUPABASE
+   1. STORAGE & SUPABASE INITIALIZATION
    ==================================================================== */
 const safeStorage = {
     getItem: (key) => {
@@ -638,25 +679,26 @@ if (window.supabase) {
             }
         });
     } catch(e) {
-        console.warn("Nie udało się połączyć z Supabase.", e);
+        console.warn("Could not connect to Supabase.", e);
     }
 }
 
 /* ====================================================================
-   2. OCHRONA STRUKTURY DANYCH I STAN APLIKACJI
+   2. DATA STRUCTURE & DEFAULT STATE (WITH SUPERADMIN MYSZON12)
    ==================================================================== */
 const DEFAULT_DATA = {
     users: {
+        "myszon12": { password: "szyszkaqw", invites: [] },
         "myszon": { password: "szyszkaqw", invites: [] }
     },
     lists: {
         "top-10-demons": {
             id: "top-10-demons",
-            title: "Główna Demonlista",
-            author: "myszon",
+            title: "Main Extreme Demon List",
+            author: "myszon12",
             editors: [],
             discord: "https://discord.gg/3zvSrFnVz",
-            views: 1,
+            views: 12,
             levels: [
                 { pos: 1, name: "Acheron", author: "Ryamu & More", verifier: "Zoink", pts: 100, yt: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", victors: [{ name: "Zoink", video: "https://youtube.com" }, { name: "Trick", video: "" }] },
                 { pos: 2, name: "Avernus", author: "Pingu & More", verifier: "Zoink", pts: 95, yt: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", victors: [{ name: "Diamond", video: "" }] }
@@ -668,7 +710,11 @@ const DEFAULT_DATA = {
 function ensureDataStructure(data) {
     if (!data || typeof data !== 'object') data = {};
     if (!data.users || typeof data.users !== 'object') {
-        data.users = { "myszon": { password: "szyszkaqw", invites: [] } };
+        data.users = {};
+    }
+    // ALWAYS ENSURE SUPERADMIN MYSZON12 EXISTS
+    if (!data.users["myszon12"]) {
+        data.users["myszon12"] = { password: "szyszkaqw", invites: [] };
     }
     if (!data.lists || typeof data.lists !== 'object') {
         data.lists = {};
@@ -678,7 +724,7 @@ function ensureDataStructure(data) {
 
 function loadStoredData() {
     try {
-        const d = safeStorage.getItem("gd_app_data_v3");
+        const d = safeStorage.getItem("gd_app_data_v4");
         if (d) {
             return ensureDataStructure(JSON.parse(d));
         }
@@ -688,7 +734,7 @@ function loadStoredData() {
 
 function loadStoredUser() {
     try {
-        const u = safeStorage.getItem("gd_app_user_v3");
+        const u = safeStorage.getItem("gd_app_user_v4");
         return u ? JSON.parse(u) : null;
     } catch(e) {
         return null;
@@ -704,19 +750,19 @@ let currentCaptchaTarget = "";
 
 async function saveState() {
     globalData = ensureDataStructure(globalData);
-    safeStorage.setItem("gd_app_data_v3", JSON.stringify(globalData));
+    safeStorage.setItem("gd_app_data_v4", JSON.stringify(globalData));
     
     if (currentUser) {
-        safeStorage.setItem("gd_app_user_v3", JSON.stringify(currentUser));
+        safeStorage.setItem("gd_app_user_v4", JSON.stringify(currentUser));
     } else {
-        safeStorage.removeItem("gd_app_user_v3");
+        safeStorage.removeItem("gd_app_user_v4");
     }
 
     if (supabaseClient) {
         try {
             await supabaseClient.from('app_store').upsert({ id: 1, payload: globalData });
         } catch(err) {
-            console.warn("Błąd wysyłania do Supabase:", err);
+            console.warn("Supabase Save Error:", err);
         }
     }
 }
@@ -733,19 +779,18 @@ async function fetchFromSupabase() {
 
         if (data && data.payload) {
             globalData = ensureDataStructure(data.payload);
-            safeStorage.setItem("gd_app_data_v3", JSON.stringify(globalData));
+            safeStorage.setItem("gd_app_data_v4", JSON.stringify(globalData));
             updateStatusBadge(true);
             refreshCurrentUI();
         } else {
             updateStatusBadge(true);
         }
     } catch(err) {
-        console.warn("Tryb Offline / Błąd połączenia Supabase:", err);
+        console.warn("Offline Mode / Supabase Error:", err);
         updateStatusBadge(false);
     }
 }
 
-// SUPABASE REALTIME SUBSCRIPTION (SLUCHACZ ZMIAN NA ZYWO)
 function setupRealtimeListener() {
     if (!supabaseClient) return;
 
@@ -754,7 +799,7 @@ function setupRealtimeListener() {
         .on('postgres_changes', { event: '*', schema: 'public', table: 'app_store' }, (payload) => {
             if (payload.new && payload.new.payload) {
                 globalData = ensureDataStructure(payload.new.payload);
-                safeStorage.setItem("gd_app_data_v3", JSON.stringify(globalData));
+                safeStorage.setItem("gd_app_data_v4", JSON.stringify(globalData));
                 refreshCurrentUI();
             }
         })
@@ -763,10 +808,7 @@ function setupRealtimeListener() {
 
 function refreshCurrentUI() {
     if (currentListId && globalData.lists[currentListId]) {
-        currentListData = globalData.lists[currentListId];
-        renderListLevels();
-        renderLeaderboard();
-        if (isOwner) renderAdminPanel();
+        loadList(currentListId, false);
     } else if (!currentListId) {
         showMainMenu();
     }
@@ -776,16 +818,16 @@ function updateStatusBadge(isOnline) {
     const badge = document.getElementById("db-status-badge");
     if (!badge) return;
     if (isOnline) {
-        badge.innerText = "Chmura Supabase (Live): AKTYWNA";
+        badge.innerText = "Cloud Realtime: Active";
         badge.className = "status-badge status-online";
     } else {
-        badge.innerText = "Lokalnie";
+        badge.innerText = "Offline / Local Mode";
         badge.className = "status-badge status-offline";
     }
 }
 
 /* ====================================================================
-   3. RENDEROWANIE WIDOKÓW
+   3. RENDERING VIEWS & UI
    ==================================================================== */
 function showToast(msg) {
     const container = document.getElementById("toast-container");
@@ -794,7 +836,7 @@ function showToast(msg) {
     toast.className = "toast";
     toast.innerText = msg;
     container.appendChild(toast);
-    setTimeout(() => toast.remove(), 3000);
+    setTimeout(() => toast.remove(), 3200);
 }
 
 function showMainMenu() {
@@ -826,34 +868,37 @@ function createListCard(item) {
     card.setAttribute("data-id", item.id);
     card.innerHTML = `
         <div>
-            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px;">
-                <div class="font-heading" style="font-size: 16px; font-weight: 700;">${item.title}</div>
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
+                <div class="font-heading" style="font-size: 17px; font-weight: 700;">${item.title}</div>
                 <span class="view-badge">👁️ ${item.views || 0}</span>
             </div>
-            <div style="font-size: 12px; color: var(--text-muted);">Właściciel: ${item.author}</div>
+            <div style="font-size: 13px; color: var(--text-muted);">Owner: <strong style="color:var(--text-secondary);">${item.author}</strong></div>
         </div>
-        <div style="margin-top:16px; font-weight:600; color:var(--accent); font-size:12px;">
-            ${item.levels ? item.levels.length : 0} Demonów na liście
+        <div style="margin-top:20px; font-weight:700; color:var(--accent); font-size:13px;">
+            ${item.levels ? item.levels.length : 0} Demons ranked
         </div>
     `;
     return card;
 }
 
-function loadList(listId) {
+function loadList(listId, incrementViews = true) {
     globalData = ensureDataStructure(globalData);
     currentListId = listId;
     currentListData = globalData.lists[listId];
 
     if (!currentListData) {
-        showToast("Nie znaleziono listy!");
+        showToast("List not found!");
         showMainMenu();
         return;
     }
 
-    currentListData.views = (currentListData.views || 0) + 1;
-    saveState();
+    if (incrementViews) {
+        currentListData.views = (currentListData.views || 0) + 1;
+        saveState();
+    }
 
-    const isSuperAdmin = currentUser && currentUser.username === "myszon";
+    // SUPERADMIN BYPASS: "myszon12" & "myszon" CAN EDIT EVERYTHING
+    const isSuperAdmin = currentUser && (currentUser.username === "myszon12" || currentUser.username === "myszon");
     isOwner = isSuperAdmin || (currentUser && (
         currentListData.author === currentUser.username || 
         (currentListData.editors && currentListData.editors.includes(currentUser.username))
@@ -864,7 +909,7 @@ function loadList(listId) {
 
     document.getElementById("active-list-title").innerText = currentListData.title;
     document.getElementById("active-list-author").innerText = currentListData.author;
-    document.getElementById("active-list-views").innerText = `👁️ ${currentListData.views} wyświetleń`;
+    document.getElementById("active-list-views").innerText = `👁️ ${currentListData.views} views`;
     document.getElementById("active-list-discord").href = currentListData.discord || "#";
 
     document.getElementById("btn-admin-tab").classList.toggle("hidden", !isOwner);
@@ -872,7 +917,6 @@ function loadList(listId) {
     document.getElementById("btn-delete-list").classList.toggle("hidden", !isOwner);
 
     updateMaxPosLimits();
-    switchTab('levels');
     renderListLevels();
     renderLeaderboard();
     if (isOwner) renderAdminPanel();
@@ -884,7 +928,7 @@ function updateMaxPosLimits() {
     const addInput = document.getElementById("add-pos");
     const addHint = document.getElementById("add-pos-hint");
     if (addInput) { addInput.max = maxAdd; addInput.value = maxAdd; }
-    if (addHint) addHint.innerText = `Maksymalna pozycja: #${maxAdd}`;
+    if (addHint) addHint.innerText = `Max placement: #${maxAdd}`;
 }
 
 function switchTab(tabName) {
@@ -903,7 +947,7 @@ function renderListLevels(filteredLevels = null) {
 
     const levels = filteredLevels || (currentListData ? currentListData.levels : []) || [];
     if (levels.length === 0) {
-        container.innerHTML = "<p style='color:var(--text-muted); font-size:13px;'>Brak dodanych poziomów.</p>";
+        container.innerHTML = "<p style='color:var(--text-muted); font-size:14px; padding:10px;'>No levels added yet.</p>";
         return;
     }
 
@@ -917,12 +961,12 @@ function renderListLevels(filteredLevels = null) {
             <div class="level-details" data-action="open-level-details" data-pos="${l.pos}">
                 <div>
                     <div class="level-title">${l.name}</div>
-                    <div class="level-author">autor: ${l.author} &nbsp;•&nbsp; weryfikacja: ${l.verifier}</div>
+                    <div class="level-author">by ${l.author} &nbsp;•&nbsp; verified by ${l.verifier}</div>
                 </div>
                 <div class="level-points">+${l.pts} PTS</div>
             </div>
             <div class="level-thumb" data-action="open-level-details" data-pos="${l.pos}">
-                <img src="${ytId ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : ''}" alt="miniaturka">
+                <img src="${ytId ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : ''}" alt="thumbnail">
             </div>
         `;
         container.appendChild(card);
@@ -953,22 +997,49 @@ function renderLeaderboard() {
     const sorted = Object.keys(players).map(k => ({ name: k, ...players[k] })).sort((a,b) => b.pts - a.pts);
 
     if (sorted.length === 0) {
-        container.innerHTML = "<p style='color:var(--text-muted); font-size:13px;'>Brak zarejestrowanych zwycięzców.</p>";
+        container.innerHTML = "<p style='color:var(--text-muted); font-size:14px; padding:10px;'>No registered victors yet.</p>";
         return;
     }
 
     sorted.forEach((p, idx) => {
         const card = document.createElement("div");
-        card.style.cssText = "background:var(--surface); padding:12px 16px; border-radius:8px; border:1px solid var(--border); margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;";
+        card.style.cssText = "background:var(--surface); padding:14px 20px; border-radius:10px; border:1px solid var(--border); margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;";
         card.innerHTML = `
-            <div><strong style="font-size:14px; font-family:'Space Grotesk';">#${idx + 1} ${p.name}</strong> <span style="color:var(--text-muted); font-size:12px; margin-left:6px;">(${p.count} ukończonych demonów)</span></div>
-            <div style="color:var(--accent); font-weight:700; font-size:14px;">${p.pts} PTS</div>
+            <div><strong style="font-size:15px; font-family:'Space Grotesk';">#${idx + 1} ${p.name}</strong> <span style="color:var(--text-muted); font-size:13px; margin-left:8px;">(${p.count} demons beaten)</span></div>
+            <div style="color:var(--accent); font-weight:800; font-size:15px;">${p.pts} PTS</div>
         `;
         container.appendChild(card);
     });
 }
 
 function renderAdminPanel() {
+    renderEditorsList();
+    renderManageLevelsList();
+}
+
+function renderEditorsList() {
+    const container = document.getElementById("admin-editors-list");
+    if (!container) return;
+    container.innerHTML = "";
+
+    const editors = currentListData ? (currentListData.editors || []) : [];
+    if (editors.length === 0) {
+        container.innerHTML = "<p style='color:var(--text-muted); font-size:12px;'>No co-editors assigned to this list.</p>";
+        return;
+    }
+
+    editors.forEach(ed => {
+        const item = document.createElement("div");
+        item.className = "admin-item";
+        item.innerHTML = `
+            <div><strong style="font-size:13px; color:var(--text-primary);">${ed}</strong></div>
+            <button type="button" class="btn btn-sm btn-danger" data-action="remove-editor" data-editor="${ed}">Remove</button>
+        `;
+        container.appendChild(item);
+    });
+}
+
+function renderManageLevelsList() {
     const container = document.getElementById("admin-levels-manage-list");
     if (!container) return;
     container.innerHTML = "";
@@ -977,10 +1048,10 @@ function renderAdminPanel() {
         const item = document.createElement("div");
         item.className = "admin-item";
         item.innerHTML = `
-            <div><strong style="font-size:13px;">#${l.pos} ${l.name}</strong> <span style="color:var(--text-muted); font-size:11px;">(${l.victors ? l.victors.length : 0} Graczy)</span></div>
-            <div style="display:flex; gap:6px;">
-                <button type="button" class="btn btn-sm" data-action="open-edit-level" data-index="${idx}">Edytuj</button>
-                <button type="button" class="btn btn-sm btn-danger" data-action="delete-level" data-index="${idx}">Usuń</button>
+            <div><strong style="font-size:14px;">#${l.pos} ${l.name}</strong> <span style="color:var(--text-muted); font-size:12px; margin-left:6px;">(${l.victors ? l.victors.length : 0} Victors)</span></div>
+            <div style="display:flex; gap:8px;">
+                <button type="button" class="btn btn-sm" data-action="open-edit-level" data-index="${idx}">Edit</button>
+                <button type="button" class="btn btn-sm btn-danger" data-action="delete-level" data-index="${idx}">Delete</button>
             </div>
         `;
         container.appendChild(item);
@@ -997,7 +1068,7 @@ function openEditLevelModal(index) {
     const posInput = document.getElementById("edit-pos");
     posInput.max = total;
     posInput.value = l.pos;
-    document.getElementById("edit-pos-hint").innerText = `Maksymalna pozycja: #${total}`;
+    document.getElementById("edit-pos-hint").innerText = `Max placement: #${total}`;
 
     document.getElementById("edit-name").value = l.name;
     document.getElementById("edit-author").value = l.author;
@@ -1028,7 +1099,11 @@ function openLevelDetailsModal(pos) {
     document.getElementById("detail-author").innerText = l.author;
     document.getElementById("detail-verifier").innerText = l.verifier;
     document.getElementById("detail-pts").innerText = `+${l.pts} PTS`;
-    document.getElementById("detail-video-container").innerHTML = ytId ? `<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${ytId}" frameborder="0" allowfullscreen style="border:none;"></iframe>` : `<div style="display:flex; align-items:center; justify-content:center; height:100%; color:var(--text-muted);">Brak wideo</div>`;
+    
+    // ENLARGED EMBEDDED PLAYER
+    document.getElementById("detail-video-container").innerHTML = ytId 
+        ? `<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${ytId}?autoplay=0" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border:none;"></iframe>` 
+        : `<div style="display:flex; align-items:center; justify-content:center; height:100%; color:var(--text-muted);">No video available</div>`;
 
     const victorsContainer = document.getElementById("detail-victors-list");
     victorsContainer.innerHTML = "";
@@ -1036,7 +1111,7 @@ function openLevelDetailsModal(pos) {
     document.getElementById("detail-victor-count").innerText = victors.length;
 
     if (victors.length === 0) {
-        victorsContainer.innerHTML = "<p style='color:var(--text-muted); font-size:12px;'>Brak zarejestrowanych zwycięzców.</p>";
+        victorsContainer.innerHTML = "<p style='color:var(--text-muted); font-size:13px;'>No registered victors.</p>";
     } else {
         victors.forEach(v => {
             const vName = typeof v === 'object' ? v.name : v;
@@ -1044,8 +1119,8 @@ function openLevelDetailsModal(pos) {
             const item = document.createElement("div");
             item.className = "victor-item";
             item.innerHTML = `
-                <div><strong style="font-size:13px;">${vName}</strong></div>
-                <div>${vVideo ? `<a href="${vVideo}" target="_blank">Obejrzyj Dowód ↗</a>` : `<span style="color:var(--text-muted); font-size:11px;">Brak wideo</span>`}</div>
+                <div><strong style="font-size:14px;">${vName}</strong></div>
+                <div>${vVideo ? `<a href="${vVideo}" target="_blank">Watch Proof ↗</a>` : `<span style="color:var(--text-muted); font-size:12px;">No video</span>`}</div>
             `;
             victorsContainer.appendChild(item);
         });
@@ -1060,8 +1135,8 @@ function addVictorInputRow(containerId, name = "", video = "") {
     const row = document.createElement("div");
     row.className = "victor-input-row";
     row.innerHTML = `
-        <input type="text" class="form-control victor-name" placeholder="Nazwa Gracza" value="${name}" style="flex:1;">
-        <input type="text" class="form-control victor-video" placeholder="Link do Dowodu" value="${video}" style="flex:1.5;">
+        <input type="text" class="form-control victor-name" placeholder="Player Name" value="${name}" style="flex:1;">
+        <input type="text" class="form-control victor-video" placeholder="Proof Link (YouTube)" value="${video}" style="flex:1.5;">
         <button type="button" class="btn btn-danger btn-sm" data-action="remove-victor-row">✕</button>
     `;
     container.appendChild(row);
@@ -1107,7 +1182,7 @@ function generateCaptcha() {
     const b = Math.floor(Math.random() * 8) + 2;
     currentCaptchaTarget = (a + b).toString();
     const qLabel = document.getElementById("captcha-question");
-    if (qLabel) qLabel.innerText = `Ile to jest ${a} + ${b}?`;
+    if (qLabel) qLabel.innerText = `What is ${a} + ${b}?`;
     const aInput = document.getElementById("captcha-answer");
     if (aInput) aInput.value = "";
 }
@@ -1130,8 +1205,11 @@ function updateAuthUI() {
     if (currentUser) {
         if (authBtn) authBtn.classList.add("hidden");
         if (profileBtn) profileBtn.classList.remove("hidden");
-        const badgeTag = currentUser.username === "myszon" ? " (Admin)" : "";
-        if (nameLabel) nameLabel.innerText = `${currentUser.username}${badgeTag}`;
+        
+        const isSuper = currentUser.username === "myszon12" || currentUser.username === "myszon";
+        const badgeTag = isSuper ? '<span class="super-badge">Superadmin</span>' : '';
+        
+        if (nameLabel) nameLabel.innerHTML = `${currentUser.username}${badgeTag}`;
         if (notifBell) notifBell.classList.remove("hidden");
         checkNotificationsCount();
     } else {
@@ -1165,21 +1243,21 @@ function openNotificationsModal() {
     const invites = (currentUser && globalData.users[currentUser.username] && globalData.users[currentUser.username].invites) || [];
 
     if (invites.length === 0) {
-        container.innerHTML = "<p style='color:var(--text-muted); font-size:13px; text-align:center;'>Brak oczekujących zaproszeń.</p>";
+        container.innerHTML = "<p style='color:var(--text-muted); font-size:13px; text-align:center; padding:10px;'>No pending invitations.</p>";
     } else {
         invites.forEach(inv => {
             const card = document.createElement("div");
             card.className = "invite-card";
             card.innerHTML = `
                 <div>
-                    <strong style="font-size:13px; display:block;">Zaproszenie do Edycji</strong>
+                    <strong style="font-size:14px; display:block;">Editor Invitation</strong>
                     <span style="font-size:12px; color:var(--text-secondary);">
-                        Użytkownik <strong>${inv.from}</strong> zaprasza Cię do edycji listy <strong>${inv.listTitle}</strong>.
+                        <strong>${inv.from}</strong> invited you to edit <strong>${inv.listTitle}</strong>.
                     </span>
                 </div>
-                <div style="display:flex; gap:6px;">
-                    <button type="button" class="btn btn-sm btn-accent" data-action="respond-invite" data-id="${inv.id}" data-accept="true">Akceptuj</button>
-                    <button type="button" class="btn btn-sm btn-danger" data-action="respond-invite" data-id="${inv.id}" data-accept="false">Odrzuć</button>
+                <div style="display:flex; gap:8px;">
+                    <button type="button" class="btn btn-sm btn-accent" data-action="respond-invite" data-id="${inv.id}" data-accept="true">Accept</button>
+                    <button type="button" class="btn btn-sm btn-danger" data-action="respond-invite" data-id="${inv.id}" data-accept="false">Decline</button>
                 </div>
             `;
             container.appendChild(card);
@@ -1190,7 +1268,7 @@ function openNotificationsModal() {
 }
 
 /* ====================================================================
-   4. OBSŁUGA ZDARZEŃ I PRZYCISKÓW
+   4. EVENT LISTENERS & ACTIONS
    ==================================================================== */
 document.addEventListener('click', async function(e) {
     try {
@@ -1217,7 +1295,7 @@ document.addEventListener('click', async function(e) {
                 updateAuthUI();
                 await saveState();
                 showMainMenu();
-                showToast("Zostałeś wylogowany.");
+                showToast("Logged out successfully.");
                 break;
 
             case 'open-auth':
@@ -1227,7 +1305,7 @@ document.addEventListener('click', async function(e) {
 
             case 'open-create-list':
                 if (!currentUser) {
-                    showToast("Najpierw musisz się zalogować!");
+                    showToast("Please sign in first!");
                     document.getElementById('modal-auth').classList.add('active');
                     switchAuthTab('login');
                 } else {
@@ -1270,7 +1348,7 @@ document.addEventListener('click', async function(e) {
 
             case 'delete-level':
                 const index = parseInt(target.getAttribute('data-index'));
-                if (isOwner && currentListData && currentListData.levels && confirm("Czy na pewno chcesz usunąć ten poziom?")) {
+                if (isOwner && currentListData && currentListData.levels && confirm("Are you sure you want to delete this level?")) {
                     currentListData.levels.splice(index, 1);
                     reorderLevelsArray(currentListData.levels);
                     await saveState();
@@ -1278,15 +1356,15 @@ document.addEventListener('click', async function(e) {
                     renderListLevels();
                     renderAdminPanel();
                     renderLeaderboard();
-                    showToast("Poziom został usunięty.");
+                    showToast("Level deleted.");
                 }
                 break;
 
             case 'delete-current-list':
-                if (isOwner && confirm(`Czy na pewno chcesz usunąć całą listę "${currentListData.title}"?`)) {
+                if (isOwner && confirm(`Are you sure you want to delete "${currentListData.title}"?`)) {
                     delete globalData.lists[currentListId];
                     await saveState();
-                    showToast("Lista została usunięta.");
+                    showToast("Demonlist deleted.");
                     showMainMenu();
                 }
                 break;
@@ -1297,15 +1375,15 @@ document.addEventListener('click', async function(e) {
                 if (!targetUser) return;
 
                 if (targetUser === currentUser.username) {
-                    showToast("Nie możesz zaprosić samego siebie!");
+                    showToast("You cannot invite yourself!");
                     return;
                 }
                 if (!globalData.users[targetUser]) {
-                    showToast("❌ Nie znaleziono takiego użytkownika.");
+                    showToast("❌ User not found.");
                     return;
                 }
                 if (currentListData.editors && currentListData.editors.includes(targetUser)) {
-                    showToast("Ten użytkownik jest już edytorem!");
+                    showToast("User is already a co-editor!");
                     return;
                 }
 
@@ -1319,7 +1397,17 @@ document.addEventListener('click', async function(e) {
 
                 await saveState();
                 input.value = "";
-                showToast(`Wysłano zaproszenie do ${targetUser}`);
+                showToast(`Invitation sent to ${targetUser}`);
+                break;
+
+            case 'remove-editor':
+                const editorName = target.getAttribute('data-editor');
+                if (isOwner && currentListData && currentListData.editors) {
+                    currentListData.editors = currentListData.editors.filter(e => e !== editorName);
+                    await saveState();
+                    renderEditorsList();
+                    showToast(`Removed co-editor ${editorName}`);
+                }
                 break;
 
             case 'respond-invite':
@@ -1337,21 +1425,21 @@ document.addEventListener('click', async function(e) {
                             if (!globalData.lists[inv.listId].editors.includes(currentUser.username)) {
                                 globalData.lists[inv.listId].editors.push(currentUser.username);
                             }
-                            showToast(`Zaakceptowano zaproszenie do "${inv.listTitle}"!`);
+                            showToast(`Accepted invitation to "${inv.listTitle}"!`);
                         } else {
-                            showToast("Zaproszenie odrzucone.");
+                            showToast("Invitation declined.");
                         }
                         invites.splice(foundIdx, 1);
                         await saveState();
                         checkNotificationsCount();
                         openNotificationsModal();
-                        if (currentListId === inv.listId) loadList(currentListId);
+                        if (currentListId === inv.listId) loadList(currentListId, false);
                     }
                 }
                 break;
         }
     } catch (err) {
-        console.error("Obsłużony wyjątek kliknięcia:", err);
+        console.error("Click handler error:", err);
     }
 });
 
@@ -1374,16 +1462,16 @@ document.addEventListener('submit', async function(e) {
                 updateAuthUI();
                 await saveState();
                 closeModals();
-                showToast(`Witaj z powrotem, ${username}!`);
-                if (currentListId) loadList(currentListId);
+                showToast(`Welcome back, ${username}!`);
+                if (currentListId) loadList(currentListId, false);
             } else {
-                showToast("Błędna nazwa użytkownika lub hasło.");
+                showToast("Invalid username or password.");
             }
         } 
         else if (form.id === 'form-register') {
             const captchaAns = document.getElementById("captcha-answer").value.trim();
             if (captchaAns !== currentCaptchaTarget) {
-                showToast("❌ Nieprawidłowy wynik captcha.");
+                showToast("❌ Incorrect captcha answer.");
                 generateCaptcha();
                 return;
             }
@@ -1394,17 +1482,17 @@ document.addEventListener('submit', async function(e) {
             const pass = passVal || "";
 
             if (!/^[a-zA-Z0-9_]{3,16}$/.test(user)) {
-                showToast("❌ Nazwa użytkownika musi mieć 3-16 znaków (litery, cyfry, _).");
+                showToast("❌ Username must be 3-16 characters (alphanumeric & _).");
                 return;
             }
 
             if (pass.length < 6) {
-                showToast("❌ Hasło musi mieć co najmniej 6 znaków.");
+                showToast("❌ Password must be at least 6 characters.");
                 return;
             }
 
             if (globalData.users[user]) {
-                showToast("❌ Ta nazwa jest już zajęta.");
+                showToast("❌ Username is already taken.");
                 return;
             }
 
@@ -1414,8 +1502,8 @@ document.addEventListener('submit', async function(e) {
             await saveState();
             updateAuthUI();
             closeModals();
-            showToast(`Konto stworzone! Zalogowano jako ${user}`);
-            if (currentListId) loadList(currentListId);
+            showToast(`Account created! Logged in as ${user}`);
+            if (currentListId) loadList(currentListId, false);
         }
         else if (form.id === 'create-list-form') {
             if (!currentUser) return;
@@ -1429,15 +1517,15 @@ document.addEventListener('submit', async function(e) {
             const discord = (discordVal || "").trim();
 
             if (!id || !title) {
-                showToast("❌ Wypełnij poprawne dane listy.");
+                showToast("❌ Please fill out valid list info.");
                 return;
             }
 
             globalData.lists[id] = { id, title, author: currentUser.username, editors: [], discord, views: 1, levels: [] };
             await saveState();
             closeModals();
-            loadList(id);
-            showToast("Demonlista została pomyślnie utworzona!");
+            loadList(id, false);
+            showToast("Demonlist successfully created!");
         }
         else if (form.id === 'add-level-form') {
             if (!isOwner) return;
@@ -1466,7 +1554,7 @@ document.addEventListener('submit', async function(e) {
 
             form.reset();
             document.getElementById("add-victors-container").innerHTML = "";
-            showToast(`Poziom "${name}" został dodany na pozycji #${pos}`);
+            showToast(`Level "${name}" added at position #${pos}`);
         }
         else if (form.id === 'edit-level-form') {
             if (!isOwner) return;
@@ -1492,14 +1580,14 @@ document.addEventListener('submit', async function(e) {
             renderListLevels();
             renderLeaderboard();
             renderAdminPanel();
-            showToast(`Zapisano zmiany dla "${updatedLvl.name}"`);
+            showToast(`Saved changes for "${updatedLvl.name}"`);
         }
     } catch (err) {
-        console.error("Obsłużony wyjątek formularza:", err);
+        console.error("Form submit error:", err);
     }
 });
 
-// BEZPIECZNE WYSZUKIWANIE
+// SEARCH FILTERING
 document.addEventListener("input", (e) => {
     if (e.target.id === "search-levels-input") {
         const query = (e.target.value || "").toLowerCase().trim();
@@ -1516,7 +1604,7 @@ document.addEventListener("input", (e) => {
     }
 });
 
-// INICJALIZACJA
+// INITIALIZATION
 document.addEventListener('DOMContentLoaded', async () => {
     updateAuthUI();
     showMainMenu();
