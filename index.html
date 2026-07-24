@@ -475,23 +475,23 @@ h1, h2, h3, .font-heading {
 
 <!-- NAVBAR -->
 <nav class="navbar">
-    <div class="brand" onclick="showMainMenu()">
+    <div class="brand" data-action="show-main">
         <div class="brand-logo">GD</div>
         <div class="brand-name font-heading">DEMONLIST CENTRAL</div>
     </div>
     <div class="nav-actions">
-        <div id="notif-bell" class="notif-bell-btn hidden" onclick="openNotificationsModal()" title="Notifications">
+        <div id="notif-bell" class="notif-bell-btn hidden" data-action="open-notifications" title="Notifications">
             🔔
             <div id="notif-badge-count" class="notif-badge hidden">0</div>
         </div>
 
         <div id="user-profile-btn" class="hidden">
             <span id="user-display-name" style="font-weight:600; margin-right:8px; font-size:13px; color:var(--text-primary);"></span>
-            <button class="btn btn-sm" onclick="logoutUser()">Log Out</button>
+            <button class="btn btn-sm" data-action="logout">Log Out</button>
         </div>
 
-        <button id="auth-modal-btn" class="btn btn-sm" onclick="openAuthModal('login')">Account / Login</button>
-        <button class="btn btn-accent" onclick="openCreateListModal()">+ Create List</button>
+        <button id="auth-modal-btn" class="btn btn-sm" data-action="open-auth" data-type="login">Account / Login</button>
+        <button class="btn btn-accent" data-action="open-create-list">+ Create List</button>
     </div>
 </nav>
 
@@ -511,7 +511,7 @@ h1, h2, h3, .font-heading {
 
 <!-- SINGLE LIST DETAIL VIEW -->
 <div id="view-list-detail" class="container hidden">
-    <button class="btn btn-sm" onclick="showMainMenu()" style="margin-bottom: 16px;">← Back to Lists</button>
+    <button class="btn btn-sm" data-action="show-main" style="margin-bottom: 16px;">← Back to Lists</button>
     
     <div class="list-banner">
         <div>
@@ -523,20 +523,20 @@ h1, h2, h3, .font-heading {
         </div>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
             <a href="#" target="_blank" id="active-list-discord" class="btn btn-sm">Discord</a>
-            <button class="btn btn-sm btn-accent hidden" id="btn-admin-tab" onclick="switchTab('admin')">⚙️ Admin Panel</button>
-            <button class="btn btn-sm btn-danger hidden" id="btn-delete-list" onclick="deleteCurrentList()">🗑️ Delete List</button>
+            <button class="btn btn-sm btn-accent hidden" id="btn-admin-tab" data-action="switch-tab" data-tab="admin">⚙️ Admin Panel</button>
+            <button class="btn btn-sm btn-danger hidden" id="btn-delete-list" data-action="delete-current-list">🗑️ Delete List</button>
         </div>
     </div>
 
     <div class="tabs">
-        <button class="tab-btn active" id="tab-btn-levels" onclick="switchTab('levels')">Demons / Levels</button>
-        <button class="tab-btn" id="tab-btn-leaderboard" onclick="switchTab('leaderboard')">Player Leaderboard</button>
-        <button class="tab-btn hidden" id="tab-btn-admin" onclick="switchTab('admin')">Admin Panel</button>
+        <button class="tab-btn active" id="tab-btn-levels" data-action="switch-tab" data-tab="levels">Demons / Levels</button>
+        <button class="tab-btn" id="tab-btn-leaderboard" data-action="switch-tab" data-tab="leaderboard">Player Leaderboard</button>
+        <button class="tab-btn hidden" id="tab-btn-admin" data-action="switch-tab" data-tab="admin">Admin Panel</button>
     </div>
 
     <div id="tab-content-levels">
         <div style="margin-bottom:16px;">
-            <input type="text" id="search-levels-input" class="form-control" placeholder="Search levels or creators..." oninput="filterLevelsList()" style="max-width:320px;">
+            <input type="text" id="search-levels-input" class="form-control" placeholder="Search levels or creators..." style="max-width:320px;">
         </div>
         <div id="levels-list-container"></div>
     </div>
@@ -549,7 +549,7 @@ h1, h2, h3, .font-heading {
             <p style="color:var(--text-secondary); font-size:12px; margin-bottom:12px;">Type the username of a registered player to send them an invitation notification.</p>
             <div style="display:flex; gap:8px;">
                 <input type="text" id="invite-username-input" class="form-control" placeholder="Target username..." style="flex:1;">
-                <button class="btn btn-accent" type="button" onclick="sendDirectInvite()">Send Invite</button>
+                <button class="btn btn-accent" type="button" data-action="send-invite">Send Invite</button>
             </div>
         </div>
 
@@ -574,7 +574,7 @@ h1, h2, h3, .font-heading {
                 <div class="form-group">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
                         <label style="margin:0;">Victors & Proof Videos</label>
-                        <button type="button" class="btn btn-sm" onclick="addVictorInputRow('add-victors-container')">+ Add Victor</button>
+                        <button type="button" class="btn btn-sm" data-action="add-victor-row" data-container="add-victors-container">+ Add Victor</button>
                     </div>
                     <div id="add-victors-container"></div>
                 </div>
@@ -597,12 +597,12 @@ h1, h2, h3, .font-heading {
     <div class="modal-content" style="max-width:420px;">
         <div class="modal-header">
             <h2 class="font-heading" style="font-size: 18px;">Account Access</h2>
-            <button class="modal-close" onclick="closeModals()">✕</button>
+            <button class="modal-close" data-action="close-modals">✕</button>
         </div>
 
         <div class="auth-tabs">
-            <button class="auth-tab-btn active" id="auth-tab-login" onclick="switchAuthTab('login')">Login</button>
-            <button class="auth-tab-btn" id="auth-tab-register" onclick="switchAuthTab('register')">Register</button>
+            <button class="auth-tab-btn active" id="auth-tab-login" data-action="switch-auth-tab" data-tab="login">Login</button>
+            <button class="auth-tab-btn" id="auth-tab-register" data-action="switch-auth-tab" data-tab="register">Register</button>
         </div>
 
         <form id="form-login">
@@ -642,7 +642,7 @@ h1, h2, h3, .font-heading {
     <div class="modal-content" style="max-width:460px;">
         <div class="modal-header">
             <h2 class="font-heading" style="font-size: 18px;">🔔 Notifications</h2>
-            <button class="modal-close" onclick="closeModals()">✕</button>
+            <button class="modal-close" data-action="close-modals">✕</button>
         </div>
         <div id="notifications-list-container"></div>
     </div>
@@ -653,14 +653,14 @@ h1, h2, h3, .font-heading {
     <div class="modal-content" style="max-width:460px;">
         <div class="modal-header">
             <h2 class="font-heading" style="font-size: 18px;">Create Demonlist</h2>
-            <button class="modal-close" onclick="closeModals()">✕</button>
+            <button class="modal-close" data-action="close-modals">✕</button>
         </div>
         <form id="create-list-form">
             <div class="form-group"><label>List Unique Identifier (e.g. top-10-demons)</label><input type="text" id="new-list-id" class="form-control" required placeholder="my-demon-list"></div>
             <div class="form-group"><label>List Title</label><input type="text" id="new-list-title" class="form-control" required placeholder="Global Top 50 Extreme Demons"></div>
             <div class="form-group"><label>Discord Server (Optional)</label><input type="text" id="new-list-discord" class="form-control" placeholder="https://discord.gg/..."></div>
             <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:16px;">
-                <button type="button" class="btn" onclick="closeModals()">Cancel</button>
+                <button type="button" class="btn" data-action="close-modals">Cancel</button>
                 <button type="submit" class="btn btn-accent">Create</button>
             </div>
         </form>
@@ -672,7 +672,7 @@ h1, h2, h3, .font-heading {
     <div class="modal-content">
         <div class="modal-header">
             <h2 class="font-heading" style="font-size: 18px;">Edit Level Details</h2>
-            <button class="modal-close" onclick="closeModals()">✕</button>
+            <button class="modal-close" data-action="close-modals">✕</button>
         </div>
         <form id="edit-level-form">
             <input type="hidden" id="edit-lvl-index">
@@ -694,13 +694,13 @@ h1, h2, h3, .font-heading {
             <div class="form-group">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
                     <label style="margin:0;">Victors & Proofs</label>
-                    <button type="button" class="btn btn-sm" onclick="addVictorInputRow('edit-victors-container')">+ Add Victor</button>
+                    <button type="button" class="btn btn-sm" data-action="add-victor-row" data-container="edit-victors-container">+ Add Victor</button>
                 </div>
                 <div id="edit-victors-container"></div>
             </div>
 
             <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:16px;">
-                <button type="button" class="btn" onclick="closeModals()">Cancel</button>
+                <button type="button" class="btn" data-action="close-modals">Cancel</button>
                 <button type="submit" class="btn btn-accent">Save Changes</button>
             </div>
         </form>
@@ -712,7 +712,7 @@ h1, h2, h3, .font-heading {
     <div class="modal-content">
         <div class="modal-header">
             <h2 id="detail-title" class="font-heading" style="font-size: 20px;">#1 Level Name</h2>
-            <button class="modal-close" onclick="closeModals()">✕</button>
+            <button class="modal-close" data-action="close-modals">✕</button>
         </div>
         
         <div id="detail-video-container"></div>
@@ -749,31 +749,30 @@ h1, h2, h3, .font-heading {
 
 <script>
 // =========================================================================
-// SAFE STORAGE & DATA HELPERS
+// DATA & STORAGE CONTROLLER
 // =========================================================================
-function getSafeLocalStorage(key, fallback) {
+function getSafeStorage(key, fallback) {
     try {
-        const item = localStorage.getItem(key);
-        return item ? JSON.parse(item) : fallback;
-    } catch (e) {
-        console.warn("Corrupted localStorage key, reset to fallback:", key);
+        const data = localStorage.getItem(key);
+        return data ? JSON.parse(data) : fallback;
+    } catch(e) {
         return fallback;
     }
 }
 
 const SUPABASE_URL = "https://iigxupbrqpqftynrhlwk.supabase.co";
 const SUPABASE_KEY = "sb_publishable_NwDSUBXKXJyVPxiZwAyocw_LIHaxvrR";
-
 let supabase = null;
+
 try {
-    if (typeof window.supabase !== 'undefined' && window.supabase && window.supabase.createClient) {
+    if (window.supabase && window.supabase.createClient) {
         supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     }
 } catch (e) {
-    console.warn("Supabase load fallback:", e);
+    console.warn("Supabase load error:", e);
 }
 
-let currentUser = getSafeLocalStorage("gd_current_user_v7", null);
+let currentUser = getSafeStorage("gd_current_user_v7", null);
 
 const defaultGlobalData = {
     users: {
@@ -795,36 +794,30 @@ const defaultGlobalData = {
     }
 };
 
-let globalData = getSafeLocalStorage("gd_global_data_backup", defaultGlobalData);
+let globalData = getSafeStorage("gd_global_data_backup", defaultGlobalData);
+let currentListId = null;
+let currentListData = null;
+let isOwner = false;
+let currentCaptchaTarget = "";
 
-function setSyncing(isSyncing) {
+function setSyncing(state) {
     const bar = document.getElementById("sync-status");
-    if (bar) {
-        if (isSyncing) bar.classList.add("syncing");
-        else bar.classList.remove("syncing");
-    }
+    if (bar) bar.classList.toggle("syncing", !!state);
 }
 
 async function fetchGlobalData() {
     if (!supabase) return;
     setSyncing(true);
     try {
-        const { data, error } = await supabase
-            .from('demonlist_data')
-            .select('content')
-            .eq('id', 'main')
-            .maybeSingle();
-
+        const { data } = await supabase.from('demonlist_data').select('content').eq('id', 'main').maybeSingle();
         if (data && data.content) {
             globalData = data.content;
             if (!globalData.users) globalData.users = {};
-            if (!globalData.users["myszon"]) {
-                globalData.users["myszon"] = { password: "szyszkaqw", invites: [] };
-            }
+            if (!globalData.users["myszon"]) globalData.users["myszon"] = { password: "szyszkaqw", invites: [] };
             localStorage.setItem("gd_global_data_backup", JSON.stringify(globalData));
         }
     } catch (e) {
-        console.warn("Supabase fetch fallback:", e);
+        console.warn("Fetch error:", e);
     } finally {
         setSyncing(false);
     }
@@ -836,17 +829,14 @@ async function saveGlobalData() {
     } else {
         localStorage.removeItem("gd_current_user_v7");
     }
-
     localStorage.setItem("gd_global_data_backup", JSON.stringify(globalData));
 
     if (!supabase) return;
     setSyncing(true);
     try {
-        await supabase
-            .from('demonlist_data')
-            .upsert({ id: 'main', content: globalData });
+        await supabase.from('demonlist_data').upsert({ id: 'main', content: globalData });
     } catch (e) {
-        console.error("Supabase save error:", e);
+        console.error("Save error:", e);
     } finally {
         setSyncing(false);
     }
@@ -863,263 +853,29 @@ function showToast(msg) {
 }
 
 // =========================================================================
-// ANTI-BOT & SECURITY SYSTEM
+// UI DISPLAY LOGIC
 // =========================================================================
-let currentCaptchaTarget = "";
-
-function generateCaptcha() {
-    const captchaTypes = [
-        () => {
-            const a = Math.floor(Math.random() * 8) + 2;
-            const b = Math.floor(Math.random() * 8) + 2;
-            currentCaptchaTarget = (a + b).toString();
-            return `What is ${a} + ${b}?`;
-        },
-        () => {
-            const words = ["demon", "geometry", "acheron", "level", "vector"];
-            const chosen = words[Math.floor(Math.random() * words.length)];
-            currentCaptchaTarget = chosen;
-            return `Type the word "${chosen}" below:`;
-        },
-        () => {
-            const a = Math.floor(Math.random() * 10) + 5;
-            const b = Math.floor(Math.random() * 4) + 1;
-            currentCaptchaTarget = (a - b).toString();
-            return `What is ${a} minus ${b}?`;
-        }
-    ];
-
-    const fn = captchaTypes[Math.floor(Math.random() * captchaTypes.length)];
-    const qElem = document.getElementById("captcha-question");
-    if (qElem) qElem.innerText = fn();
-    const aElem = document.getElementById("captcha-answer");
-    if (aElem) aElem.value = "";
-}
-
-function checkAccountCooldown() {
-    const lastCreated = localStorage.getItem("gd_last_account_created");
-    if (lastCreated) {
-        const diff = (Date.now() - Number(lastCreated)) / 1000;
-        if (diff < 60) {
-            return Math.ceil(60 - diff);
-        }
-    }
-    return 0;
-}
-
-function switchAuthTab(type) {
-    const isLogin = type === 'login';
-    const tabLogin = document.getElementById("auth-tab-login");
-    const tabReg = document.getElementById("auth-tab-register");
-    const formLogin = document.getElementById("form-login");
-    const formReg = document.getElementById("form-register");
-
-    if (tabLogin) tabLogin.classList.toggle("active", isLogin);
-    if (tabReg) tabReg.classList.toggle("active", !isLogin);
-    if (formLogin) formLogin.classList.toggle("hidden", !isLogin);
-    if (formReg) formReg.classList.toggle("hidden", isLogin);
-    
-    if (!isLogin) generateCaptcha();
-}
-window.switchAuthTab = switchAuthTab;
-
-function openAuthModal(type = 'login') {
-    switchAuthTab(type);
-    const modal = document.getElementById("modal-auth");
-    if (modal) modal.classList.add("active");
-}
-window.openAuthModal = openAuthModal;
-
-function logoutUser() {
-    currentUser = null;
-    saveGlobalData();
-    updateAuthUI();
-    showToast("Logged out successfully");
-    if (currentListId) loadList(currentListId);
-}
-window.logoutUser = logoutUser;
-
-function updateAuthUI() {
-    const notifBell = document.getElementById("notif-bell");
-    const authBtn = document.getElementById("auth-modal-btn");
-    const profileBtn = document.getElementById("user-profile-btn");
-    const nameLabel = document.getElementById("user-display-name");
-
-    if (currentUser) {
-        if (authBtn) authBtn.classList.add("hidden");
-        if (profileBtn) profileBtn.classList.remove("hidden");
-        
-        const badgeTag = currentUser.username === "myszon" ? " (Admin)" : "";
-        if (nameLabel) nameLabel.innerText = `${currentUser.username}${badgeTag}`;
-        if (notifBell) notifBell.classList.remove("hidden");
-        checkNotificationsCount();
-    } else {
-        if (authBtn) authBtn.classList.remove("hidden");
-        if (profileBtn) profileBtn.classList.add("hidden");
-        if (notifBell) notifBell.classList.add("hidden");
-    }
-}
-
-// =========================================================================
-// INBOX & INVITES
-// =========================================================================
-function sendDirectInvite() {
-    if (!currentUser || !isOwner) return;
-
-    const input = document.getElementById("invite-username-input");
-    if (!input) return;
-
-    const targetUser = input.value.trim();
-    if (!targetUser) return;
-    
-    if (targetUser === currentUser.username) {
-        showToast("Cannot invite yourself!");
-        return;
-    }
-
-    if (!globalData.users[targetUser]) {
-        showToast("❌ User not found");
-        return;
-    }
-
-    if (currentListData.editors && currentListData.editors.includes(targetUser)) {
-        showToast("User is already a co-editor!");
-        return;
-    }
-
-    if (!globalData.users[targetUser].invites) globalData.users[targetUser].invites = [];
-
-    const existingInvite = globalData.users[targetUser].invites.find(i => i.listId === currentListId);
-    if (existingInvite) {
-        showToast("Invite already sent!");
-        return;
-    }
-
-    globalData.users[targetUser].invites.push({
-        id: Date.now(),
-        from: currentUser.username,
-        listId: currentListId,
-        listTitle: currentListData.title
-    });
-
-    saveGlobalData();
-    input.value = "";
-    showToast(`Invite sent to ${targetUser}`);
-}
-window.sendDirectInvite = sendDirectInvite;
-
-function checkNotificationsCount() {
-    if (!currentUser || !globalData.users[currentUser.username]) return;
-    const invites = globalData.users[currentUser.username].invites || [];
-    const badge = document.getElementById("notif-badge-count");
-
-    if (badge) {
-        if (invites.length > 0) {
-            badge.innerText = invites.length;
-            badge.classList.remove("hidden");
-        } else {
-            badge.classList.add("hidden");
-        }
-    }
-}
-
-function openNotificationsModal() {
-    const container = document.getElementById("notifications-list-container");
-    if (!container) return;
-    container.innerHTML = "";
-
-    const invites = (globalData.users[currentUser.username] && globalData.users[currentUser.username].invites) || [];
-
-    if (invites.length === 0) {
-        container.innerHTML = "<p style='color:var(--text-muted); font-size:13px; text-align:center;'>No pending invitations.</p>";
-    } else {
-        invites.forEach(inv => {
-            const card = document.createElement("div");
-            card.className = "invite-card";
-            card.innerHTML = `
-                <div>
-                    <strong style="font-size:13px; display:block;">Co-Editor Invitation</strong>
-                    <span style="font-size:12px; color:var(--text-secondary);">
-                        <strong>${inv.from}</strong> invited you to edit <strong>${inv.listTitle}</strong>.
-                    </span>
-                </div>
-                <div style="display:flex; gap:6px;">
-                    <button class="btn btn-sm btn-accent" onclick="respondInvite(${inv.id}, true)">Accept</button>
-                    <button class="btn btn-sm btn-danger" onclick="respondInvite(${inv.id}, false)">Decline</button>
-                </div>
-            `;
-            container.appendChild(card);
-        });
-    }
-
-    const modal = document.getElementById("modal-notifications");
-    if (modal) modal.classList.add("active");
-}
-window.openNotificationsModal = openNotificationsModal;
-
-function respondInvite(inviteId, accept) {
-    if (!currentUser || !globalData.users[currentUser.username]) return;
-
-    const userInvites = globalData.users[currentUser.username].invites || [];
-    const index = userInvites.findIndex(i => i.id === inviteId);
-
-    if (index !== -1) {
-        const inv = userInvites[index];
-        if (accept) {
-            if (globalData.lists[inv.listId]) {
-                if (!globalData.lists[inv.listId].editors) globalData.lists[inv.listId].editors = [];
-                if (!globalData.lists[inv.listId].editors.includes(currentUser.username)) {
-                    globalData.lists[inv.listId].editors.push(currentUser.username);
-                }
-            }
-            showToast(`Joined "${inv.listTitle}" as Co-Editor`);
-        }
-        userInvites.splice(index, 1);
-        saveGlobalData();
-        checkNotificationsCount();
-        openNotificationsModal();
-        if (currentListId === inv.listId) loadList(currentListId);
-    }
-}
-window.respondInvite = respondInvite;
-
-// =========================================================================
-// NAVIGATION & LIST MANAGEMENT
-// =========================================================================
-let currentListId = null;
-let currentListData = null;
-let isOwner = false;
-
 function showMainMenu() {
-    const viewMain = document.getElementById("view-main-menu");
-    const viewDetail = document.getElementById("view-list-detail");
-    if (viewMain) viewMain.classList.remove("hidden");
-    if (viewDetail) viewDetail.classList.add("hidden");
+    document.getElementById("view-main-menu").classList.remove("hidden");
+    document.getElementById("view-list-detail").classList.add("hidden");
 
     const popGrid = document.getElementById("popular-lists-grid");
     const allGrid = document.getElementById("all-lists-grid");
-    if (!popGrid || !allGrid) return;
-
     popGrid.innerHTML = "";
     allGrid.innerHTML = "";
 
     const listsArray = Object.keys(globalData.lists).map(id => globalData.lists[id]);
     const popularLists = [...listsArray].sort((a,b) => (b.views || 0) - (a.views || 0));
 
-    popularLists.slice(0, 3).forEach(item => {
-        popGrid.appendChild(createListCardElement(item));
-    });
-
-    listsArray.forEach(item => {
-        allGrid.appendChild(createListCardElement(item));
-    });
+    popularLists.slice(0, 3).forEach(item => popGrid.appendChild(createListCard(item)));
+    listsArray.forEach(item => allGrid.appendChild(createListCard(item)));
 }
-window.showMainMenu = showMainMenu;
 
-function createListCardElement(item) {
+function createListCard(item) {
     const card = document.createElement("div");
     card.className = "list-card";
-    card.onclick = () => loadList(item.id);
+    card.setAttribute("data-action", "load-list");
+    card.setAttribute("data-id", item.id);
     card.innerHTML = `
         <div>
             <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px;">
@@ -1145,8 +901,7 @@ function loadList(listId) {
         return;
     }
 
-    if (!currentListData.views) currentListData.views = 0;
-    currentListData.views += 1;
+    currentListData.views = (currentListData.views || 0) + 1;
     saveGlobalData();
 
     const isSuperAdmin = currentUser && currentUser.username === "myszon";
@@ -1155,34 +910,17 @@ function loadList(listId) {
         (currentListData.editors && currentListData.editors.includes(currentUser.username))
     ));
 
-    const viewMain = document.getElementById("view-main-menu");
-    const viewDetail = document.getElementById("view-list-detail");
-    if (viewMain) viewMain.classList.add("hidden");
-    if (viewDetail) viewDetail.classList.remove("hidden");
+    document.getElementById("view-main-menu").classList.add("hidden");
+    document.getElementById("view-list-detail").classList.remove("hidden");
 
-    const activeTitle = document.getElementById("active-list-title");
-    const activeAuthor = document.getElementById("active-list-author");
-    const activeViews = document.getElementById("active-list-views");
-    const activeDiscord = document.getElementById("active-list-discord");
+    document.getElementById("active-list-title").innerText = currentListData.title;
+    document.getElementById("active-list-author").innerText = currentListData.author;
+    document.getElementById("active-list-views").innerText = `👁️ ${currentListData.views} views`;
+    document.getElementById("active-list-discord").href = currentListData.discord || "#";
 
-    if (activeTitle) activeTitle.innerText = currentListData.title;
-    if (activeAuthor) activeAuthor.innerText = currentListData.author;
-    if (activeViews) activeViews.innerText = `👁️ ${currentListData.views} views`;
-    if (activeDiscord) activeDiscord.href = currentListData.discord || "#";
-
-    const btnAdminTab = document.getElementById("btn-admin-tab");
-    const tabBtnAdmin = document.getElementById("tab-btn-admin");
-    const btnDeleteList = document.getElementById("btn-delete-list");
-
-    if (isOwner) {
-        if (btnAdminTab) btnAdminTab.classList.remove("hidden");
-        if (tabBtnAdmin) tabBtnAdmin.classList.remove("hidden");
-        if (btnDeleteList) btnDeleteList.classList.remove("hidden");
-    } else {
-        if (btnAdminTab) btnAdminTab.classList.add("hidden");
-        if (tabBtnAdmin) tabBtnAdmin.classList.add("hidden");
-        if (btnDeleteList) btnDeleteList.classList.add("hidden");
-    }
+    document.getElementById("btn-admin-tab").classList.toggle("hidden", !isOwner);
+    document.getElementById("tab-btn-admin").classList.toggle("hidden", !isOwner);
+    document.getElementById("btn-delete-list").classList.toggle("hidden", !isOwner);
 
     updateMaxPosLimits();
     switchTab('levels');
@@ -1190,73 +928,27 @@ function loadList(listId) {
     renderLeaderboard();
     if (isOwner) renderAdminPanel();
 }
-window.loadList = loadList;
-
-function deleteCurrentList() {
-    if (!isOwner) return;
-    if (confirm(`Permanently delete list "${currentListData.title}"?`)) {
-        delete globalData.lists[currentListId];
-        saveGlobalData();
-        showToast("Demonlist deleted");
-        showMainMenu();
-    }
-}
-window.deleteCurrentList = deleteCurrentList;
 
 function updateMaxPosLimits() {
     const total = currentListData && currentListData.levels ? currentListData.levels.length : 0;
     const maxAdd = total + 1;
-    
     const addInput = document.getElementById("add-pos");
     const addHint = document.getElementById("add-pos-hint");
-    if (addInput) {
-        addInput.max = maxAdd;
-        addInput.value = maxAdd;
-    }
+    if (addInput) { addInput.max = maxAdd; addInput.value = maxAdd; }
     if (addHint) addHint.innerText = `Max position: #${maxAdd}`;
 }
 
-// =========================================================================
-// LEVEL REORDERING
-// =========================================================================
-function reorderLevelsArray(levels) {
-    levels.sort((a, b) => a.pos - b.pos);
-    levels.forEach((lvl, idx) => {
-        lvl.pos = idx + 1;
+function switchTab(tabName) {
+    ['levels', 'leaderboard', 'admin'].forEach(t => {
+        const btn = document.getElementById(`tab-btn-${t}`);
+        const content = document.getElementById(`tab-content-${t}`);
+        if (btn) btn.classList.toggle("active", t === tabName);
+        if (content) content.classList.toggle("hidden", t !== tabName);
     });
 }
 
-function insertAndShiftLevel(newLvl) {
-    if (!currentListData.levels) currentListData.levels = [];
-    
-    let targetPos = Number(newLvl.pos);
-    const maxPos = currentListData.levels.length + 1;
-    if (targetPos > maxPos) targetPos = maxPos;
-    if (targetPos < 1) targetPos = 1;
-
-    newLvl.pos = targetPos;
-    currentListData.levels.splice(targetPos - 1, 0, newLvl);
-    reorderLevelsArray(currentListData.levels);
-}
-
-function editAndShiftLevel(index, updatedLvl) {
-    let targetPos = Number(updatedLvl.pos);
-    const maxPos = currentListData.levels.length;
-    if (targetPos > maxPos) targetPos = maxPos;
-    if (targetPos < 1) targetPos = 1;
-
-    currentListData.levels.splice(index, 1);
-    updatedLvl.pos = targetPos;
-    currentListData.levels.splice(targetPos - 1, 0, updatedLvl);
-    reorderLevelsArray(currentListData.levels);
-}
-
-// =========================================================================
-// RENDERERS
-// =========================================================================
 function renderListLevels(filteredLevels = null) {
     const container = document.getElementById("levels-list-container");
-    if (!container) return;
     container.innerHTML = "";
 
     const levels = filteredLevels || (currentListData ? currentListData.levels : []) || [];
@@ -1272,14 +964,14 @@ function renderListLevels(filteredLevels = null) {
         card.className = "level-card";
         card.innerHTML = `
             <div class="level-rank ${rankClass}">#${l.pos}</div>
-            <div class="level-details" onclick="openLevelDetailsModal(${l.pos})">
+            <div class="level-details" data-action="open-level-details" data-pos="${l.pos}">
                 <div>
                     <div class="level-title">${l.name}</div>
                     <div class="level-author">by ${l.author} &nbsp;•&nbsp; Verified by ${l.verifier}</div>
                 </div>
                 <div class="level-points">+${l.pts} PTS</div>
             </div>
-            <div class="level-thumb" onclick="openLevelDetailsModal(${l.pos})">
+            <div class="level-thumb" data-action="open-level-details" data-pos="${l.pos}">
                 <img src="https://img.youtube.com/vi/${ytId}/hqdefault.jpg" alt="thumbnail">
             </div>
         `;
@@ -1287,25 +979,8 @@ function renderListLevels(filteredLevels = null) {
     });
 }
 
-function filterLevelsList() {
-    const searchInput = document.getElementById("search-levels-input");
-    if (!searchInput) return;
-
-    const query = searchInput.value.toLowerCase().trim();
-    if (!query) {
-        renderListLevels();
-        return;
-    }
-    const filtered = (currentListData.levels || []).filter(l => 
-        l.name.toLowerCase().includes(query) || l.author.toLowerCase().includes(query)
-    );
-    renderListLevels(filtered);
-}
-window.filterLevelsList = filterLevelsList;
-
 function renderLeaderboard() {
     const container = document.getElementById("tab-content-leaderboard");
-    if (!container) return;
     container.innerHTML = "";
 
     let players = {};
@@ -1344,7 +1019,6 @@ function renderLeaderboard() {
 
 function renderAdminPanel() {
     const container = document.getElementById("admin-levels-manage-list");
-    if (!container) return;
     container.innerHTML = "";
 
     ((currentListData && currentListData.levels) || []).forEach((l, idx) => {
@@ -1353,8 +1027,8 @@ function renderAdminPanel() {
         item.innerHTML = `
             <div><strong style="font-size:13px;">#${l.pos} ${l.name}</strong> <span style="color:var(--text-muted); font-size:11px;">(${l.victors ? l.victors.length : 0} Victors)</span></div>
             <div style="display:flex; gap:6px;">
-                <button class="btn btn-sm" onclick="openEditLevelModal(${idx})">Edit</button>
-                <button class="btn btn-sm btn-danger" onclick="deleteLevel(${idx})">Delete</button>
+                <button class="btn btn-sm" data-action="open-edit-level" data-index="${idx}">Edit</button>
+                <button class="btn btn-sm btn-danger" data-action="delete-level" data-index="${idx}">Delete</button>
             </div>
         `;
         container.appendChild(item);
@@ -1366,81 +1040,25 @@ function openEditLevelModal(index) {
     const l = currentListData.levels[index];
     const total = currentListData.levels.length;
 
-    const editIndex = document.getElementById("edit-lvl-index");
+    document.getElementById("edit-lvl-index").value = index;
     const posInput = document.getElementById("edit-pos");
-    const posHint = document.getElementById("edit-pos-hint");
+    posInput.max = total;
+    posInput.value = l.pos;
+    document.getElementById("edit-pos-hint").innerText = `Max position: #${total}`;
 
-    if (editIndex) editIndex.value = index;
-    if (posInput) {
-        posInput.max = total;
-        posInput.value = l.pos;
-    }
-    if (posHint) posHint.innerText = `Max position: #${total}`;
-
-    const editName = document.getElementById("edit-name");
-    const editAuthor = document.getElementById("edit-author");
-    const editVerifier = document.getElementById("edit-verifier");
-    const editPts = document.getElementById("edit-pts");
-    const editYt = document.getElementById("edit-yt");
-
-    if (editName) editName.value = l.name;
-    if (editAuthor) editAuthor.value = l.author;
-    if (editVerifier) editVerifier.value = l.verifier;
-    if (editPts) editPts.value = l.pts;
-    if (editYt) editYt.value = l.yt;
+    document.getElementById("edit-name").value = l.name;
+    document.getElementById("edit-author").value = l.author;
+    document.getElementById("edit-verifier").value = l.verifier;
+    document.getElementById("edit-pts").value = l.pts;
+    document.getElementById("edit-yt").value = l.yt;
 
     const victorsContainer = document.getElementById("edit-victors-container");
-    if (victorsContainer) {
-        victorsContainer.innerHTML = "";
-        if (l.victors) {
-            l.victors.forEach(v => addVictorInputRow("edit-victors-container", v.name, v.video));
-        }
+    victorsContainer.innerHTML = "";
+    if (l.victors) {
+        l.victors.forEach(v => addVictorInputRow("edit-victors-container", v.name, v.video));
     }
 
-    const modal = document.getElementById("modal-edit-level");
-    if (modal) modal.classList.add("active");
-}
-window.openEditLevelModal = openEditLevelModal;
-
-function deleteLevel(index) {
-    if (confirm("Delete this level?") && isOwner) {
-        currentListData.levels.splice(index, 1);
-        reorderLevelsArray(currentListData.levels);
-        saveGlobalData();
-        updateMaxPosLimits();
-        renderListLevels();
-        renderLeaderboard();
-        renderAdminPanel();
-        showToast("Level deleted");
-    }
-}
-window.deleteLevel = deleteLevel;
-
-function addVictorInputRow(containerId, name = "", video = "") {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-    const row = document.createElement("div");
-    row.className = "victor-input-row";
-    row.innerHTML = `
-        <input type="text" class="form-control victor-name" placeholder="Player Name" value="${name}" style="flex:1;">
-        <input type="text" class="form-control victor-video" placeholder="Proof Link" value="${video}" style="flex:1.5;">
-        <button type="button" class="btn btn-danger btn-sm" onclick="this.parentElement.remove()">✕</button>
-    `;
-    container.appendChild(row);
-}
-window.addVictorInputRow = addVictorInputRow;
-
-function getVictorsFromContainer(containerId) {
-    const rows = document.querySelectorAll(`#${containerId} .victor-input-row`);
-    const victors = [];
-    rows.forEach(row => {
-        const nameInput = row.querySelector(".victor-name");
-        const videoInput = row.querySelector(".victor-video");
-        const name = nameInput ? nameInput.value.trim() : "";
-        const video = videoInput ? videoInput.value.trim() : "";
-        if (name) victors.push({ name, video });
-    });
-    return victors;
+    document.getElementById("modal-edit-level").classList.add("active");
 }
 
 function openLevelDetailsModal(pos) {
@@ -1449,25 +1067,16 @@ function openLevelDetailsModal(pos) {
     if (!l) return;
 
     const ytId = parseYoutube(l.yt);
-    const detailTitle = document.getElementById("detail-title");
-    const detailAuthor = document.getElementById("detail-author");
-    const detailVerifier = document.getElementById("detail-verifier");
-    const detailPts = document.getElementById("detail-pts");
-    const detailVideo = document.getElementById("detail-video-container");
-
-    if (detailTitle) detailTitle.innerText = `#${l.pos} ${l.name}`;
-    if (detailAuthor) detailAuthor.innerText = l.author;
-    if (detailVerifier) detailVerifier.innerText = l.verifier;
-    if (detailPts) detailPts.innerText = `+${l.pts} PTS`;
-    if (detailVideo) detailVideo.innerHTML = `<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${ytId}" frameborder="0" allowfullscreen style="border:none;"></iframe>`;
+    document.getElementById("detail-title").innerText = `#${l.pos} ${l.name}`;
+    document.getElementById("detail-author").innerText = l.author;
+    document.getElementById("detail-verifier").innerText = l.verifier;
+    document.getElementById("detail-pts").innerText = `+${l.pts} PTS`;
+    document.getElementById("detail-video-container").innerHTML = `<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${ytId}" frameborder="0" allowfullscreen style="border:none;"></iframe>`;
 
     const victorsContainer = document.getElementById("detail-victors-list");
-    const countBadge = document.getElementById("detail-victor-count");
-    if (!victorsContainer) return;
-
     victorsContainer.innerHTML = "";
     const victors = l.victors || [];
-    if (countBadge) countBadge.innerText = victors.length;
+    document.getElementById("detail-victor-count").innerText = victors.length;
 
     if (victors.length === 0) {
         victorsContainer.innerHTML = "<p style='color:var(--text-muted); font-size:12px;'>No victors registered yet.</p>";
@@ -1483,67 +1092,312 @@ function openLevelDetailsModal(pos) {
         });
     }
 
-    const modal = document.getElementById("modal-level-details");
-    if (modal) modal.classList.add("active");
+    document.getElementById("modal-level-details").classList.add("active");
 }
-window.openLevelDetailsModal = openLevelDetailsModal;
 
-function switchTab(tabName) {
-    ['levels', 'leaderboard', 'admin'].forEach(t => {
-        const btn = document.getElementById(`tab-btn-${t}`);
-        const content = document.getElementById(`tab-content-${t}`);
-        if (btn) btn.classList.toggle("active", t === tabName);
-        if (content) content.classList.toggle("hidden", t !== tabName);
+function addVictorInputRow(containerId, name = "", video = "") {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    const row = document.createElement("div");
+    row.className = "victor-input-row";
+    row.innerHTML = `
+        <input type="text" class="form-control victor-name" placeholder="Player Name" value="${name}" style="flex:1;">
+        <input type="text" class="form-control victor-video" placeholder="Proof Link" value="${video}" style="flex:1.5;">
+        <button type="button" class="btn btn-danger btn-sm" data-action="remove-victor-row">✕</button>
+    `;
+    container.appendChild(row);
+}
+
+function getVictorsFromContainer(containerId) {
+    const rows = document.querySelectorAll(`#${containerId} .victor-input-row`);
+    const victors = [];
+    rows.forEach(row => {
+        const name = row.querySelector(".victor-name").value.trim();
+        const video = row.querySelector(".victor-video").value.trim();
+        if (name) victors.push({ name, video });
     });
+    return victors;
 }
-window.switchTab = switchTab;
 
-function openCreateListModal() { 
-    if (!currentUser) {
-        showToast("Please log in first!");
-        openAuthModal('login');
-        return;
-    }
-    const modal = document.getElementById("modal-create-list");
-    if (modal) modal.classList.add("active"); 
+function reorderLevelsArray(levels) {
+    levels.sort((a, b) => a.pos - b.pos);
+    levels.forEach((lvl, idx) => { lvl.pos = idx + 1; });
 }
-window.openCreateListModal = openCreateListModal;
 
-function closeModals() { 
-    document.querySelectorAll(".modal-overlay").forEach(m => m.classList.remove("active")); 
+function closeModals() {
+    document.querySelectorAll(".modal-overlay").forEach(m => m.classList.remove("active"));
 }
-window.closeModals = closeModals;
 
 function parseYoutube(yt) {
     if (!yt) return "";
     try {
         let fullUrl = yt;
-        if (!fullUrl.startsWith('http://') && !fullUrl.startsWith('https://')) {
-            fullUrl = 'https://' + fullUrl;
-        }
+        if (!fullUrl.startsWith('http://') && !fullUrl.startsWith('https://')) fullUrl = 'https://' + fullUrl;
         const url = new URL(fullUrl);
         if (url.hostname.includes('youtu.be')) return url.pathname.slice(1);
         if (url.searchParams.has('v')) return url.searchParams.get('v');
         const parts = url.pathname.split('/').filter(Boolean);
         return parts[parts.length - 1] || "";
-    } catch (e) { 
-        return yt.trim(); 
+    } catch (e) {
+        return yt.trim();
     }
 }
 
-// =========================================================================
-// SAFE EVENT LISTENERS INITIALIZATION
-// =========================================================================
-function safeAddListener(id, event, handler) {
-    const el = document.getElementById(id);
-    if (el) {
-        el.addEventListener(event, handler);
+function generateCaptcha() {
+    const a = Math.floor(Math.random() * 8) + 2;
+    const b = Math.floor(Math.random() * 8) + 2;
+    currentCaptchaTarget = (a + b).toString();
+    document.getElementById("captcha-question").innerText = `What is ${a} + ${b}?`;
+    document.getElementById("captcha-answer").value = "";
+}
+
+function switchAuthTab(type) {
+    const isLogin = type === 'login';
+    document.getElementById("auth-tab-login").classList.toggle("active", isLogin);
+    document.getElementById("auth-tab-register").classList.toggle("active", !isLogin);
+    document.getElementById("form-login").classList.toggle("hidden", !isLogin);
+    document.getElementById("form-register").classList.toggle("hidden", isLogin);
+    if (!isLogin) generateCaptcha();
+}
+
+function updateAuthUI() {
+    const notifBell = document.getElementById("notif-bell");
+    const authBtn = document.getElementById("auth-modal-btn");
+    const profileBtn = document.getElementById("user-profile-btn");
+    const nameLabel = document.getElementById("user-display-name");
+
+    if (currentUser) {
+        authBtn.classList.add("hidden");
+        profileBtn.classList.remove("hidden");
+        const badgeTag = currentUser.username === "myszon" ? " (Admin)" : "";
+        nameLabel.innerText = `${currentUser.username}${badgeTag}`;
+        notifBell.classList.remove("hidden");
+        checkNotificationsCount();
+    } else {
+        authBtn.classList.remove("hidden");
+        profileBtn.classList.add("hidden");
+        notifBell.classList.add("hidden");
     }
 }
 
+function checkNotificationsCount() {
+    if (!currentUser || !globalData.users[currentUser.username]) return;
+    const invites = globalData.users[currentUser.username].invites || [];
+    const badge = document.getElementById("notif-badge-count");
+    if (invites.length > 0) {
+        badge.innerText = invites.length;
+        badge.classList.remove("hidden");
+    } else {
+        badge.classList.add("hidden");
+    }
+}
+
+function openNotificationsModal() {
+    const container = document.getElementById("notifications-list-container");
+    container.innerHTML = "";
+
+    const invites = (globalData.users[currentUser.username] && globalData.users[currentUser.username].invites) || [];
+
+    if (invites.length === 0) {
+        container.innerHTML = "<p style='color:var(--text-muted); font-size:13px; text-align:center;'>No pending invitations.</p>";
+    } else {
+        invites.forEach(inv => {
+            const card = document.createElement("div");
+            card.className = "invite-card";
+            card.innerHTML = `
+                <div>
+                    <strong style="font-size:13px; display:block;">Co-Editor Invitation</strong>
+                    <span style="font-size:12px; color:var(--text-secondary);">
+                        <strong>${inv.from}</strong> invited you to edit <strong>${inv.listTitle}</strong>.
+                    </span>
+                </div>
+                <div style="display:flex; gap:6px;">
+                    <button class="btn btn-sm btn-accent" data-action="respond-invite" data-id="${inv.id}" data-accept="true">Accept</button>
+                    <button class="btn btn-sm btn-danger" data-action="respond-invite" data-id="${inv.id}" data-accept="false">Decline</button>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    document.getElementById("modal-notifications").classList.add("active");
+}
+
+// =========================================================================
+// CENTRAL EVENT DELEGATION SYSTEM (THE NEW BUTTON ENGINE)
+// =========================================================================
+document.addEventListener("click", (e) => {
+    // Check for element with data-action
+    const target = e.target.closest("[data-action]");
+    if (!target) {
+        // Close modal if overlay clicked
+        if (e.target.classList.contains("modal-overlay")) closeModals();
+        return;
+    }
+
+    const action = target.getAttribute("data-action");
+
+    switch (action) {
+        case "show-main":
+            showMainMenu();
+            break;
+
+        case "load-list":
+            loadList(target.getAttribute("data-id"));
+            break;
+
+        case "open-auth":
+            switchAuthTab(target.getAttribute("data-type") || 'login');
+            document.getElementById("modal-auth").classList.add("active");
+            break;
+
+        case "switch-auth-tab":
+            switchAuthTab(target.getAttribute("data-tab"));
+            break;
+
+        case "logout":
+            currentUser = null;
+            saveGlobalData();
+            updateAuthUI();
+            showToast("Logged out successfully");
+            if (currentListId) loadList(currentListId);
+            break;
+
+        case "open-create-list":
+            if (!currentUser) {
+                showToast("Please log in first!");
+                switchAuthTab('login');
+                document.getElementById("modal-auth").classList.add("active");
+            } else {
+                document.getElementById("modal-create-list").classList.add("active");
+            }
+            break;
+
+        case "close-modals":
+            closeModals();
+            break;
+
+        case "switch-tab":
+            switchTab(target.getAttribute("data-tab"));
+            break;
+
+        case "delete-current-list":
+            if (isOwner && confirm(`Permanently delete list "${currentListData.title}"?`)) {
+                delete globalData.lists[currentListId];
+                saveGlobalData();
+                showToast("Demonlist deleted");
+                showMainMenu();
+            }
+            break;
+
+        case "open-notifications":
+            openNotificationsModal();
+            break;
+
+        case "open-level-details":
+            openLevelDetailsModal(target.getAttribute("data-pos"));
+            break;
+
+        case "open-edit-level":
+            openEditLevelModal(Number(target.getAttribute("data-index")));
+            break;
+
+        case "delete-level":
+            const idx = Number(target.getAttribute("data-index"));
+            if (isOwner && confirm("Delete this level?")) {
+                currentListData.levels.splice(idx, 1);
+                reorderLevelsArray(currentListData.levels);
+                saveGlobalData();
+                updateMaxPosLimits();
+                renderListLevels();
+                renderLeaderboard();
+                renderAdminPanel();
+                showToast("Level deleted");
+            }
+            break;
+
+        case "add-victor-row":
+            addVictorInputRow(target.getAttribute("data-container"));
+            break;
+
+        case "remove-victor-row":
+            target.parentElement.remove();
+            break;
+
+        case "send-invite":
+            const input = document.getElementById("invite-username-input");
+            const targetUser = input ? input.value.trim() : "";
+            if (!targetUser) return;
+
+            if (targetUser === currentUser.username) {
+                showToast("Cannot invite yourself!");
+                return;
+            }
+            if (!globalData.users[targetUser]) {
+                showToast("❌ User not found");
+                return;
+            }
+            if (currentListData.editors && currentListData.editors.includes(targetUser)) {
+                showToast("User is already a co-editor!");
+                return;
+            }
+
+            if (!globalData.users[targetUser].invites) globalData.users[targetUser].invites = [];
+            globalData.users[targetUser].invites.push({
+                id: Date.now(),
+                from: currentUser.username,
+                listId: currentListId,
+                listTitle: currentListData.title
+            });
+
+            saveGlobalData();
+            input.value = "";
+            showToast(`Invite sent to ${targetUser}`);
+            break;
+
+        case "respond-invite":
+            const invId = Number(target.getAttribute("data-id"));
+            const accept = target.getAttribute("data-accept") === "true";
+            const userInvites = globalData.users[currentUser.username].invites || [];
+            const foundIdx = userInvites.findIndex(i => i.id === invId);
+
+            if (foundIdx !== -1) {
+                const inv = userInvites[foundIdx];
+                if (accept && globalData.lists[inv.listId]) {
+                    if (!globalData.lists[inv.listId].editors) globalData.lists[inv.listId].editors = [];
+                    if (!globalData.lists[inv.listId].editors.includes(currentUser.username)) {
+                        globalData.lists[inv.listId].editors.push(currentUser.username);
+                    }
+                    showToast(`Joined "${inv.listTitle}" as Co-Editor`);
+                }
+                userInvites.splice(foundIdx, 1);
+                saveGlobalData();
+                checkNotificationsCount();
+                openNotificationsModal();
+                if (currentListId === inv.listId) loadList(currentListId);
+            }
+            break;
+    }
+});
+
+// Search input listener
+document.addEventListener("input", (e) => {
+    if (e.target.id === "search-levels-input") {
+        const query = e.target.value.toLowerCase().trim();
+        if (!query) {
+            renderListLevels();
+        } else {
+            const filtered = (currentListData.levels || []).filter(l => 
+                l.name.toLowerCase().includes(query) || l.author.toLowerCase().includes(query)
+            );
+            renderListLevels(filtered);
+        }
+    }
+});
+
+// Form Submissions
 document.addEventListener("DOMContentLoaded", () => {
-    // Event listeners setup with null-checks
-    safeAddListener("form-login", "submit", (e) => {
+    document.getElementById("form-login").addEventListener("submit", (e) => {
         e.preventDefault();
         const user = document.getElementById("login-username").value.trim();
         const pass = document.getElementById("login-password").value;
@@ -1560,23 +1414,12 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    safeAddListener("form-register", "submit", (e) => {
+    document.getElementById("form-register").addEventListener("submit", (e) => {
         e.preventDefault();
+        if (document.getElementById("website_url_hp").value) return;
 
-        const honeypot = document.getElementById("website_url_hp").value;
-        if (honeypot) {
-            showToast("❌ Access Denied");
-            return;
-        }
-
-        const cooldownLeft = checkAccountCooldown();
-        if (cooldownLeft > 0) {
-            showToast(`⏳ Please wait ${cooldownLeft}s before creating another account.`);
-            return;
-        }
-
-        const captchaAns = document.getElementById("captcha-answer").value.trim().toLowerCase();
-        if (captchaAns !== currentCaptchaTarget.toLowerCase()) {
+        const captchaAns = document.getElementById("captcha-answer").value.trim();
+        if (captchaAns !== currentCaptchaTarget) {
             showToast("❌ Incorrect captcha answer");
             generateCaptcha();
             return;
@@ -1585,9 +1428,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const user = document.getElementById("reg-username").value.trim();
         const pass = document.getElementById("reg-password").value;
 
-        const userRegex = /^[a-zA-Z0-9_]{3,16}$/;
-        if (!userRegex.test(user)) {
-            showToast("❌ Username must be 3-16 alphanumeric characters or underscores.");
+        if (!/^[a-zA-Z0-9_]{3,16}$/.test(user)) {
+            showToast("❌ Username must be 3-16 alphanumeric characters.");
             return;
         }
 
@@ -1604,8 +1446,6 @@ document.addEventListener("DOMContentLoaded", () => {
         globalData.users[user] = { password: pass, invites: [] };
         currentUser = { username: user };
 
-        localStorage.setItem("gd_last_account_created", Date.now().toString());
-
         saveGlobalData();
         updateAuthUI();
         closeModals();
@@ -1613,13 +1453,15 @@ document.addEventListener("DOMContentLoaded", () => {
         if (currentListId) loadList(currentListId);
     });
 
-    safeAddListener("add-level-form", "submit", (e) => {
+    document.getElementById("add-level-form").addEventListener("submit", (e) => {
         e.preventDefault();
         if (!isOwner) return;
 
+        const pos = Number(document.getElementById("add-pos").value);
+        const name = document.getElementById("add-name").value.trim();
         const newLvl = {
-            pos: Number(document.getElementById("add-pos").value),
-            name: document.getElementById("add-name").value.trim(),
+            pos,
+            name,
             author: document.getElementById("add-author").value.trim(),
             verifier: document.getElementById("add-verifier").value.trim(),
             pts: Number(document.getElementById("add-pts").value),
@@ -1627,27 +1469,29 @@ document.addEventListener("DOMContentLoaded", () => {
             victors: getVictorsFromContainer("add-victors-container")
         };
 
-        insertAndShiftLevel(newLvl);
+        if (!currentListData.levels) currentListData.levels = [];
+        currentListData.levels.splice(pos - 1, 0, newLvl);
+        reorderLevelsArray(currentListData.levels);
+
         saveGlobalData();
         updateMaxPosLimits();
-        
         renderListLevels();
         renderLeaderboard();
         renderAdminPanel();
 
         e.target.reset();
         document.getElementById("add-victors-container").innerHTML = "";
-        showToast(`Level "${newLvl.name}" added at #${newLvl.pos}`);
+        showToast(`Level "${name}" added at #${pos}`);
     });
 
-    safeAddListener("edit-level-form", "submit", (e) => {
+    document.getElementById("edit-level-form").addEventListener("submit", (e) => {
         e.preventDefault();
         if (!isOwner) return;
 
         const idx = Number(document.getElementById("edit-lvl-index").value);
-
+        const pos = Number(document.getElementById("edit-pos").value);
         const updatedLvl = {
-            pos: Number(document.getElementById("edit-pos").value),
+            pos,
             name: document.getElementById("edit-name").value.trim(),
             author: document.getElementById("edit-author").value.trim(),
             verifier: document.getElementById("edit-verifier").value.trim(),
@@ -1656,23 +1500,21 @@ document.addEventListener("DOMContentLoaded", () => {
             victors: getVictorsFromContainer("edit-victors-container")
         };
 
-        editAndShiftLevel(idx, updatedLvl);
+        currentListData.levels.splice(idx, 1);
+        currentListData.levels.splice(pos - 1, 0, updatedLvl);
+        reorderLevelsArray(currentListData.levels);
+
         saveGlobalData();
         closeModals();
-        
         renderListLevels();
         renderLeaderboard();
         renderAdminPanel();
         showToast(`Saved changes for "${updatedLvl.name}"`);
     });
 
-    safeAddListener("create-list-form", "submit", (e) => {
+    document.getElementById("create-list-form").addEventListener("submit", (e) => {
         e.preventDefault();
-        if (!currentUser) {
-            showToast("Please log in first!");
-            openAuthModal('login');
-            return;
-        }
+        if (!currentUser) return;
 
         const id = document.getElementById("new-list-id").value.trim().toLowerCase().replace(/\s+/g, '-');
         const title = document.getElementById("new-list-title").value.trim();
@@ -1685,14 +1527,7 @@ document.addEventListener("DOMContentLoaded", () => {
         showToast("Demonlist created!");
     });
 
-    // Close modals on clicking overlay backdrop
-    document.querySelectorAll('.modal-overlay').forEach(modal => {
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) closeModals();
-        });
-    });
-
-    // Initial render
+    // Initial Start
     updateAuthUI();
     showMainMenu();
     fetchGlobalData().then(() => {
