@@ -599,7 +599,7 @@ h1, h2, h3, .font-heading {
 
 <script>
 /* ====================================================================
-   1. AUTOMATYCZNA KONFIGURACJA SUPABASE
+   1. AUTOMATYCZNA KONFIGURACJA SUPABASE (BEZ MIEJSCOWYCH BŁĘDÓW TRACKING)
    ==================================================================== */
 const SUPABASE_URL = "https://iigxupbrqpftynrhlwk.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlpZ3h1cGJycXBxZnR5bnJobHdrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4MzAzNjEsImV4cCI6MjEwMDQwNjM2MX0.hK0GlMWVE7B3_n2mEzsUlz3qU6TSWt5w2S9Td20fl68";
@@ -608,7 +608,12 @@ let supabaseClient = null;
 
 if (window.supabase) {
     try {
-        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+            auth: {
+                persistSession: false,
+                autoRefreshToken: false
+            }
+        });
     } catch(e) {
         console.warn("Nie udało się połączyć z Supabase.", e);
     }
