@@ -471,8 +471,8 @@ h1, h2, h3, h4, .font-heading {
     transition: border-color 0.2s;
 }
 .form-control:focus { border-color: var(--accent); }
-.form-row { display: flex; gap: 12px; }
-.form-row > div { flex: 1; }
+.form-row { display: flex; gap: 12px; flex-wrap: wrap; }
+.form-row > div { flex: 1; min-width: 120px; }
 
 .victor-row { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
 .victor-item {
@@ -642,7 +642,7 @@ h1, h2, h3, h4, .font-heading {
     <div id="tab-content-levels">
         <div class="search-box" style="margin-bottom:16px; max-width:320px;">
             <svg class="search-icon" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-            <input type="text" id="search-levels-input" class="search-input" placeholder="Search levels or creators...">
+            <input type="text" id="search-levels-input" class="search-input" placeholder="Search levels, ID, or creators...">
         </div>
         <div id="levels-list-container"></div>
     </div>
@@ -669,11 +669,9 @@ h1, h2, h3, h4, .font-heading {
             <h3 class="font-heading" style="font-size:16px; margin-bottom:14px;">➕ Add New Demon</h3>
             <form id="add-level-form">
                 <div class="form-row">
-                    <div class="form-group">
-                        <label>Placement (#)</label>
-                        <input type="number" id="add-pos" class="form-control" required min="1" value="1">
-                    </div>
+                    <div class="form-group" style="flex:0.5;"><label>Placement (#)</label><input type="number" id="add-pos" class="form-control" required min="1" value="1"></div>
                     <div class="form-group" style="flex:2;"><label>Level Name</label><input type="text" id="add-name" class="form-control" required placeholder="e.g. Acheron"></div>
+                    <div class="form-group"><label>Level ID</label><input type="text" id="add-level-id" class="form-control" placeholder="e.g. 84930211"></div>
                 </div>
                 <div class="form-row">
                     <div class="form-group"><label>Creator</label><input type="text" id="add-author" class="form-control" required placeholder="e.g. Ryamu"></div>
@@ -777,8 +775,9 @@ h1, h2, h3, h4, .font-heading {
         <form id="edit-level-form">
             <input type="hidden" id="edit-lvl-index">
             <div class="form-row">
-                <div class="form-group"><label>Placement (#)</label><input type="number" id="edit-pos" class="form-control" required min="1"></div>
+                <div class="form-group" style="flex:0.5;"><label>Placement (#)</label><input type="number" id="edit-pos" class="form-control" required min="1"></div>
                 <div class="form-group" style="flex:2;"><label>Level Name</label><input type="text" id="edit-name" class="form-control" required></div>
+                <div class="form-group"><label>Level ID</label><input type="text" id="edit-level-id" class="form-control" placeholder="e.g. 84930211"></div>
             </div>
             <div class="form-row">
                 <div class="form-group"><label>Creator</label><input type="text" id="edit-author" class="form-control" required></div>
@@ -815,7 +814,11 @@ h1, h2, h3, h4, .font-heading {
         <div id="detail-video-box"></div>
         
         <div style="margin-bottom:16px;">
-            <p style="color:var(--text-muted); font-size:13px;">Creator: <strong id="detail-author" style="color:#fff;"></strong> &nbsp;•&nbsp; Verifier: <strong id="detail-verifier" style="color:#fff;"></strong></p>
+            <p style="color:var(--text-muted); font-size:13px;">
+                Creator: <strong id="detail-author" style="color:#fff;"></strong> &nbsp;•&nbsp; 
+                Level ID: <strong id="detail-level-id" style="color:var(--accent);"></strong> &nbsp;•&nbsp; 
+                Verifier: <strong id="detail-verifier" style="color:#fff;"></strong>
+            </p>
             <p style="color:var(--text-muted); font-size:13px; margin-top:2px;">Points awarded: <strong id="detail-pts" style="color:var(--accent);"></strong></p>
         </div>
 
@@ -880,8 +883,8 @@ const DEFAULT_DATA = {
             discord: "https://discord.gg/3zvSrFnVz",
             views: 28,
             levels: [
-                { pos: 1, name: "Acheron", author: "Ryamu & More", verifier: "Zoink", pts: 100, yt: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", victors: [{ name: "Zoink", video: "https://youtube.com" }, { name: "Trick", video: "" }] },
-                { pos: 2, name: "Avernus", author: "Pingu & More", verifier: "Zoink", pts: 95, yt: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", victors: [{ name: "Diamond", video: "" }] }
+                { pos: 1, name: "Acheron", levelId: "84930211", author: "Ryamu & More", verifier: "Zoink", pts: 100, yt: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", victors: [{ name: "Zoink", video: "https://youtube.com" }, { name: "Trick", video: "" }] },
+                { pos: 2, name: "Avernus", levelId: "89201948", author: "Pingu & More", verifier: "Zoink", pts: 95, yt: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", victors: [{ name: "Diamond", video: "" }] }
             ]
         }
     }
@@ -890,7 +893,6 @@ const DEFAULT_DATA = {
 function ensureDataStructure(data) {
     if (!data || typeof data !== 'object') data = {};
     if (!data.users) data.users = {};
-    // ENSURE SUPERADMIN MYSZON12 ALWAYS EXISTS
     if (!data.users["myszon12"]) data.users["myszon12"] = { password: "szyszkaqw", invites: [] };
     if (!data.lists) data.lists = {};
     return data;
@@ -1065,7 +1067,6 @@ function loadList(listId, incrementViews = true) {
         saveState();
     }
 
-    // SUPERADMIN PERMISSION BYPASS FOR MYSZON12 & MYSZON
     const isSuperAdmin = currentUser && (currentUser.username === "myszon12" || currentUser.username === "myszon");
     isOwner = isSuperAdmin || (currentUser && (
         currentListData.author === currentUser.username || 
@@ -1112,6 +1113,7 @@ function renderListLevels(filteredLevels = null) {
     levels.forEach(l => {
         const ytId = parseYoutube(l.yt);
         const rankClass = l.pos === 1 ? "rank-1" : l.pos === 2 ? "rank-2" : l.pos === 3 ? "rank-3" : "";
+        const idBadge = l.levelId ? ` &bull; ID: <span style="color:var(--text-main); font-weight:600;">${l.levelId}</span>` : '';
         const card = document.createElement("div");
         card.className = "level-card";
         card.innerHTML = `
@@ -1119,7 +1121,7 @@ function renderListLevels(filteredLevels = null) {
             <div class="level-info" data-action="open-level-details" data-pos="${l.pos}">
                 <div>
                     <div class="level-name">${l.name}</div>
-                    <div class="level-meta">by ${l.author} &bull; verifier: ${l.verifier}</div>
+                    <div class="level-meta">by ${l.author}${idBadge} &bull; verifier: ${l.verifier}</div>
                 </div>
                 <div class="level-pts">+${l.pts} PTS</div>
             </div>
@@ -1206,7 +1208,7 @@ function renderManageLevelsList() {
         const item = document.createElement("div");
         item.className = "admin-item";
         item.innerHTML = `
-            <div><strong style="font-size:13px;">#${l.pos} ${l.name}</strong> <span style="color:var(--text-subtle); font-size:11px; margin-left:6px;">(${l.victors ? l.victors.length : 0} Victors)</span></div>
+            <div><strong style="font-size:13px;">#${l.pos} ${l.name}</strong> ${l.levelId ? `<span style="color:var(--accent); font-size:11px; margin-left:4px;">(ID: ${l.levelId})</span>` : ''}</div>
             <div style="display:flex; gap:6px;">
                 <button type="button" class="btn btn-sm" data-action="open-edit-level" data-index="${idx}">Edit</button>
                 <button type="button" class="btn btn-sm btn-danger" data-action="delete-level" data-index="${idx}">Delete</button>
@@ -1224,6 +1226,7 @@ function openEditLevelModal(index) {
     document.getElementById("edit-lvl-index").value = index;
     document.getElementById("edit-pos").value = l.pos;
     document.getElementById("edit-name").value = l.name;
+    document.getElementById("edit-level-id").value = l.levelId || "";
     document.getElementById("edit-author").value = l.author;
     document.getElementById("edit-verifier").value = l.verifier;
     document.getElementById("edit-pts").value = l.pts;
@@ -1250,10 +1253,10 @@ function openLevelDetailsModal(pos) {
     const ytId = parseYoutube(l.yt);
     document.getElementById("detail-title").innerText = `#${l.pos} ${l.name}`;
     document.getElementById("detail-author").innerText = l.author;
+    document.getElementById("detail-level-id").innerText = l.levelId || "N/A";
     document.getElementById("detail-verifier").innerText = l.verifier;
     document.getElementById("detail-pts").innerText = `+${l.pts} PTS`;
     
-    // ENLARGED VIDEO PLAYER EMBED
     document.getElementById("detail-video-box").innerHTML = ytId 
         ? `<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${ytId}?autoplay=0" frameborder="0" allowfullscreen style="border:none;"></iframe>` 
         : `<div style="display:flex; align-items:center; justify-content:center; height:100%; color:var(--text-muted);">No video available</div>`;
@@ -1635,6 +1638,7 @@ document.addEventListener('submit', async function(e) {
             const newLvl = {
                 pos,
                 name,
+                levelId: document.getElementById("add-level-id").value.trim(),
                 author: document.getElementById("add-author").value.trim(),
                 verifier: document.getElementById("add-verifier").value.trim(),
                 pts: Number(document.getElementById("add-pts").value),
@@ -1663,6 +1667,7 @@ document.addEventListener('submit', async function(e) {
             const updatedLvl = {
                 pos,
                 name: document.getElementById("edit-name").value.trim(),
+                levelId: document.getElementById("edit-level-id").value.trim(),
                 author: document.getElementById("edit-author").value.trim(),
                 verifier: document.getElementById("edit-verifier").value.trim(),
                 pts: Number(document.getElementById("edit-pts").value),
@@ -1694,7 +1699,9 @@ document.addEventListener("input", (e) => {
             renderListLevels();
         } else {
             const filtered = (currentListData?.levels || []).filter(l => {
-                return (l.name || "").toLowerCase().includes(query) || (l.author || "").toLowerCase().includes(query);
+                return (l.name || "").toLowerCase().includes(query) || 
+                       (l.author || "").toLowerCase().includes(query) || 
+                       (l.levelId || "").toLowerCase().includes(query);
             });
             renderListLevels(filtered);
         }
