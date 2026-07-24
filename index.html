@@ -426,7 +426,7 @@ h1, h2, h3, .font-heading {
 
 #detail-video-container { width: 100%; height: 320px; background: #000; border-radius: 10px; overflow: hidden; margin-bottom: 16px; border: 1px solid var(--border); }
 
-/* FOOTER / CREDITS */
+/* FOOTER */
 .footer {
     background: rgba(11, 14, 21, 0.95);
     border-top: 1px solid var(--border);
@@ -549,7 +549,7 @@ h1, h2, h3, .font-heading {
             <p style="color:var(--text-secondary); font-size:12px; margin-bottom:12px;">Type the username of a registered player to send them an invitation notification.</p>
             <div style="display:flex; gap:8px;">
                 <input type="text" id="invite-username-input" class="form-control" placeholder="Target username..." style="flex:1;">
-                <button class="btn btn-accent" onclick="sendDirectInvite()">Send Invite</button>
+                <button class="btn btn-accent" type="button" onclick="sendDirectInvite()">Send Invite</button>
             </div>
         </div>
 
@@ -729,12 +729,12 @@ h1, h2, h3, .font-heading {
     </div>
 </div>
 
-<!-- FOOTER WITH CREDITS AND DISCORD -->
+<!-- FOOTER -->
 <footer class="footer">
     <div class="footer-content">
         <div class="footer-left">
             <div class="footer-credits">Demonlist Central &bull; Made by <span>myszon12</span></div>
-            <div class="footer-sub">Real-time GD Demonlist platform powered by Supabase Cloud Engine</div>
+            <div class="footer-sub">Real-time GD Demonlist platform powered by LocalStorage & Supabase Cloud Engine</div>
         </div>
         <div class="footer-links">
             <a href="https://discord.gg/3zvSrFnVz" target="_blank" class="discord-btn">
@@ -749,21 +749,31 @@ h1, h2, h3, .font-heading {
 
 <script>
 // =========================================================================
-// SAFE SUPABASE INITIALIZATION
+// SAFE STORAGE & DATA HELPERS
 // =========================================================================
+function getSafeLocalStorage(key, fallback) {
+    try {
+        const item = localStorage.getItem(key);
+        return item ? JSON.parse(item) : fallback;
+    } catch (e) {
+        console.warn("Corrupted localStorage key, reset to fallback:", key);
+        return fallback;
+    }
+}
+
 const SUPABASE_URL = "https://iigxupbrqpqftynrhlwk.supabase.co";
 const SUPABASE_KEY = "sb_publishable_NwDSUBXKXJyVPxiZwAyocw_LIHaxvrR";
 
 let supabase = null;
 try {
-    if (window.supabase && window.supabase.createClient) {
+    if (typeof window.supabase !== 'undefined' && window.supabase && window.supabase.createClient) {
         supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     }
 } catch (e) {
-    console.error("Supabase load error:", e);
+    console.warn("Supabase load fallback:", e);
 }
 
-let currentUser = JSON.parse(localStorage.getItem("gd_current_user_v7")) || null;
+let currentUser = getSafeLocalStorage("gd_current_user_v7", null);
 
 const defaultGlobalData = {
     users: {
@@ -785,7 +795,7 @@ const defaultGlobalData = {
     }
 };
 
-let globalData = JSON.parse(localStorage.getItem("gd_global_data_backup")) || defaultGlobalData;
+let globalData = getSafeLocalStorage("gd_global_data_backup", defaultGlobalData);
 
 function setSyncing(isSyncing) {
     const bar = document.getElementById("sync-status");
@@ -897,112 +907,55 @@ function checkAccountCooldown() {
     return 0;
 }
 
-window.switchAuthTab = function(type) {
+function switchAuthTab(type) {
     const isLogin = type === 'login';
-    document.getElementById("auth-tab-login").classList.toggle("active", isLogin);
-    document.getElementById("auth-tab-register").classList.toggle("active", !isLogin);
-    document.getElementById("form-login").classList.toggle("hidden", !isLogin);
-    document.getElementById("form-register").classList.toggle("hidden", isLogin);
-    if (!isLogin) generateCaptcha();
-};
+    const tabLogin = document.getElementById("auth-tab-login");
+    const tabReg = document.getElementById("auth-tab-register");
+    const formLogin = document.getElementById("form-login");
+    const formReg = document.getElementById("form-register");
 
-window.openAuthModal = function(type = 'login') {
-    switchAuthTab(type);
-    document.getElementById("modal-auth").classList.add("active");
-};
-
-document.getElementById("form-login").addEventListener("submit", (e) => {
-    e.preventDefault();
+    if (tabLogin) tabLogin.classList.toggle("active", isLogin);
+    if (tabReg) tabReg.classList.toggle("active", !isLogin);
+    if (formLogin) formLogin.classList.toggle("hidden", !isLogin);
+    if (formReg) formReg.classList.toggle("hidden", isLogin);
     
-    const user = document.getElementById("login-username").value.trim();
-    const pass = document.getElementById("login-password").value;
+    if (!isLogin) generateCaptcha();
+}
+window.switchAuthTab = switchAuthTab;
 
-    if (globalData.users[user] && globalData.users[user].password === pass) {
-        currentUser = { username: user };
-        saveGlobalData();
-        updateAuthUI();
-        closeModals();
-        showToast(`Welcome back, ${user}!`);
-        if (currentListId) loadList(currentListId);
-    } else {
-        showToast("❌ Incorrect username or password");
-    }
-});
+function openAuthModal(type = 'login') {
+    switchAuthTab(type);
+    const modal = document.getElementById("modal-auth");
+    if (modal) modal.classList.add("active");
+}
+window.openAuthModal = openAuthModal;
 
-document.getElementById("form-register").addEventListener("submit", (e) => {
-    e.preventDefault();
-
-    const honeypot = document.getElementById("website_url_hp").value;
-    if (honeypot) {
-        showToast("❌ Access Denied");
-        return;
-    }
-
-    const cooldownLeft = checkAccountCooldown();
-    if (cooldownLeft > 0) {
-        showToast(`⏳ Please wait ${cooldownLeft}s before creating another account.`);
-        return;
-    }
-
-    const captchaAns = document.getElementById("captcha-answer").value.trim().toLowerCase();
-    if (captchaAns !== currentCaptchaTarget.toLowerCase()) {
-        showToast("❌ Incorrect captcha answer");
-        generateCaptcha();
-        return;
-    }
-
-    const user = document.getElementById("reg-username").value.trim();
-    const pass = document.getElementById("reg-password").value;
-
-    const userRegex = /^[a-zA-Z0-9_]{3,16}$/;
-    if (!userRegex.test(user)) {
-        showToast("❌ Username must be 3-16 alphanumeric characters or underscores.");
-        return;
-    }
-
-    if (pass.length < 6) {
-        showToast("❌ Password must be at least 6 characters.");
-        return;
-    }
-
-    if (globalData.users[user]) {
-        showToast("❌ Username is already registered");
-        return;
-    }
-
-    globalData.users[user] = { password: pass, invites: [] };
-    currentUser = { username: user };
-
-    localStorage.setItem("gd_last_account_created", Date.now().toString());
-
-    saveGlobalData();
-    updateAuthUI();
-    closeModals();
-    showToast(`Account created! Logged in as ${user}`);
-    if (currentListId) loadList(currentListId);
-});
-
-window.logoutUser = function() {
+function logoutUser() {
     currentUser = null;
     saveGlobalData();
     updateAuthUI();
     showToast("Logged out successfully");
     if (currentListId) loadList(currentListId);
-};
+}
+window.logoutUser = logoutUser;
 
 function updateAuthUI() {
     const notifBell = document.getElementById("notif-bell");
+    const authBtn = document.getElementById("auth-modal-btn");
+    const profileBtn = document.getElementById("user-profile-btn");
+    const nameLabel = document.getElementById("user-display-name");
+
     if (currentUser) {
-        document.getElementById("auth-modal-btn").classList.add("hidden");
-        document.getElementById("user-profile-btn").classList.remove("hidden");
+        if (authBtn) authBtn.classList.add("hidden");
+        if (profileBtn) profileBtn.classList.remove("hidden");
         
         const badgeTag = currentUser.username === "myszon" ? " (Admin)" : "";
-        document.getElementById("user-display-name").innerText = `${currentUser.username}${badgeTag}`;
+        if (nameLabel) nameLabel.innerText = `${currentUser.username}${badgeTag}`;
         if (notifBell) notifBell.classList.remove("hidden");
         checkNotificationsCount();
     } else {
-        document.getElementById("auth-modal-btn").classList.remove("hidden");
-        document.getElementById("user-profile-btn").classList.add("hidden");
+        if (authBtn) authBtn.classList.remove("hidden");
+        if (profileBtn) profileBtn.classList.add("hidden");
         if (notifBell) notifBell.classList.add("hidden");
     }
 }
@@ -1010,10 +963,13 @@ function updateAuthUI() {
 // =========================================================================
 // INBOX & INVITES
 // =========================================================================
-window.sendDirectInvite = function() {
+function sendDirectInvite() {
     if (!currentUser || !isOwner) return;
 
-    const targetUser = document.getElementById("invite-username-input").value.trim();
+    const input = document.getElementById("invite-username-input");
+    if (!input) return;
+
+    const targetUser = input.value.trim();
     if (!targetUser) return;
     
     if (targetUser === currentUser.username) {
@@ -1047,9 +1003,10 @@ window.sendDirectInvite = function() {
     });
 
     saveGlobalData();
-    document.getElementById("invite-username-input").value = "";
+    input.value = "";
     showToast(`Invite sent to ${targetUser}`);
-};
+}
+window.sendDirectInvite = sendDirectInvite;
 
 function checkNotificationsCount() {
     if (!currentUser || !globalData.users[currentUser.username]) return;
@@ -1066,8 +1023,9 @@ function checkNotificationsCount() {
     }
 }
 
-window.openNotificationsModal = function() {
+function openNotificationsModal() {
     const container = document.getElementById("notifications-list-container");
+    if (!container) return;
     container.innerHTML = "";
 
     const invites = (globalData.users[currentUser.username] && globalData.users[currentUser.username].invites) || [];
@@ -1094,11 +1052,15 @@ window.openNotificationsModal = function() {
         });
     }
 
-    document.getElementById("modal-notifications").classList.add("active");
-};
+    const modal = document.getElementById("modal-notifications");
+    if (modal) modal.classList.add("active");
+}
+window.openNotificationsModal = openNotificationsModal;
 
-window.respondInvite = function(inviteId, accept) {
-    const userInvites = globalData.users[currentUser.username].invites;
+function respondInvite(inviteId, accept) {
+    if (!currentUser || !globalData.users[currentUser.username]) return;
+
+    const userInvites = globalData.users[currentUser.username].invites || [];
     const index = userInvites.findIndex(i => i.id === inviteId);
 
     if (index !== -1) {
@@ -1118,7 +1080,8 @@ window.respondInvite = function(inviteId, accept) {
         openNotificationsModal();
         if (currentListId === inv.listId) loadList(currentListId);
     }
-};
+}
+window.respondInvite = respondInvite;
 
 // =========================================================================
 // NAVIGATION & LIST MANAGEMENT
@@ -1127,21 +1090,16 @@ let currentListId = null;
 let currentListData = null;
 let isOwner = false;
 
-window.addEventListener("DOMContentLoaded", () => {
-    updateAuthUI();
-    showMainMenu();
-    fetchGlobalData().then(() => {
-        updateAuthUI();
-        if (!currentListId) showMainMenu();
-    });
-});
-
-window.showMainMenu = function() {
-    document.getElementById("view-main-menu").classList.remove("hidden");
-    document.getElementById("view-list-detail").classList.add("hidden");
+function showMainMenu() {
+    const viewMain = document.getElementById("view-main-menu");
+    const viewDetail = document.getElementById("view-list-detail");
+    if (viewMain) viewMain.classList.remove("hidden");
+    if (viewDetail) viewDetail.classList.add("hidden");
 
     const popGrid = document.getElementById("popular-lists-grid");
     const allGrid = document.getElementById("all-lists-grid");
+    if (!popGrid || !allGrid) return;
+
     popGrid.innerHTML = "";
     allGrid.innerHTML = "";
 
@@ -1155,7 +1113,8 @@ window.showMainMenu = function() {
     listsArray.forEach(item => {
         allGrid.appendChild(createListCardElement(item));
     });
-};
+}
+window.showMainMenu = showMainMenu;
 
 function createListCardElement(item) {
     const card = document.createElement("div");
@@ -1176,7 +1135,7 @@ function createListCardElement(item) {
     return card;
 }
 
-window.loadList = function(listId) {
+function loadList(listId) {
     currentListId = listId;
     currentListData = globalData.lists[listId];
 
@@ -1196,22 +1155,33 @@ window.loadList = function(listId) {
         (currentListData.editors && currentListData.editors.includes(currentUser.username))
     ));
 
-    document.getElementById("view-main-menu").classList.add("hidden");
-    document.getElementById("view-list-detail").classList.remove("hidden");
+    const viewMain = document.getElementById("view-main-menu");
+    const viewDetail = document.getElementById("view-list-detail");
+    if (viewMain) viewMain.classList.add("hidden");
+    if (viewDetail) viewDetail.classList.remove("hidden");
 
-    document.getElementById("active-list-title").innerText = currentListData.title;
-    document.getElementById("active-list-author").innerText = currentListData.author;
-    document.getElementById("active-list-views").innerText = `👁️ ${currentListData.views} views`;
-    document.getElementById("active-list-discord").href = currentListData.discord || "#";
+    const activeTitle = document.getElementById("active-list-title");
+    const activeAuthor = document.getElementById("active-list-author");
+    const activeViews = document.getElementById("active-list-views");
+    const activeDiscord = document.getElementById("active-list-discord");
+
+    if (activeTitle) activeTitle.innerText = currentListData.title;
+    if (activeAuthor) activeAuthor.innerText = currentListData.author;
+    if (activeViews) activeViews.innerText = `👁️ ${currentListData.views} views`;
+    if (activeDiscord) activeDiscord.href = currentListData.discord || "#";
+
+    const btnAdminTab = document.getElementById("btn-admin-tab");
+    const tabBtnAdmin = document.getElementById("tab-btn-admin");
+    const btnDeleteList = document.getElementById("btn-delete-list");
 
     if (isOwner) {
-        document.getElementById("btn-admin-tab").classList.remove("hidden");
-        document.getElementById("tab-btn-admin").classList.remove("hidden");
-        document.getElementById("btn-delete-list").classList.remove("hidden");
+        if (btnAdminTab) btnAdminTab.classList.remove("hidden");
+        if (tabBtnAdmin) tabBtnAdmin.classList.remove("hidden");
+        if (btnDeleteList) btnDeleteList.classList.remove("hidden");
     } else {
-        document.getElementById("btn-admin-tab").classList.add("hidden");
-        document.getElementById("tab-btn-admin").classList.add("hidden");
-        document.getElementById("btn-delete-list").classList.add("hidden");
+        if (btnAdminTab) btnAdminTab.classList.add("hidden");
+        if (tabBtnAdmin) tabBtnAdmin.classList.add("hidden");
+        if (btnDeleteList) btnDeleteList.classList.add("hidden");
     }
 
     updateMaxPosLimits();
@@ -1219,9 +1189,10 @@ window.loadList = function(listId) {
     renderListLevels();
     renderLeaderboard();
     if (isOwner) renderAdminPanel();
-};
+}
+window.loadList = loadList;
 
-window.deleteCurrentList = function() {
+function deleteCurrentList() {
     if (!isOwner) return;
     if (confirm(`Permanently delete list "${currentListData.title}"?`)) {
         delete globalData.lists[currentListId];
@@ -1229,16 +1200,20 @@ window.deleteCurrentList = function() {
         showToast("Demonlist deleted");
         showMainMenu();
     }
-};
+}
+window.deleteCurrentList = deleteCurrentList;
 
 function updateMaxPosLimits() {
-    const total = currentListData.levels ? currentListData.levels.length : 0;
+    const total = currentListData && currentListData.levels ? currentListData.levels.length : 0;
     const maxAdd = total + 1;
     
     const addInput = document.getElementById("add-pos");
-    addInput.max = maxAdd;
-    addInput.value = maxAdd;
-    document.getElementById("add-pos-hint").innerText = `Max position: #${maxAdd}`;
+    const addHint = document.getElementById("add-pos-hint");
+    if (addInput) {
+        addInput.max = maxAdd;
+        addInput.value = maxAdd;
+    }
+    if (addHint) addHint.innerText = `Max position: #${maxAdd}`;
 }
 
 // =========================================================================
@@ -1281,9 +1256,10 @@ function editAndShiftLevel(index, updatedLvl) {
 // =========================================================================
 function renderListLevels(filteredLevels = null) {
     const container = document.getElementById("levels-list-container");
+    if (!container) return;
     container.innerHTML = "";
 
-    const levels = filteredLevels || currentListData.levels || [];
+    const levels = filteredLevels || (currentListData ? currentListData.levels : []) || [];
     if (levels.length === 0) {
         container.innerHTML = "<p style='color:var(--text-muted); font-size:13px;'>No levels added yet.</p>";
         return;
@@ -1311,8 +1287,11 @@ function renderListLevels(filteredLevels = null) {
     });
 }
 
-window.filterLevelsList = function() {
-    const query = document.getElementById("search-levels-input").value.toLowerCase().trim();
+function filterLevelsList() {
+    const searchInput = document.getElementById("search-levels-input");
+    if (!searchInput) return;
+
+    const query = searchInput.value.toLowerCase().trim();
     if (!query) {
         renderListLevels();
         return;
@@ -1321,14 +1300,16 @@ window.filterLevelsList = function() {
         l.name.toLowerCase().includes(query) || l.author.toLowerCase().includes(query)
     );
     renderListLevels(filtered);
-};
+}
+window.filterLevelsList = filterLevelsList;
 
 function renderLeaderboard() {
     const container = document.getElementById("tab-content-leaderboard");
+    if (!container) return;
     container.innerHTML = "";
 
     let players = {};
-    (currentListData.levels || []).forEach(l => {
+    ((currentListData && currentListData.levels) || []).forEach(l => {
         const pts = Number(l.pts) || 0;
         if (l.victors) {
             l.victors.forEach(v => {
@@ -1363,9 +1344,10 @@ function renderLeaderboard() {
 
 function renderAdminPanel() {
     const container = document.getElementById("admin-levels-manage-list");
+    if (!container) return;
     container.innerHTML = "";
 
-    (currentListData.levels || []).forEach((l, idx) => {
+    ((currentListData && currentListData.levels) || []).forEach((l, idx) => {
         const item = document.createElement("div");
         item.className = "admin-item";
         item.innerHTML = `
@@ -1379,88 +1361,48 @@ function renderAdminPanel() {
     });
 }
 
-// =========================================================================
-// FORM HANDLERS
-// =========================================================================
-document.getElementById("add-level-form").addEventListener("submit", (e) => {
-    e.preventDefault();
-    if (!isOwner) return;
-
-    const newLvl = {
-        pos: Number(document.getElementById("add-pos").value),
-        name: document.getElementById("add-name").value.trim(),
-        author: document.getElementById("add-author").value.trim(),
-        verifier: document.getElementById("add-verifier").value.trim(),
-        pts: Number(document.getElementById("add-pts").value),
-        yt: document.getElementById("add-yt").value.trim(),
-        victors: getVictorsFromContainer("add-victors-container")
-    };
-
-    insertAndShiftLevel(newLvl);
-    saveGlobalData();
-    updateMaxPosLimits();
-    
-    renderListLevels();
-    renderLeaderboard();
-    renderAdminPanel();
-
-    e.target.reset();
-    document.getElementById("add-victors-container").innerHTML = "";
-    showToast(`Level "${newLvl.name}" added at #${newLvl.pos}`);
-});
-
-window.openEditLevelModal = function(index) {
+function openEditLevelModal(index) {
+    if (!currentListData || !currentListData.levels[index]) return;
     const l = currentListData.levels[index];
     const total = currentListData.levels.length;
 
-    document.getElementById("edit-lvl-index").value = index;
+    const editIndex = document.getElementById("edit-lvl-index");
     const posInput = document.getElementById("edit-pos");
-    posInput.max = total;
-    posInput.value = l.pos;
-    document.getElementById("edit-pos-hint").innerText = `Max position: #${total}`;
+    const posHint = document.getElementById("edit-pos-hint");
 
-    document.getElementById("edit-name").value = l.name;
-    document.getElementById("edit-author").value = l.author;
-    document.getElementById("edit-verifier").value = l.verifier;
-    document.getElementById("edit-pts").value = l.pts;
-    document.getElementById("edit-yt").value = l.yt;
+    if (editIndex) editIndex.value = index;
+    if (posInput) {
+        posInput.max = total;
+        posInput.value = l.pos;
+    }
+    if (posHint) posHint.innerText = `Max position: #${total}`;
+
+    const editName = document.getElementById("edit-name");
+    const editAuthor = document.getElementById("edit-author");
+    const editVerifier = document.getElementById("edit-verifier");
+    const editPts = document.getElementById("edit-pts");
+    const editYt = document.getElementById("edit-yt");
+
+    if (editName) editName.value = l.name;
+    if (editAuthor) editAuthor.value = l.author;
+    if (editVerifier) editVerifier.value = l.verifier;
+    if (editPts) editPts.value = l.pts;
+    if (editYt) editYt.value = l.yt;
 
     const victorsContainer = document.getElementById("edit-victors-container");
-    victorsContainer.innerHTML = "";
-    if (l.victors) {
-        l.victors.forEach(v => addVictorInputRow("edit-victors-container", v.name, v.video));
+    if (victorsContainer) {
+        victorsContainer.innerHTML = "";
+        if (l.victors) {
+            l.victors.forEach(v => addVictorInputRow("edit-victors-container", v.name, v.video));
+        }
     }
 
-    document.getElementById("modal-edit-level").classList.add("active");
-};
+    const modal = document.getElementById("modal-edit-level");
+    if (modal) modal.classList.add("active");
+}
+window.openEditLevelModal = openEditLevelModal;
 
-document.getElementById("edit-level-form").addEventListener("submit", (e) => {
-    e.preventDefault();
-    if (!isOwner) return;
-
-    const idx = Number(document.getElementById("edit-lvl-index").value);
-
-    const updatedLvl = {
-        pos: Number(document.getElementById("edit-pos").value),
-        name: document.getElementById("edit-name").value.trim(),
-        author: document.getElementById("edit-author").value.trim(),
-        verifier: document.getElementById("edit-verifier").value.trim(),
-        pts: Number(document.getElementById("edit-pts").value),
-        yt: document.getElementById("edit-yt").value.trim(),
-        victors: getVictorsFromContainer("edit-victors-container")
-    };
-
-    editAndShiftLevel(idx, updatedLvl);
-    saveGlobalData();
-    closeModals();
-    
-    renderListLevels();
-    renderLeaderboard();
-    renderAdminPanel();
-    showToast(`Saved changes for "${updatedLvl.name}"`);
-});
-
-window.deleteLevel = function(index) {
+function deleteLevel(index) {
     if (confirm("Delete this level?") && isOwner) {
         currentListData.levels.splice(index, 1);
         reorderLevelsArray(currentListData.levels);
@@ -1471,29 +1413,10 @@ window.deleteLevel = function(index) {
         renderAdminPanel();
         showToast("Level deleted");
     }
-};
+}
+window.deleteLevel = deleteLevel;
 
-document.getElementById("create-list-form").addEventListener("submit", (e) => {
-    e.preventDefault();
-    if (!currentUser) {
-        showToast("Please log in first!");
-        openAuthModal('login');
-        return;
-    }
-
-    const id = document.getElementById("new-list-id").value.trim().toLowerCase().replace(/\s+/g, '-');
-    const title = document.getElementById("new-list-title").value.trim();
-    const discord = document.getElementById("new-list-discord").value.trim();
-
-    globalData.lists[id] = { id, title, author: currentUser.username, editors: [], discord, views: 1, levels: [] };
-    saveGlobalData();
-    closeModals();
-    loadList(id);
-    showToast("Demonlist created!");
-});
-
-// UTILS
-window.addVictorInputRow = function(containerId, name = "", video = "") {
+function addVictorInputRow(containerId, name = "", video = "") {
     const container = document.getElementById(containerId);
     if (!container) return;
     const row = document.createElement("div");
@@ -1504,36 +1427,47 @@ window.addVictorInputRow = function(containerId, name = "", video = "") {
         <button type="button" class="btn btn-danger btn-sm" onclick="this.parentElement.remove()">✕</button>
     `;
     container.appendChild(row);
-};
+}
+window.addVictorInputRow = addVictorInputRow;
 
 function getVictorsFromContainer(containerId) {
     const rows = document.querySelectorAll(`#${containerId} .victor-input-row`);
     const victors = [];
     rows.forEach(row => {
-        const name = row.querySelector(".victor-name").value.trim();
-        const video = row.querySelector(".victor-video").value.trim();
+        const nameInput = row.querySelector(".victor-name");
+        const videoInput = row.querySelector(".victor-video");
+        const name = nameInput ? nameInput.value.trim() : "";
+        const video = videoInput ? videoInput.value.trim() : "";
         if (name) victors.push({ name, video });
     });
     return victors;
 }
 
-window.openLevelDetailsModal = function(pos) {
-    const l = currentListData.levels.find(item => item.pos === pos);
+function openLevelDetailsModal(pos) {
+    if (!currentListData) return;
+    const l = currentListData.levels.find(item => Number(item.pos) === Number(pos));
     if (!l) return;
 
     const ytId = parseYoutube(l.yt);
-    document.getElementById("detail-title").innerText = `#${l.pos} ${l.name}`;
-    document.getElementById("detail-author").innerText = l.author;
-    document.getElementById("detail-verifier").innerText = l.verifier;
-    document.getElementById("detail-pts").innerText = `+${l.pts} PTS`;
-    
-    document.getElementById("detail-video-container").innerHTML = `<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${ytId}" frameborder="0" allowfullscreen style="border:none;"></iframe>`;
+    const detailTitle = document.getElementById("detail-title");
+    const detailAuthor = document.getElementById("detail-author");
+    const detailVerifier = document.getElementById("detail-verifier");
+    const detailPts = document.getElementById("detail-pts");
+    const detailVideo = document.getElementById("detail-video-container");
+
+    if (detailTitle) detailTitle.innerText = `#${l.pos} ${l.name}`;
+    if (detailAuthor) detailAuthor.innerText = l.author;
+    if (detailVerifier) detailVerifier.innerText = l.verifier;
+    if (detailPts) detailPts.innerText = `+${l.pts} PTS`;
+    if (detailVideo) detailVideo.innerHTML = `<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${ytId}" frameborder="0" allowfullscreen style="border:none;"></iframe>`;
 
     const victorsContainer = document.getElementById("detail-victors-list");
+    const countBadge = document.getElementById("detail-victor-count");
+    if (!victorsContainer) return;
+
     victorsContainer.innerHTML = "";
-    
     const victors = l.victors || [];
-    document.getElementById("detail-victor-count").innerText = victors.length;
+    if (countBadge) countBadge.innerText = victors.length;
 
     if (victors.length === 0) {
         victorsContainer.innerHTML = "<p style='color:var(--text-muted); font-size:12px;'>No victors registered yet.</p>";
@@ -1549,40 +1483,223 @@ window.openLevelDetailsModal = function(pos) {
         });
     }
 
-    document.getElementById("modal-level-details").classList.add("active");
-};
+    const modal = document.getElementById("modal-level-details");
+    if (modal) modal.classList.add("active");
+}
+window.openLevelDetailsModal = openLevelDetailsModal;
 
-window.switchTab = function(tabName) {
+function switchTab(tabName) {
     ['levels', 'leaderboard', 'admin'].forEach(t => {
         const btn = document.getElementById(`tab-btn-${t}`);
         const content = document.getElementById(`tab-content-${t}`);
         if (btn) btn.classList.toggle("active", t === tabName);
         if (content) content.classList.toggle("hidden", t !== tabName);
     });
-};
+}
+window.switchTab = switchTab;
 
-window.openCreateListModal = function() { 
+function openCreateListModal() { 
     if (!currentUser) {
         showToast("Please log in first!");
         openAuthModal('login');
         return;
     }
-    document.getElementById("modal-create-list").classList.add("active"); 
-};
+    const modal = document.getElementById("modal-create-list");
+    if (modal) modal.classList.add("active"); 
+}
+window.openCreateListModal = openCreateListModal;
 
-window.closeModals = function() { 
+function closeModals() { 
     document.querySelectorAll(".modal-overlay").forEach(m => m.classList.remove("active")); 
-};
+}
+window.closeModals = closeModals;
 
 function parseYoutube(yt) {
     if (!yt) return "";
     try {
-        const url = new URL(yt.startsWith('http') ? yt : 'https://youtube.com/' + yt);
+        let fullUrl = yt;
+        if (!fullUrl.startsWith('http://') && !fullUrl.startsWith('https://')) {
+            fullUrl = 'https://' + fullUrl;
+        }
+        const url = new URL(fullUrl);
         if (url.hostname.includes('youtu.be')) return url.pathname.slice(1);
         if (url.searchParams.has('v')) return url.searchParams.get('v');
-        return url.pathname.split('/').pop();
-    } catch (e) { return ""; }
+        const parts = url.pathname.split('/').filter(Boolean);
+        return parts[parts.length - 1] || "";
+    } catch (e) { 
+        return yt.trim(); 
+    }
 }
+
+// =========================================================================
+// SAFE EVENT LISTENERS INITIALIZATION
+// =========================================================================
+function safeAddListener(id, event, handler) {
+    const el = document.getElementById(id);
+    if (el) {
+        el.addEventListener(event, handler);
+    }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    // Event listeners setup with null-checks
+    safeAddListener("form-login", "submit", (e) => {
+        e.preventDefault();
+        const user = document.getElementById("login-username").value.trim();
+        const pass = document.getElementById("login-password").value;
+
+        if (globalData.users[user] && globalData.users[user].password === pass) {
+            currentUser = { username: user };
+            saveGlobalData();
+            updateAuthUI();
+            closeModals();
+            showToast(`Welcome back, ${user}!`);
+            if (currentListId) loadList(currentListId);
+        } else {
+            showToast("❌ Incorrect username or password");
+        }
+    });
+
+    safeAddListener("form-register", "submit", (e) => {
+        e.preventDefault();
+
+        const honeypot = document.getElementById("website_url_hp").value;
+        if (honeypot) {
+            showToast("❌ Access Denied");
+            return;
+        }
+
+        const cooldownLeft = checkAccountCooldown();
+        if (cooldownLeft > 0) {
+            showToast(`⏳ Please wait ${cooldownLeft}s before creating another account.`);
+            return;
+        }
+
+        const captchaAns = document.getElementById("captcha-answer").value.trim().toLowerCase();
+        if (captchaAns !== currentCaptchaTarget.toLowerCase()) {
+            showToast("❌ Incorrect captcha answer");
+            generateCaptcha();
+            return;
+        }
+
+        const user = document.getElementById("reg-username").value.trim();
+        const pass = document.getElementById("reg-password").value;
+
+        const userRegex = /^[a-zA-Z0-9_]{3,16}$/;
+        if (!userRegex.test(user)) {
+            showToast("❌ Username must be 3-16 alphanumeric characters or underscores.");
+            return;
+        }
+
+        if (pass.length < 6) {
+            showToast("❌ Password must be at least 6 characters.");
+            return;
+        }
+
+        if (globalData.users[user]) {
+            showToast("❌ Username is already registered");
+            return;
+        }
+
+        globalData.users[user] = { password: pass, invites: [] };
+        currentUser = { username: user };
+
+        localStorage.setItem("gd_last_account_created", Date.now().toString());
+
+        saveGlobalData();
+        updateAuthUI();
+        closeModals();
+        showToast(`Account created! Logged in as ${user}`);
+        if (currentListId) loadList(currentListId);
+    });
+
+    safeAddListener("add-level-form", "submit", (e) => {
+        e.preventDefault();
+        if (!isOwner) return;
+
+        const newLvl = {
+            pos: Number(document.getElementById("add-pos").value),
+            name: document.getElementById("add-name").value.trim(),
+            author: document.getElementById("add-author").value.trim(),
+            verifier: document.getElementById("add-verifier").value.trim(),
+            pts: Number(document.getElementById("add-pts").value),
+            yt: document.getElementById("add-yt").value.trim(),
+            victors: getVictorsFromContainer("add-victors-container")
+        };
+
+        insertAndShiftLevel(newLvl);
+        saveGlobalData();
+        updateMaxPosLimits();
+        
+        renderListLevels();
+        renderLeaderboard();
+        renderAdminPanel();
+
+        e.target.reset();
+        document.getElementById("add-victors-container").innerHTML = "";
+        showToast(`Level "${newLvl.name}" added at #${newLvl.pos}`);
+    });
+
+    safeAddListener("edit-level-form", "submit", (e) => {
+        e.preventDefault();
+        if (!isOwner) return;
+
+        const idx = Number(document.getElementById("edit-lvl-index").value);
+
+        const updatedLvl = {
+            pos: Number(document.getElementById("edit-pos").value),
+            name: document.getElementById("edit-name").value.trim(),
+            author: document.getElementById("edit-author").value.trim(),
+            verifier: document.getElementById("edit-verifier").value.trim(),
+            pts: Number(document.getElementById("edit-pts").value),
+            yt: document.getElementById("edit-yt").value.trim(),
+            victors: getVictorsFromContainer("edit-victors-container")
+        };
+
+        editAndShiftLevel(idx, updatedLvl);
+        saveGlobalData();
+        closeModals();
+        
+        renderListLevels();
+        renderLeaderboard();
+        renderAdminPanel();
+        showToast(`Saved changes for "${updatedLvl.name}"`);
+    });
+
+    safeAddListener("create-list-form", "submit", (e) => {
+        e.preventDefault();
+        if (!currentUser) {
+            showToast("Please log in first!");
+            openAuthModal('login');
+            return;
+        }
+
+        const id = document.getElementById("new-list-id").value.trim().toLowerCase().replace(/\s+/g, '-');
+        const title = document.getElementById("new-list-title").value.trim();
+        const discord = document.getElementById("new-list-discord").value.trim();
+
+        globalData.lists[id] = { id, title, author: currentUser.username, editors: [], discord, views: 1, levels: [] };
+        saveGlobalData();
+        closeModals();
+        loadList(id);
+        showToast("Demonlist created!");
+    });
+
+    // Close modals on clicking overlay backdrop
+    document.querySelectorAll('.modal-overlay').forEach(modal => {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeModals();
+        });
+    });
+
+    // Initial render
+    updateAuthUI();
+    showMainMenu();
+    fetchGlobalData().then(() => {
+        updateAuthUI();
+        if (!currentListId) showMainMenu();
+    });
+});
 </script>
 </body>
 </html>
