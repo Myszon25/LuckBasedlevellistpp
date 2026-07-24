@@ -182,7 +182,7 @@ h1, h2, h3, .font-heading {
     position: fixed;
     bottom: 24px;
     right: 24px;
-    z-index: 9999;
+    z-index: 99999;
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -354,7 +354,7 @@ h1, h2, h3, .font-heading {
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000;
+    z-index: 10000;
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.15s ease;
@@ -397,7 +397,6 @@ h1, h2, h3, .font-heading {
 
 .admin-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 8px; }
 
-/* ENHANCED CAPTCHA BOX */
 .captcha-box {
     background: var(--bg);
     border: 1px solid var(--border-strong);
@@ -450,7 +449,7 @@ h1, h2, h3, .font-heading {
 .footer-credits span { color: var(--accent); }
 .footer-sub { font-size: 11px; color: var(--text-muted); }
 
-.footer-links { display: flex; items-center: center; gap: 12px; }
+.footer-links { display: flex; align-items: center; gap: 12px; }
 .discord-btn {
     background: #5865F2;
     color: #fff;
@@ -466,7 +465,6 @@ h1, h2, h3, .font-heading {
 }
 .discord-btn:hover { opacity: 0.9; }
 
-/* Honeypot field - invisible to humans */
 .hp-field { display: none !important; opacity: 0; position: absolute; left: -9999px; }
 </style>
 </head>
@@ -594,7 +592,7 @@ h1, h2, h3, .font-heading {
 
 <!-- MODALS -->
 
-<!-- AUTH MODAL WITH ADVANCED ANTI-BOT -->
+<!-- AUTH MODAL -->
 <div id="modal-auth" class="modal-overlay">
     <div class="modal-content" style="max-width:420px;">
         <div class="modal-header">
@@ -614,7 +612,6 @@ h1, h2, h3, .font-heading {
         </form>
 
         <form id="form-register" class="hidden">
-            <!-- BOT TRAP HONEYPOT -->
             <input type="text" id="website_url_hp" class="hp-field" tabindex="-1" autocomplete="off">
 
             <div class="form-group">
@@ -752,12 +749,19 @@ h1, h2, h3, .font-heading {
 
 <script>
 // =========================================================================
-// SUPABASE CLIENT & CONFIGURATION
+// SAFE SUPABASE INITIALIZATION
 // =========================================================================
 const SUPABASE_URL = "https://iigxupbrqpqftynrhlwk.supabase.co";
 const SUPABASE_KEY = "sb_publishable_NwDSUBXKXJyVPxiZwAyocw_LIHaxvrR";
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+let supabase = null;
+try {
+    if (window.supabase && window.supabase.createClient) {
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    }
+} catch (e) {
+    console.error("Supabase load error:", e);
+}
 
 let currentUser = JSON.parse(localStorage.getItem("gd_current_user_v7")) || null;
 
@@ -783,18 +787,21 @@ let globalData = {
 
 function setSyncing(isSyncing) {
     const bar = document.getElementById("sync-status");
-    if (isSyncing) bar.classList.add("syncing");
-    else bar.classList.remove("syncing");
+    if (bar) {
+        if (isSyncing) bar.classList.add("syncing");
+        else bar.classList.remove("syncing");
+    }
 }
 
 async function fetchGlobalData() {
+    if (!supabase) return;
     setSyncing(true);
     try {
         const { data, error } = await supabase
             .from('demonlist_data')
             .select('content')
             .eq('id', 'main')
-            .single();
+            .maybeSingle();
 
         if (data && data.content) {
             globalData = data.content;
@@ -806,26 +813,27 @@ async function fetchGlobalData() {
             await saveGlobalData();
         }
     } catch (e) {
-        console.warn("Supabase load fallback:", e);
+        console.warn("Supabase fetch fallback:", e);
     } finally {
         setSyncing(false);
     }
 }
 
 async function saveGlobalData() {
-    setSyncing(true);
     if (currentUser) {
         localStorage.setItem("gd_current_user_v7", JSON.stringify(currentUser));
     } else {
         localStorage.removeItem("gd_current_user_v7");
     }
 
+    if (!supabase) return;
+    setSyncing(true);
     try {
         await supabase
             .from('demonlist_data')
             .upsert({ id: 'main', content: globalData });
     } catch (e) {
-        console.error("Supabase sync failed:", e);
+        console.error("Supabase save error:", e);
     } finally {
         setSyncing(false);
     }
@@ -833,6 +841,7 @@ async function saveGlobalData() {
 
 function showToast(msg) {
     const container = document.getElementById("toast-container");
+    if (!container) return;
     const toast = document.createElement("div");
     toast.className = "toast";
     toast.innerText = msg;
@@ -841,7 +850,7 @@ function showToast(msg) {
 }
 
 // =========================================================================
-// ADVANCED ANTI-BOT & SECURITY SYSTEM
+// ANTI-BOT & SECURITY SYSTEM
 // =========================================================================
 let currentCaptchaTarget = "";
 
@@ -868,8 +877,10 @@ function generateCaptcha() {
     ];
 
     const fn = captchaTypes[Math.floor(Math.random() * captchaTypes.length)];
-    document.getElementById("captcha-question").innerText = fn();
-    document.getElementById("captcha-answer").value = "";
+    const qElem = document.getElementById("captcha-question");
+    if (qElem) qElem.innerText = fn();
+    const aElem = document.getElementById("captcha-answer");
+    if (aElem) aElem.value = "";
 }
 
 function checkAccountCooldown() {
@@ -883,19 +894,19 @@ function checkAccountCooldown() {
     return 0;
 }
 
-function switchAuthTab(type) {
+window.switchAuthTab = function(type) {
     const isLogin = type === 'login';
     document.getElementById("auth-tab-login").classList.toggle("active", isLogin);
     document.getElementById("auth-tab-register").classList.toggle("active", !isLogin);
     document.getElementById("form-login").classList.toggle("hidden", !isLogin);
     document.getElementById("form-register").classList.toggle("hidden", isLogin);
     if (!isLogin) generateCaptcha();
-}
+};
 
-function openAuthModal(type = 'login') {
+window.openAuthModal = function(type = 'login') {
     switchAuthTab(type);
     document.getElementById("modal-auth").classList.add("active");
-}
+};
 
 document.getElementById("form-login").addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -919,21 +930,18 @@ document.getElementById("form-login").addEventListener("submit", async (e) => {
 document.getElementById("form-register").addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    // 1. HONEYPOT CHECK (BOT TRAP)
     const honeypot = document.getElementById("website_url_hp").value;
     if (honeypot) {
         showToast("❌ Access Denied");
         return;
     }
 
-    // 2. COOLDOWN RATE LIMITING
     const cooldownLeft = checkAccountCooldown();
     if (cooldownLeft > 0) {
         showToast(`⏳ Please wait ${cooldownLeft}s before creating another account.`);
         return;
     }
 
-    // 3. CAPTCHA CHECK
     const captchaAns = document.getElementById("captcha-answer").value.trim().toLowerCase();
     if (captchaAns !== currentCaptchaTarget.toLowerCase()) {
         showToast("❌ Incorrect captcha answer");
@@ -944,7 +952,6 @@ document.getElementById("form-register").addEventListener("submit", async (e) =>
     const user = document.getElementById("reg-username").value.trim();
     const pass = document.getElementById("reg-password").value;
 
-    // 4. USERNAME & PASSWORD VALIDATION
     const userRegex = /^[a-zA-Z0-9_]{3,16}$/;
     if (!userRegex.test(user)) {
         showToast("❌ Username must be 3-16 alphanumeric characters or underscores.");
@@ -975,13 +982,13 @@ document.getElementById("form-register").addEventListener("submit", async (e) =>
     if (currentListId) loadList(currentListId);
 });
 
-function logoutUser() {
+window.logoutUser = function() {
     currentUser = null;
     saveGlobalData();
     updateAuthUI();
     showToast("Logged out successfully");
     if (currentListId) loadList(currentListId);
-}
+};
 
 function updateAuthUI() {
     const notifBell = document.getElementById("notif-bell");
@@ -991,19 +998,19 @@ function updateAuthUI() {
         
         const badgeTag = currentUser.username === "myszon" ? " (Admin)" : "";
         document.getElementById("user-display-name").innerText = `${currentUser.username}${badgeTag}`;
-        notifBell.classList.remove("hidden");
+        if (notifBell) notifBell.classList.remove("hidden");
         checkNotificationsCount();
     } else {
         document.getElementById("auth-modal-btn").classList.remove("hidden");
         document.getElementById("user-profile-btn").classList.add("hidden");
-        notifBell.classList.add("hidden");
+        if (notifBell) notifBell.classList.add("hidden");
     }
 }
 
 // =========================================================================
 // INBOX & INVITES
 // =========================================================================
-async function sendDirectInvite() {
+window.sendDirectInvite = async function() {
     if (!currentUser || !isOwner) return;
 
     const targetUser = document.getElementById("invite-username-input").value.trim();
@@ -1044,22 +1051,24 @@ async function sendDirectInvite() {
     await saveGlobalData();
     document.getElementById("invite-username-input").value = "";
     showToast(`Invite sent to ${targetUser}`);
-}
+};
 
 function checkNotificationsCount() {
     if (!currentUser || !globalData.users[currentUser.username]) return;
     const invites = globalData.users[currentUser.username].invites || [];
     const badge = document.getElementById("notif-badge-count");
 
-    if (invites.length > 0) {
-        badge.innerText = invites.length;
-        badge.classList.remove("hidden");
-    } else {
-        badge.classList.add("hidden");
+    if (badge) {
+        if (invites.length > 0) {
+            badge.innerText = invites.length;
+            badge.classList.remove("hidden");
+        } else {
+            badge.classList.add("hidden");
+        }
     }
 }
 
-function openNotificationsModal() {
+window.openNotificationsModal = function() {
     const container = document.getElementById("notifications-list-container");
     container.innerHTML = "";
 
@@ -1088,9 +1097,9 @@ function openNotificationsModal() {
     }
 
     document.getElementById("modal-notifications").classList.add("active");
-}
+};
 
-async function respondInvite(inviteId, accept) {
+window.respondInvite = async function(inviteId, accept) {
     await fetchGlobalData();
     const userInvites = globalData.users[currentUser.username].invites;
     const index = userInvites.findIndex(i => i.id === inviteId);
@@ -1112,7 +1121,7 @@ async function respondInvite(inviteId, accept) {
         openNotificationsModal();
         if (currentListId === inv.listId) loadList(currentListId);
     }
-}
+};
 
 // =========================================================================
 // NAVIGATION & LIST MANAGEMENT
@@ -1127,7 +1136,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     showMainMenu();
 });
 
-async function showMainMenu() {
+window.showMainMenu = async function() {
     await fetchGlobalData();
 
     document.getElementById("view-main-menu").classList.remove("hidden");
@@ -1148,7 +1157,7 @@ async function showMainMenu() {
     listsArray.forEach(item => {
         allGrid.appendChild(createListCardElement(item));
     });
-}
+};
 
 function createListCardElement(item) {
     const card = document.createElement("div");
@@ -1215,7 +1224,7 @@ async function loadList(listId) {
     if (isOwner) renderAdminPanel();
 }
 
-async function deleteCurrentList() {
+window.deleteCurrentList = async function() {
     if (!isOwner) return;
     if (confirm(`Permanently delete list "${currentListData.title}"?`)) {
         delete globalData.lists[currentListId];
@@ -1223,7 +1232,7 @@ async function deleteCurrentList() {
         showToast("Demonlist deleted");
         showMainMenu();
     }
-}
+};
 
 function updateMaxPosLimits() {
     const total = currentListData.levels ? currentListData.levels.length : 0;
@@ -1305,7 +1314,7 @@ function renderListLevels(filteredLevels = null) {
     });
 }
 
-function filterLevelsList() {
+window.filterLevelsList = function() {
     const query = document.getElementById("search-levels-input").value.toLowerCase().trim();
     if (!query) {
         renderListLevels();
@@ -1315,7 +1324,7 @@ function filterLevelsList() {
         l.name.toLowerCase().includes(query) || l.author.toLowerCase().includes(query)
     );
     renderListLevels(filtered);
-}
+};
 
 function renderLeaderboard() {
     const container = document.getElementById("tab-content-leaderboard");
@@ -1403,7 +1412,7 @@ document.getElementById("add-level-form").addEventListener("submit", async (e) =
     showToast(`Level "${newLvl.name}" added at #${newLvl.pos}`);
 });
 
-function openEditLevelModal(index) {
+window.openEditLevelModal = function(index) {
     const l = currentListData.levels[index];
     const total = currentListData.levels.length;
 
@@ -1426,7 +1435,7 @@ function openEditLevelModal(index) {
     }
 
     document.getElementById("modal-edit-level").classList.add("active");
-}
+};
 
 document.getElementById("edit-level-form").addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -1454,7 +1463,7 @@ document.getElementById("edit-level-form").addEventListener("submit", async (e) 
     showToast(`Saved changes for "${updatedLvl.name}"`);
 });
 
-async function deleteLevel(index) {
+window.deleteLevel = async function(index) {
     if (confirm("Delete this level?") && isOwner) {
         currentListData.levels.splice(index, 1);
         reorderLevelsArray(currentListData.levels);
@@ -1465,7 +1474,7 @@ async function deleteLevel(index) {
         renderAdminPanel();
         showToast("Level deleted");
     }
-}
+};
 
 document.getElementById("create-list-form").addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -1488,8 +1497,9 @@ document.getElementById("create-list-form").addEventListener("submit", async (e)
 });
 
 // UTILS
-function addVictorInputRow(containerId, name = "", video = "") {
+window.addVictorInputRow = function(containerId, name = "", video = "") {
     const container = document.getElementById(containerId);
+    if (!container) return;
     const row = document.createElement("div");
     row.className = "victor-input-row";
     row.innerHTML = `
@@ -1498,7 +1508,7 @@ function addVictorInputRow(containerId, name = "", video = "") {
         <button type="button" class="btn btn-danger btn-sm" onclick="this.parentElement.remove()">✕</button>
     `;
     container.appendChild(row);
-}
+};
 
 function getVictorsFromContainer(containerId) {
     const rows = document.querySelectorAll(`#${containerId} .victor-input-row`);
@@ -1511,7 +1521,7 @@ function getVictorsFromContainer(containerId) {
     return victors;
 }
 
-function openLevelDetailsModal(pos) {
+window.openLevelDetailsModal = function(pos) {
     const l = currentListData.levels.find(item => item.pos === pos);
     if (!l) return;
 
@@ -1544,27 +1554,29 @@ function openLevelDetailsModal(pos) {
     }
 
     document.getElementById("modal-level-details").classList.add("active");
-}
+};
 
-function switchTab(tabName) {
+window.switchTab = function(tabName) {
     ['levels', 'leaderboard', 'admin'].forEach(t => {
         const btn = document.getElementById(`tab-btn-${t}`);
         const content = document.getElementById(`tab-content-${t}`);
         if (btn) btn.classList.toggle("active", t === tabName);
         if (content) content.classList.toggle("hidden", t !== tabName);
     });
-}
+};
 
-function openCreateListModal() { 
+window.openCreateListModal = function() { 
     if (!currentUser) {
         showToast("Please log in first!");
         openAuthModal('login');
         return;
     }
     document.getElementById("modal-create-list").classList.add("active"); 
-}
+};
 
-function closeModals() { document.querySelectorAll(".modal-overlay").forEach(m => m.classList.remove("active")); }
+window.closeModals = function() { 
+    document.querySelectorAll(".modal-overlay").forEach(m => m.classList.remove("active")); 
+};
 
 function parseYoutube(yt) {
     if (!yt) return "";
