@@ -3,11 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Demonlist Central</title>
+<title>Demonlist Central (Supabase Active)</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+
+<!-- SUPABASE CLIENT SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 :root {
@@ -314,6 +317,10 @@ h1, h2, h3, .font-heading {
 
 #detail-video-container { width: 100%; height: 320px; background: #000; border-radius: 10px; overflow: hidden; margin-bottom: 16px; border: 1px solid var(--border); }
 
+.status-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; margin-left: 10px; }
+.status-online { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+.status-offline { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
+
 .footer { background: rgba(11, 14, 21, 0.95); border-top: 1px solid var(--border); padding: 24px 5vw; margin-top: 40px; }
 .footer-content { max-width: 1000px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
 .footer-left { display: flex; flex-direction: column; gap: 4px; }
@@ -334,6 +341,7 @@ h1, h2, h3, .font-heading {
     <div class="brand" data-action="show-main">
         <div class="brand-logo">GD</div>
         <div class="brand-name font-heading">DEMONLIST CENTRAL</div>
+        <span id="db-status-badge" class="status-badge status-offline">Łączenie z chmurą...</span>
     </div>
     <div class="nav-actions">
         <div id="notif-bell" class="notif-bell-btn hidden" data-action="open-notifications" title="Powiadomienia">
@@ -355,7 +363,7 @@ h1, h2, h3, .font-heading {
 <div id="view-main-menu" class="container">
     <div class="hero">
         <h1 class="font-heading">Geometry Dash Demonlists</h1>
-        <p>Twórz własne rankingi demonów, śledź punkty graczy i weryfikuj rekordy wideo. Szybko, czysto i bez zacinań.</p>
+        <p>Twórz własne rankingi demonów, śledź punkty graczy i weryfikuj rekordy wideo.</p>
     </div>
 
     <div class="section-title">🔥 Popularne Listy</div>
@@ -402,7 +410,7 @@ h1, h2, h3, .font-heading {
     <div id="tab-content-admin" class="hidden">
         <div style="background:var(--surface); padding:20px; border-radius:12px; border:1px solid var(--border); margin-bottom:20px;">
             <h3 class="font-heading" style="font-size: 16px; margin-bottom:4px;">📨 Zaproś Współedytora</h3>
-            <p style="color:var(--text-secondary); font-size:12px; margin-bottom:12px;">Wpisz nazwę zarejestrowanego użytkownika, aby wysłać mu zaproszenie.</p>
+            <p style="color:var(--text-secondary); font-size:12px; margin-bottom:12px;">Wpisz nazwę użytkownika, aby wysłać mu zaproszenie.</p>
             <div style="display:flex; gap:8px;">
                 <input type="text" id="invite-username-input" class="form-control" placeholder="Nazwa użytkownika..." style="flex:1;">
                 <button class="btn btn-accent" type="button" data-action="send-invite">Wyślij Zaproszenie</button>
@@ -581,7 +589,7 @@ h1, h2, h3, .font-heading {
     <div class="footer-content">
         <div class="footer-left">
             <div class="footer-credits">Demonlist Central &bull; Stworzone przez <span>myszon12</span></div>
-            <div class="footer-sub">Aplikacja w 100% lokalna i gotowa do działania</div>
+            <div class="footer-sub">Synchronizacja z chmurą Supabase + Zapasowy LocalStorage</div>
         </div>
         <div class="footer-links">
             <a href="https://discord.gg/3zvSrFnVz" target="_blank" class="discord-btn">Dołącz do Discorda</a>
@@ -590,7 +598,25 @@ h1, h2, h3, .font-heading {
 </footer>
 
 <script>
-// LOKALNA PAMIĘĆ BEZ ZEWNĘTRZNYCH BŁĘDÓW SIEĆIOWYCH
+/* ====================================================================
+   1. AUTOMATYCZNA KONFIGURACJA SUPABASE
+   ==================================================================== */
+const SUPABASE_URL = "https://iigxupbrqpftynrhlwk.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlpZ3h1cGJycXBxZnR5bnJobHdrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4MzAzNjEsImV4cCI6MjEwMDQwNjM2MX0.hK0GlMWVE7B3_n2mEzsUlz3qU6TSWt5w2S9Td20fl68";
+
+let supabaseClient = null;
+
+if (window.supabase) {
+    try {
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    } catch(e) {
+        console.warn("Nie udało się połączyć z Supabase.", e);
+    }
+}
+
+/* ====================================================================
+   2. STAN DOMYŚLNY I OBSŁUGA PAMIĘCI
+   ==================================================================== */
 const DEFAULT_DATA = {
     users: {
         "myszon": { password: "szyszkaqw", invites: [] }
@@ -613,7 +639,7 @@ const DEFAULT_DATA = {
 
 function loadStoredData() {
     try {
-        const d = localStorage.getItem("gd_app_data_v2");
+        const d = localStorage.getItem("gd_app_data_v3");
         return d ? JSON.parse(d) : DEFAULT_DATA;
     } catch(e) {
         return DEFAULT_DATA;
@@ -622,7 +648,7 @@ function loadStoredData() {
 
 function loadStoredUser() {
     try {
-        const u = localStorage.getItem("gd_app_user_v2");
+        const u = localStorage.getItem("gd_app_user_v3");
         return u ? JSON.parse(u) : null;
     } catch(e) {
         return null;
@@ -636,19 +662,61 @@ let currentListData = null;
 let isOwner = false;
 let currentCaptchaTarget = "";
 
-function saveState() {
+async function saveState() {
     try {
-        localStorage.setItem("gd_app_data_v2", JSON.stringify(globalData));
+        localStorage.setItem("gd_app_data_v3", JSON.stringify(globalData));
         if (currentUser) {
-            localStorage.setItem("gd_app_user_v2", JSON.stringify(currentUser));
+            localStorage.setItem("gd_app_user_v3", JSON.stringify(currentUser));
         } else {
-            localStorage.removeItem("gd_app_user_v2");
+            localStorage.removeItem("gd_app_user_v3");
         }
     } catch(e) {
-        console.error("Błąd zapisu danych lokalnych:", e);
+        console.error("Błąd zapisu w localStorage:", e);
+    }
+
+    if (supabaseClient) {
+        try {
+            await supabaseClient.from('app_store').upsert({ id: 1, payload: globalData });
+        } catch(err) {
+            console.warn("Błąd wysyłania do Supabase:", err);
+        }
     }
 }
 
+async function fetchFromSupabase() {
+    if (!supabaseClient) return;
+
+    try {
+        const { data, error } = await supabaseClient.from('app_store').select('payload').eq('id', 1).single();
+        if (data && data.payload) {
+            globalData = data.payload;
+            localStorage.setItem("gd_app_data_v3", JSON.stringify(globalData));
+            updateStatusBadge(true);
+            showMainMenu();
+        } else {
+            updateStatusBadge(true);
+        }
+    } catch(err) {
+        console.warn("Offline/Lokalny tryb:", err);
+        updateStatusBadge(false);
+    }
+}
+
+function updateStatusBadge(isOnline) {
+    const badge = document.getElementById("db-status-badge");
+    if (!badge) return;
+    if (isOnline) {
+        badge.innerText = "Chmura Supabase: AKTYWNA";
+        badge.className = "status-badge status-online";
+    } else {
+        badge.innerText = "Lokalnie";
+        badge.className = "status-badge status-offline";
+    }
+}
+
+/* ====================================================================
+   3. RENDEROWANIE WIDOKÓW
+   ==================================================================== */
 function showToast(msg) {
     const container = document.getElementById("toast-container");
     if (!container) return;
@@ -662,7 +730,7 @@ function showToast(msg) {
 function showMainMenu() {
     currentListId = null;
     currentListData = null;
-    
+
     document.getElementById("view-main-menu").classList.remove("hidden");
     document.getElementById("view-list-detail").classList.add("hidden");
 
@@ -705,7 +773,7 @@ function loadList(listId) {
     currentListData = globalData.lists[listId];
 
     if (!currentListData) {
-        showToast("Nie znaleziono wybranej listy!");
+        showToast("Nie znaleziono listy!");
         showMainMenu();
         return;
     }
@@ -813,7 +881,7 @@ function renderLeaderboard() {
     const sorted = Object.keys(players).map(k => ({ name: k, ...players[k] })).sort((a,b) => b.pts - a.pts);
 
     if (sorted.length === 0) {
-        container.innerHTML = "<p style='color:var(--text-muted); font-size:13px;'>Brak zarejestrowanych zwycięzców na tej liście.</p>";
+        container.innerHTML = "<p style='color:var(--text-muted); font-size:13px;'>Brak zarejestrowanych zwycięzców.</p>";
         return;
     }
 
@@ -1047,7 +1115,9 @@ function openNotificationsModal() {
     document.getElementById("modal-notifications").classList.add("active");
 }
 
-// OBSŁUGA AKCJI I KLIKNIĘĆ PRZYCISKÓW
+/* ====================================================================
+   4. OBSŁUGA ZDARZEŃ I PRZYCISKÓW
+   ==================================================================== */
 document.addEventListener('click', function(e) {
     const target = e.target.closest('[data-action]');
     if (!target) {
@@ -1206,7 +1276,7 @@ document.addEventListener('click', function(e) {
     }
 });
 
-// SUBMIT FORMULARZY
+// FORM SUBMISSIONS
 document.addEventListener('submit', function(e) {
     const form = e.target;
     e.preventDefault();
@@ -1331,6 +1401,7 @@ document.addEventListener('submit', function(e) {
     }
 });
 
+// WYSZUKIWANA
 document.addEventListener("input", (e) => {
     if (e.target.id === "search-levels-input") {
         const query = e.target.value.toLowerCase().trim();
@@ -1345,10 +1416,11 @@ document.addEventListener("input", (e) => {
     }
 });
 
-// START
+// INITIALIZATION
 document.addEventListener('DOMContentLoaded', () => {
     updateAuthUI();
     showMainMenu();
+    fetchFromSupabase();
 });
 </script>
 </body>
