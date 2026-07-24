@@ -856,6 +856,9 @@ function showToast(msg) {
 // VIEW & UI FUNCTIONS
 // =========================================================================
 function showMainMenu() {
+    currentListId = null;
+    currentListData = null;
+    
     document.getElementById("view-main-menu").classList.remove("hidden");
     document.getElementById("view-list-detail").classList.add("hidden");
 
@@ -975,7 +978,7 @@ function renderListLevels(filteredLevels = null) {
                 <div class="level-points">+${l.pts} PTS</div>
             </div>
             <div class="level-thumb" data-action="open-level-details" data-pos="${l.pos}">
-                <img src="https://img.youtube.com/vi/${ytId}/hqdefault.jpg" alt="miniaturka">
+                <img src="${ytId ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : ''}" alt="miniaturka">
             </div>
         `;
         container.appendChild(card);
@@ -1061,7 +1064,11 @@ function openEditLevelModal(index) {
     const victorsContainer = document.getElementById("edit-victors-container");
     victorsContainer.innerHTML = "";
     if (l.victors) {
-        l.victors.forEach(v => addVictorInputRow("edit-victors-container", v.name, v.video));
+        l.victors.forEach(v => {
+            const vName = typeof v === 'object' ? v.name : v;
+            const vVideo = typeof v === 'object' ? (v.video || '') : '';
+            addVictorInputRow("edit-victors-container", vName, vVideo);
+        });
     }
 
     document.getElementById("modal-edit-level").classList.add("active");
@@ -1077,7 +1084,7 @@ function openLevelDetailsModal(pos) {
     document.getElementById("detail-author").innerText = l.author;
     document.getElementById("detail-verifier").innerText = l.verifier;
     document.getElementById("detail-pts").innerText = `+${l.pts} PTS`;
-    document.getElementById("detail-video-container").innerHTML = `<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${ytId}" frameborder="0" allowfullscreen style="border:none;"></iframe>`;
+    document.getElementById("detail-video-container").innerHTML = ytId ? `<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${ytId}" frameborder="0" allowfullscreen style="border:none;"></iframe>` : `<div style="display:flex; align-items:center; justify-content:center; height:100%; color:var(--text-muted);">Brak wideo</div>`;
 
     const victorsContainer = document.getElementById("detail-victors-list");
     victorsContainer.innerHTML = "";
@@ -1085,14 +1092,16 @@ function openLevelDetailsModal(pos) {
     document.getElementById("detail-victor-count").innerText = victors.length;
 
     if (victors.length === 0) {
-        victorsContainer.innerHTML = "<p style='color:var(--text-muted); font-size:12px;'>Brak zarejestrowanych победителей.</p>";
+        victorsContainer.innerHTML = "<p style='color:var(--text-muted); font-size:12px;'>Brak zarejestrowanych zwycięzców.</p>";
     } else {
         victors.forEach(v => {
+            const vName = typeof v === 'object' ? v.name : v;
+            const vVideo = typeof v === 'object' ? v.video : '';
             const item = document.createElement("div");
             item.className = "victor-item";
             item.innerHTML = `
-                <div><strong style="font-size:13px;">${v.name}</strong></div>
-                <div>${v.video ? `<a href="${v.video}" target="_blank">Obejrzyj Dowód ↗</a>` : `<span style="color:var(--text-muted); font-size:11px;">Brak wideo</span>`}</div>
+                <div><strong style="font-size:13px;">${vName}</strong></div>
+                <div>${vVideo ? `<a href="${vVideo}" target="_blank">Obejrzyj Dowód ↗</a>` : `<span style="color:var(--text-muted); font-size:11px;">Brak wideo</span>`}</div>
             `;
             victorsContainer.appendChild(item);
         });
@@ -1137,7 +1146,7 @@ function closeModals() {
 function parseYoutube(yt) {
     if (!yt) return "";
     try {
-        let fullUrl = yt;
+        let fullUrl = yt.trim();
         if (!fullUrl.startsWith('http://') && !fullUrl.startsWith('https://')) fullUrl = 'https://' + fullUrl;
         const url = new URL(fullUrl);
         if (url.hostname.includes('youtu.be')) return url.pathname.slice(1);
@@ -1235,14 +1244,13 @@ function openNotificationsModal() {
 }
 
 // =========================================================================
-// EVENT DELEGATION (Obsługa kliknięć przycisków)
+// EVENT DELEGATION
 // =========================================================================
 document.addEventListener('click', function(e) {
-    // Szukamy najbliższego elementu z atrybutem data-action
     const target = e.target.closest('[data-action]');
     if (!target) {
         if (e.target.classList.contains("modal-overlay")) closeModals();
-        return; // Jeśli kliknięto w coś innego, ignoruj
+        return;
     }
 
     const action = target.getAttribute('data-action');
@@ -1396,10 +1404,10 @@ document.addEventListener('click', function(e) {
     }
 });
 
-// Dodatkowo: obsługa wysyłania formularzy (submit)
+// Form Submissions
 document.addEventListener('submit', function(e) {
     const form = e.target;
-    e.preventDefault(); // Zapobiegaj przeładowaniu strony
+    e.preventDefault();
 
     if (form.id === 'form-login') {
         const username = document.getElementById('login-username').value.trim();
@@ -1523,7 +1531,7 @@ document.addEventListener('submit', function(e) {
     }
 });
 
-// Szukanie w czasie rzeczywistym
+// Wyszukiwanie poziomów
 document.addEventListener("input", (e) => {
     if (e.target.id === "search-levels-input") {
         const query = e.target.value.toLowerCase().trim();
@@ -1538,13 +1546,17 @@ document.addEventListener("input", (e) => {
     }
 });
 
-// Inicjalizacja aplikacji po załadowaniu strony
+// Start aplikacji
 document.addEventListener('DOMContentLoaded', () => {
     updateAuthUI();
     showMainMenu();
     fetchGlobalData().then(() => {
         updateAuthUI();
-        if (!currentListId) showMainMenu();
+        if (currentListId) {
+            loadList(currentListId);
+        } else {
+            showMainMenu();
+        }
     });
 });
 </script>
