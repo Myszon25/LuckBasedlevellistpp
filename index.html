@@ -531,7 +531,7 @@ h1, h2, h3, .font-heading {
     <div class="tabs">
         <button class="tab-btn active" id="tab-btn-levels" onclick="switchTab('levels')">Demons / Levels</button>
         <button class="tab-btn" id="tab-btn-leaderboard" onclick="switchTab('leaderboard')">Player Leaderboard</button>
-        <button class="tab-btn hidden" id="tab-btn-admin-nav" onclick="switchTab('admin')">Admin Panel</button>
+        <button class="tab-btn hidden" id="tab-btn-admin" onclick="switchTab('admin')">Admin Panel</button>
     </div>
 
     <div id="tab-content-levels">
@@ -765,7 +765,7 @@ try {
 
 let currentUser = JSON.parse(localStorage.getItem("gd_current_user_v7")) || null;
 
-let globalData = {
+const defaultGlobalData = {
     users: {
         "myszon": { password: "szyszkaqw", invites: [] }
     },
@@ -784,6 +784,8 @@ let globalData = {
         }
     }
 };
+
+let globalData = JSON.parse(localStorage.getItem("gd_global_data_backup")) || defaultGlobalData;
 
 function setSyncing(isSyncing) {
     const bar = document.getElementById("sync-status");
@@ -809,8 +811,7 @@ async function fetchGlobalData() {
             if (!globalData.users["myszon"]) {
                 globalData.users["myszon"] = { password: "szyszkaqw", invites: [] };
             }
-        } else {
-            await saveGlobalData();
+            localStorage.setItem("gd_global_data_backup", JSON.stringify(globalData));
         }
     } catch (e) {
         console.warn("Supabase fetch fallback:", e);
@@ -825,6 +826,8 @@ async function saveGlobalData() {
     } else {
         localStorage.removeItem("gd_current_user_v7");
     }
+
+    localStorage.setItem("gd_global_data_backup", JSON.stringify(globalData));
 
     if (!supabase) return;
     setSyncing(true);
@@ -908,16 +911,15 @@ window.openAuthModal = function(type = 'login') {
     document.getElementById("modal-auth").classList.add("active");
 };
 
-document.getElementById("form-login").addEventListener("submit", async (e) => {
+document.getElementById("form-login").addEventListener("submit", (e) => {
     e.preventDefault();
-    await fetchGlobalData();
     
     const user = document.getElementById("login-username").value.trim();
     const pass = document.getElementById("login-password").value;
 
     if (globalData.users[user] && globalData.users[user].password === pass) {
         currentUser = { username: user };
-        await saveGlobalData();
+        saveGlobalData();
         updateAuthUI();
         closeModals();
         showToast(`Welcome back, ${user}!`);
@@ -927,7 +929,7 @@ document.getElementById("form-login").addEventListener("submit", async (e) => {
     }
 });
 
-document.getElementById("form-register").addEventListener("submit", async (e) => {
+document.getElementById("form-register").addEventListener("submit", (e) => {
     e.preventDefault();
 
     const honeypot = document.getElementById("website_url_hp").value;
@@ -963,8 +965,6 @@ document.getElementById("form-register").addEventListener("submit", async (e) =>
         return;
     }
 
-    await fetchGlobalData();
-
     if (globalData.users[user]) {
         showToast("❌ Username is already registered");
         return;
@@ -975,7 +975,7 @@ document.getElementById("form-register").addEventListener("submit", async (e) =>
 
     localStorage.setItem("gd_last_account_created", Date.now().toString());
 
-    await saveGlobalData();
+    saveGlobalData();
     updateAuthUI();
     closeModals();
     showToast(`Account created! Logged in as ${user}`);
@@ -1010,7 +1010,7 @@ function updateAuthUI() {
 // =========================================================================
 // INBOX & INVITES
 // =========================================================================
-window.sendDirectInvite = async function() {
+window.sendDirectInvite = function() {
     if (!currentUser || !isOwner) return;
 
     const targetUser = document.getElementById("invite-username-input").value.trim();
@@ -1020,8 +1020,6 @@ window.sendDirectInvite = async function() {
         showToast("Cannot invite yourself!");
         return;
     }
-
-    await fetchGlobalData();
 
     if (!globalData.users[targetUser]) {
         showToast("❌ User not found");
@@ -1048,7 +1046,7 @@ window.sendDirectInvite = async function() {
         listTitle: currentListData.title
     });
 
-    await saveGlobalData();
+    saveGlobalData();
     document.getElementById("invite-username-input").value = "";
     showToast(`Invite sent to ${targetUser}`);
 };
@@ -1099,8 +1097,7 @@ window.openNotificationsModal = function() {
     document.getElementById("modal-notifications").classList.add("active");
 };
 
-window.respondInvite = async function(inviteId, accept) {
-    await fetchGlobalData();
+window.respondInvite = function(inviteId, accept) {
     const userInvites = globalData.users[currentUser.username].invites;
     const index = userInvites.findIndex(i => i.id === inviteId);
 
@@ -1116,7 +1113,7 @@ window.respondInvite = async function(inviteId, accept) {
             showToast(`Joined "${inv.listTitle}" as Co-Editor`);
         }
         userInvites.splice(index, 1);
-        await saveGlobalData();
+        saveGlobalData();
         checkNotificationsCount();
         openNotificationsModal();
         if (currentListId === inv.listId) loadList(currentListId);
@@ -1130,15 +1127,16 @@ let currentListId = null;
 let currentListData = null;
 let isOwner = false;
 
-window.addEventListener("DOMContentLoaded", async () => {
-    await fetchGlobalData();
+window.addEventListener("DOMContentLoaded", () => {
     updateAuthUI();
     showMainMenu();
+    fetchGlobalData().then(() => {
+        updateAuthUI();
+        if (!currentListId) showMainMenu();
+    });
 });
 
-window.showMainMenu = async function() {
-    await fetchGlobalData();
-
+window.showMainMenu = function() {
     document.getElementById("view-main-menu").classList.remove("hidden");
     document.getElementById("view-list-detail").classList.add("hidden");
 
@@ -1178,8 +1176,7 @@ function createListCardElement(item) {
     return card;
 }
 
-async function loadList(listId) {
-    await fetchGlobalData();
+window.loadList = function(listId) {
     currentListId = listId;
     currentListData = globalData.lists[listId];
 
@@ -1209,11 +1206,11 @@ async function loadList(listId) {
 
     if (isOwner) {
         document.getElementById("btn-admin-tab").classList.remove("hidden");
-        document.getElementById("tab-btn-admin-nav").classList.remove("hidden");
+        document.getElementById("tab-btn-admin").classList.remove("hidden");
         document.getElementById("btn-delete-list").classList.remove("hidden");
     } else {
         document.getElementById("btn-admin-tab").classList.add("hidden");
-        document.getElementById("tab-btn-admin-nav").classList.add("hidden");
+        document.getElementById("tab-btn-admin").classList.add("hidden");
         document.getElementById("btn-delete-list").classList.add("hidden");
     }
 
@@ -1222,13 +1219,13 @@ async function loadList(listId) {
     renderListLevels();
     renderLeaderboard();
     if (isOwner) renderAdminPanel();
-}
+};
 
-window.deleteCurrentList = async function() {
+window.deleteCurrentList = function() {
     if (!isOwner) return;
     if (confirm(`Permanently delete list "${currentListData.title}"?`)) {
         delete globalData.lists[currentListId];
-        await saveGlobalData();
+        saveGlobalData();
         showToast("Demonlist deleted");
         showMainMenu();
     }
@@ -1385,7 +1382,7 @@ function renderAdminPanel() {
 // =========================================================================
 // FORM HANDLERS
 // =========================================================================
-document.getElementById("add-level-form").addEventListener("submit", async (e) => {
+document.getElementById("add-level-form").addEventListener("submit", (e) => {
     e.preventDefault();
     if (!isOwner) return;
 
@@ -1400,7 +1397,7 @@ document.getElementById("add-level-form").addEventListener("submit", async (e) =
     };
 
     insertAndShiftLevel(newLvl);
-    await saveGlobalData();
+    saveGlobalData();
     updateMaxPosLimits();
     
     renderListLevels();
@@ -1437,7 +1434,7 @@ window.openEditLevelModal = function(index) {
     document.getElementById("modal-edit-level").classList.add("active");
 };
 
-document.getElementById("edit-level-form").addEventListener("submit", async (e) => {
+document.getElementById("edit-level-form").addEventListener("submit", (e) => {
     e.preventDefault();
     if (!isOwner) return;
 
@@ -1454,7 +1451,7 @@ document.getElementById("edit-level-form").addEventListener("submit", async (e) 
     };
 
     editAndShiftLevel(idx, updatedLvl);
-    await saveGlobalData();
+    saveGlobalData();
     closeModals();
     
     renderListLevels();
@@ -1463,11 +1460,11 @@ document.getElementById("edit-level-form").addEventListener("submit", async (e) 
     showToast(`Saved changes for "${updatedLvl.name}"`);
 });
 
-window.deleteLevel = async function(index) {
+window.deleteLevel = function(index) {
     if (confirm("Delete this level?") && isOwner) {
         currentListData.levels.splice(index, 1);
         reorderLevelsArray(currentListData.levels);
-        await saveGlobalData();
+        saveGlobalData();
         updateMaxPosLimits();
         renderListLevels();
         renderLeaderboard();
@@ -1476,7 +1473,7 @@ window.deleteLevel = async function(index) {
     }
 };
 
-document.getElementById("create-list-form").addEventListener("submit", async (e) => {
+document.getElementById("create-list-form").addEventListener("submit", (e) => {
     e.preventDefault();
     if (!currentUser) {
         showToast("Please log in first!");
@@ -1488,9 +1485,8 @@ document.getElementById("create-list-form").addEventListener("submit", async (e)
     const title = document.getElementById("new-list-title").value.trim();
     const discord = document.getElementById("new-list-discord").value.trim();
 
-    await fetchGlobalData();
     globalData.lists[id] = { id, title, author: currentUser.username, editors: [], discord, views: 1, levels: [] };
-    await saveGlobalData();
+    saveGlobalData();
     closeModals();
     loadList(id);
     showToast("Demonlist created!");
