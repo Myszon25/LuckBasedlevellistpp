@@ -694,6 +694,8 @@ h1, h2, h3, h4, .font-heading {
     </div>
 
     <div class="nav-controls">
+        <button id="btn-super-admin" class="btn btn-sm btn-danger hidden" data-action="open-super-admin">🛡️ User Admin</button>
+
         <div id="notif-btn" class="icon-btn hidden" data-action="open-notifications" title="Notifications">
             🔔
             <div id="notif-badge-count" class="badge-count hidden">0</div>
@@ -841,6 +843,11 @@ h1, h2, h3, h4, .font-heading {
 
     <!-- PRIVATE CHAT VIEW -->
     <div id="chat-view-private" class="hidden" style="display:flex; flex-direction:column; flex:1; overflow:hidden;">
+        <!-- CHAT SEARCH BAR FOR DM -->
+        <div style="padding:8px 10px; border-bottom:1px solid var(--border);">
+            <input type="text" id="dm-search-input" class="form-control" placeholder="🔍 Search players to DM..." style="padding:6px 10px; font-size:11px; width:100%;">
+        </div>
+
         <div id="dm-users-list" class="chat-messages" style="padding: 10px;"></div>
         
         <div id="dm-active-conversation" class="hidden" style="display:flex; flex-direction:column; flex:1; overflow:hidden;">
@@ -858,6 +865,18 @@ h1, h2, h3, h4, .font-heading {
 </div>
 
 <!-- MODALS -->
+<!-- SUPERADMIN CONTROL MODAL (BAN / RESET PASS) -->
+<div id="modal-super-admin" class="modal-overlay">
+    <div class="modal-content" style="max-width:520px;">
+        <div class="modal-header">
+            <h2 class="font-heading" style="font-size: 18px;">🛡️ Superadmin User Management</h2>
+            <button type="button" class="modal-close" data-action="close-modals">✕</button>
+        </div>
+        <p style="font-size:12px; color:var(--text-muted); margin-bottom:14px;">Reset user passwords or ban/unban registered accounts.</p>
+        <div id="admin-users-list-container"></div>
+    </div>
+</div>
+
 <!-- AUTH MODAL -->
 <div id="modal-auth" class="modal-overlay">
     <div class="modal-content" style="max-width:400px;">
@@ -894,9 +913,9 @@ h1, h2, h3, h4, .font-heading {
 
 <!-- NOTIFICATIONS MODAL -->
 <div id="modal-notifications" class="modal-overlay">
-    <div class="modal-content" style="max-width:440px;">
+    <div class="modal-content" style="max-width:460px;">
         <div class="modal-header">
-            <h2 class="font-heading" style="font-size: 18px;">🔔 Invitations</h2>
+            <h2 class="font-heading" style="font-size: 18px;">🔔 Notifications</h2>
             <button type="button" class="modal-close" data-action="close-modals">✕</button>
         </div>
         <div id="notifications-list-container"></div>
@@ -1000,7 +1019,7 @@ h1, h2, h3, h4, .font-heading {
 
 <script>
 /* ====================================================================
-   1. STORAGE & SUPABASE SETUP
+   1. STORAGE & SECURITY & SUPABASE SETUP
    ==================================================================== */
 const safeStorage = {
     getItem: (k) => { try { return localStorage.getItem(k); } catch(e) { return null; } },
@@ -1022,13 +1041,27 @@ if (window.supabase) {
     } catch(e) {}
 }
 
+// Password Hashing with Salt
+async function hashPassword(password) {
+    if (!password) return '';
+    try {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(password + "_gd_security_salt_2026");
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    } catch(e) {
+        return password; // Fallback
+    }
+}
+
 /* ====================================================================
    2. INITIAL STATE & CHAT CONFIG
    ==================================================================== */
 const DEFAULT_DATA = {
     users: {
-        "myszon12": { password: "szyszkaqw", invites: [] },
-        "myszon": { password: "szyszkaqw", invites: [] }
+        "myszon12": { password: "szyszkaqw", invites: [], banned: false },
+        "myszon": { password: "szyszkaqw", invites: [], banned: false }
     },
     lists: {
         "top-10-demons": {
@@ -1047,17 +1080,15 @@ const DEFAULT_DATA = {
     chatMessages: [
         { user: "myszon12", text: "Welcome to Demonlist Central! Feel free to chat with other players here.", time: "12:00" }
     ],
-    directMessages: [] // { from, to, text, time }
+    directMessages: [] // { from, to, text, time, read: false }
 };
 
 function ensureDataStructure(data) {
     if (!data || typeof data !== 'object') data = {};
     if (!data.users) data.users = {};
-    if (!data.users["myszon12"]) data.users["myszon12"] = { password: "szyszkaqw", invites: [] };
+    if (!data.users["myszon12"]) data.users["myszon12"] = { password: "szyszkaqw", invites: [], banned: false };
     if (!data.lists) data.lists = {};
-    if (!data.chatMessages) data.chatMessages = [
-        { user: "myszon12", text: "Welcome to Demonlist Central! Feel free to chat with other players here.", time: "12:00" }
-    ];
+    if (!data.chatMessages) data.chatMessages = [];
     if (!data.directMessages) data.directMessages = [];
     return data;
 }
@@ -1083,7 +1114,7 @@ let currentListId = null;
 let currentListData = null;
 let isOwner = false;
 let currentCaptchaTarget = "";
-let currentChatMode = "public"; // 'public' or 'private'
+let currentChatMode = "public";
 let activeDmPartner = null;
 
 async function saveState() {
@@ -1108,6 +1139,13 @@ async function fetchFromSupabase() {
         if (data && data.payload) {
             globalData = ensureDataStructure(data.payload);
             safeStorage.setItem("gd_app_data_v6", JSON.stringify(globalData));
+            
+            // Check if current user was banned while online
+            if (currentUser && globalData.users[currentUser.username]?.banned) {
+                currentUser = null;
+                showToast("❌ Your account was banned.");
+            }
+
             updateStatusBadge(true);
             refreshCurrentUI();
         } else {
@@ -1126,6 +1164,12 @@ function setupRealtimeListener() {
             if (payload.new && payload.new.payload) {
                 globalData = ensureDataStructure(payload.new.payload);
                 safeStorage.setItem("gd_app_data_v6", JSON.stringify(globalData));
+                
+                if (currentUser && globalData.users[currentUser.username]?.banned) {
+                    currentUser = null;
+                    showToast("❌ Your account was banned.");
+                }
+
                 refreshCurrentUI();
             }
         })
@@ -1135,6 +1179,7 @@ function setupRealtimeListener() {
 function refreshCurrentUI() {
     renderChatMessages();
     renderDmUsersList();
+    checkNotificationsCount();
     if (activeDmPartner) renderDmMessages(activeDmPartner);
     if (currentListId && globalData.lists[currentListId]) {
         loadList(currentListId, false);
@@ -1228,20 +1273,25 @@ function renderChatMessages() {
     box.scrollTop = box.scrollHeight;
 }
 
-function renderDmUsersList() {
+function renderDmUsersList(searchQuery = "") {
     const container = document.getElementById("dm-users-list");
     if (!container || currentChatMode !== 'private') return;
-    if (activeDmPartner) return; // If inside an active chat window, don't show list
+    if (activeDmPartner) return;
 
     container.innerHTML = "";
     container.classList.remove("hidden");
     document.getElementById("dm-active-conversation").classList.add("hidden");
 
     globalData = ensureDataStructure(globalData);
-    const users = Object.keys(globalData.users || {}).filter(u => u !== (currentUser ? currentUser.username : ""));
+    let users = Object.keys(globalData.users || {}).filter(u => u !== (currentUser ? currentUser.username : ""));
+
+    if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        users = users.filter(u => u.toLowerCase().includes(q));
+    }
 
     if (users.length === 0) {
-        container.innerHTML = `<div style="color:var(--text-subtle); font-size:12px; text-align:center; margin-top:20px;">No other users registered yet.</div>`;
+        container.innerHTML = `<div style="color:var(--text-subtle); font-size:12px; text-align:center; margin-top:20px;">No users found.</div>`;
         return;
     }
 
@@ -1254,8 +1304,12 @@ function renderDmUsersList() {
         const isSuper = username === "myszon12" || username === "myszon";
         const badge = isSuper ? '<span class="super-badge" style="font-size:8px;">ADMIN</span>' : '';
 
+        // Check unread count from this user
+        const unreadCount = (globalData.directMessages || []).filter(m => m.from === username && m.to === currentUser?.username && !m.read).length;
+        const unreadBadge = unreadCount > 0 ? `<span style="background:var(--danger); color:#fff; font-size:10px; font-weight:800; padding:2px 6px; border-radius:10px; margin-left:6px;">${unreadCount} UNREAD</span>` : '';
+
         item.innerHTML = `
-            <div>👤 ${username} ${badge}</div>
+            <div>👤 ${username} ${badge} ${unreadBadge}</div>
             <div style="font-size: 11px; color: var(--accent); font-weight:700;">Chat ↗</div>
         `;
         container.appendChild(item);
@@ -1268,6 +1322,22 @@ function openDmChat(partnerName) {
     const activeBox = document.getElementById("dm-active-conversation");
     activeBox.classList.remove("hidden");
     document.getElementById("dm-active-partner").innerText = `Chatting with: ${partnerName}`;
+
+    // Mark messages from this user as read
+    if (currentUser) {
+        let changed = false;
+        (globalData.directMessages || []).forEach(m => {
+            if (m.from === partnerName && m.to === currentUser.username && !m.read) {
+                m.read = true;
+                changed = true;
+            }
+        });
+        if (changed) {
+            saveState();
+            checkNotificationsCount();
+        }
+    }
+
     renderDmMessages(partnerName);
 }
 
@@ -1308,7 +1378,13 @@ function renderDmMessages(partnerName) {
 }
 
 function escapeHtml(str) {
-    return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 }
 
 function showHome() {
@@ -1445,6 +1521,9 @@ function renderListLevels(filteredLevels = null) {
     });
 }
 
+/* ====================================================================
+   VERIFIER NOW GETS POINTS ON LEADERBOARD
+   ==================================================================== */
 function renderLeaderboard() {
     const container = document.getElementById("tab-content-leaderboard");
     if (!container) return;
@@ -1453,23 +1532,35 @@ function renderLeaderboard() {
     let players = {};
     ((currentListData && currentListData.levels) || []).forEach(l => {
         const pts = Number(l.pts) || 0;
+        const levelPlayers = new Set();
+
+        // Verifier gets points
+        if (l.verifier && l.verifier.trim()) {
+            levelPlayers.add(l.verifier.trim());
+        }
+
+        // Victors get points
         if (l.victors) {
             l.victors.forEach(v => {
                 const name = typeof v === 'object' ? v.name : v;
                 if (name && name.trim()) {
-                    const cleanName = name.trim();
-                    if (!players[cleanName]) players[cleanName] = { pts: 0, count: 0 };
-                    players[cleanName].pts += pts;
-                    players[cleanName].count += 1;
+                    levelPlayers.add(name.trim());
                 }
             });
         }
+
+        // Award points once per level per player
+        levelPlayers.forEach(pName => {
+            if (!players[pName]) players[pName] = { pts: 0, count: 0 };
+            players[pName].pts += pts;
+            players[pName].count += 1;
+        });
     });
 
     const sorted = Object.keys(players).map(k => ({ name: k, ...players[k] })).sort((a,b) => b.pts - a.pts);
 
     if (sorted.length === 0) {
-        container.innerHTML = "<p style='color:var(--text-muted); font-size:13px; padding:10px;'>No victors registered on this list yet.</p>";
+        container.innerHTML = "<p style='color:var(--text-muted); font-size:13px; padding:10px;'>No victors or verifiers registered on this list yet.</p>";
         return;
     }
 
@@ -1669,12 +1760,16 @@ function updateAuthUI() {
     const authBtn = document.getElementById("auth-modal-btn");
     const profileBtn = document.getElementById("user-profile-btn");
     const nameLabel = document.getElementById("user-display-name");
+    const superAdminBtn = document.getElementById("btn-super-admin");
+
+    const isSuper = currentUser && (currentUser.username === "myszon12" || currentUser.username === "myszon");
+
+    if (superAdminBtn) superAdminBtn.classList.toggle("hidden", !isSuper);
 
     if (currentUser) {
         if (authBtn) authBtn.classList.add("hidden");
         if (profileBtn) profileBtn.classList.remove("hidden");
         
-        const isSuper = currentUser.username === "myszon12" || currentUser.username === "myszon";
         const badgeTag = isSuper ? '<span class="super-badge">Superadmin</span>' : '';
         
         if (nameLabel) nameLabel.innerHTML = `${currentUser.username}${badgeTag}`;
@@ -1687,14 +1782,21 @@ function updateAuthUI() {
     }
 }
 
+/* ====================================================================
+   NOTIFICATIONS LOGIC (INVITES + DM ALERTS)
+   ==================================================================== */
 function checkNotificationsCount() {
     globalData = ensureDataStructure(globalData);
     if (!currentUser || !globalData.users[currentUser.username]) return;
+
     const invites = globalData.users[currentUser.username].invites || [];
+    const unreadDms = (globalData.directMessages || []).filter(m => m.to === currentUser.username && !m.read);
+    
+    const totalCount = invites.length + unreadDms.length;
     const badge = document.getElementById("notif-badge-count");
     if (badge) {
-        if (invites.length > 0) {
-            badge.innerText = invites.length;
+        if (totalCount > 0) {
+            badge.innerText = totalCount;
             badge.classList.remove("hidden");
         } else {
             badge.classList.add("hidden");
@@ -1709,30 +1811,98 @@ function openNotificationsModal() {
     container.innerHTML = "";
 
     const invites = (currentUser && globalData.users[currentUser.username] && globalData.users[currentUser.username].invites) || [];
+    const unreadDms = (globalData.directMessages || []).filter(m => m.to === currentUser?.username && !m.read);
 
-    if (invites.length === 0) {
-        container.innerHTML = "<p style='color:var(--text-muted); font-size:12px; text-align:center; padding:10px;'>No pending invitations.</p>";
+    if (invites.length === 0 && unreadDms.length === 0) {
+        container.innerHTML = "<p style='color:var(--text-muted); font-size:12px; text-align:center; padding:10px;'>No new notifications.</p>";
     } else {
-        invites.forEach(inv => {
-            const card = document.createElement("div");
-            card.style.cssText = "background:var(--bg-input); border:1px solid var(--border); padding:12px; border-radius:8px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;";
-            card.innerHTML = `
-                <div>
-                    <strong style="font-size:13px; display:block;">Co-Editor Invite</strong>
-                    <span style="font-size:11px; color:var(--text-muted);">
-                        <strong>${inv.from}</strong> invited you to <strong>${inv.listTitle}</strong>.
-                    </span>
-                </div>
-                <div style="display:flex; gap:6px;">
-                    <button type="button" class="btn btn-sm btn-accent" data-action="respond-invite" data-id="${inv.id}" data-accept="true">Accept</button>
-                    <button type="button" class="btn btn-sm btn-danger" data-action="respond-invite" data-id="${inv.id}" data-accept="false">Decline</button>
-                </div>
-            `;
-            container.appendChild(card);
-        });
+        // Render Direct Message Notifications
+        if (unreadDms.length > 0) {
+            const dmHeader = document.createElement("div");
+            dmHeader.style.cssText = "font-size:12px; font-weight:800; color:var(--text-subtle); text-transform:uppercase; margin-bottom:8px;";
+            dmHeader.innerText = "💬 Unread Direct Messages";
+            container.appendChild(dmHeader);
+
+            unreadDms.forEach(m => {
+                const card = document.createElement("div");
+                card.style.cssText = "background:var(--bg-input); border:1px solid var(--accent); padding:12px; border-radius:8px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;";
+                card.innerHTML = `
+                    <div>
+                        <strong style="font-size:13px; color:var(--accent);">Message from ${m.from}</strong>
+                        <span style="font-size:11px; color:var(--text-muted); display:block;">"${escapeHtml(m.text.slice(0, 30))}${m.text.length > 30 ? '...' : ''}"</span>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-accent" data-action="open-dm-from-notif" data-user="${m.from}">Reply</button>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Render List Invitation Notifications
+        if (invites.length > 0) {
+            const invHeader = document.createElement("div");
+            invHeader.style.cssText = "font-size:12px; font-weight:800; color:var(--text-subtle); text-transform:uppercase; margin:14px 0 8px 0;";
+            invHeader.innerText = "📩 List Editor Invitations";
+            container.appendChild(invHeader);
+
+            invites.forEach(inv => {
+                const card = document.createElement("div");
+                card.style.cssText = "background:var(--bg-input); border:1px solid var(--border); padding:12px; border-radius:8px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;";
+                card.innerHTML = `
+                    <div>
+                        <strong style="font-size:13px; display:block;">Co-Editor Invite</strong>
+                        <span style="font-size:11px; color:var(--text-muted);">
+                            <strong>${inv.from}</strong> invited you to <strong>${inv.listTitle}</strong>.
+                        </span>
+                    </div>
+                    <div style="display:flex; gap:6px;">
+                        <button type="button" class="btn btn-sm btn-accent" data-action="respond-invite" data-id="${inv.id}" data-accept="true">Accept</button>
+                        <button type="button" class="btn btn-sm btn-danger" data-action="respond-invite" data-id="${inv.id}" data-accept="false">Decline</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
     }
 
     document.getElementById("modal-notifications").classList.add("active");
+}
+
+/* ====================================================================
+   SUPERADMIN USER MANAGEMENT MODAL
+   ==================================================================== */
+function openSuperAdminModal() {
+    const isSuper = currentUser && (currentUser.username === "myszon12" || currentUser.username === "myszon");
+    if (!isSuper) return;
+
+    const container = document.getElementById("admin-users-list-container");
+    if (!container) return;
+    container.innerHTML = "";
+
+    const users = Object.keys(globalData.users || {});
+    users.forEach(u => {
+        const uData = globalData.users[u];
+        const isBanned = uData.banned || false;
+        const item = document.createElement("div");
+        item.style.cssText = "background:var(--bg-input); border:1px solid var(--border); border-radius:8px; padding:12px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;";
+        
+        item.innerHTML = `
+            <div>
+                <strong style="font-size:13px; color:#fff;">${u}</strong>
+                <span style="font-size:11px; padding:2px 6px; border-radius:4px; margin-left:6px; background:${isBanned ? 'var(--danger-subtle)' : 'rgba(16,185,129,0.15)'}; color:${isBanned ? 'var(--danger)' : 'var(--success)'}; font-weight:700;">
+                    ${isBanned ? 'BANNED' : 'ACTIVE'}
+                </span>
+            </div>
+            <div style="display:flex; gap:6px;">
+                <button type="button" class="btn btn-sm" data-action="admin-reset-pass" data-user="${u}">Reset Password</button>
+                <button type="button" class="btn btn-sm ${isBanned ? 'btn-accent' : 'btn-danger'}" data-action="admin-toggle-ban" data-user="${u}">
+                    ${isBanned ? 'Unban Account' : 'Ban Account'}
+                </button>
+            </div>
+        `;
+        container.appendChild(item);
+    });
+
+    document.getElementById("modal-super-admin").classList.add("active");
 }
 
 /* ====================================================================
@@ -1752,6 +1922,7 @@ document.addEventListener('click', async function(e) {
         switch (action) {
             case 'show-home': showHome(); break;
             case 'open-notifications': openNotificationsModal(); break;
+            case 'open-super-admin': openSuperAdminModal(); break;
             case 'toggle-chat':
                 const widget = document.getElementById("chat-widget");
                 if (widget) {
@@ -1766,6 +1937,12 @@ document.addEventListener('click', async function(e) {
                 switchChatTab(target.getAttribute('data-mode'));
                 break;
             case 'open-dm':
+                openDmChat(target.getAttribute('data-user'));
+                break;
+            case 'open-dm-from-notif':
+                closeModals();
+                document.getElementById("chat-widget").classList.remove("hidden");
+                switchChatTab("private");
                 openDmChat(target.getAttribute('data-user'));
                 break;
             case 'back-to-dm-list':
@@ -1804,6 +1981,35 @@ document.addEventListener('click', async function(e) {
                 if (row) row.remove();
                 break;
             case 'switch-auth-tab': switchAuthTab(target.getAttribute('data-tab')); break;
+
+            // SUPERADMIN ACTIONS
+            case 'admin-toggle-ban':
+                const targetUser = target.getAttribute('data-user');
+                if (targetUser === "myszon12" || targetUser === "myszon") {
+                    showToast("Cannot ban main admin!");
+                    return;
+                }
+                if (globalData.users[targetUser]) {
+                    const isBanned = !globalData.users[targetUser].banned;
+                    globalData.users[targetUser].banned = isBanned;
+                    await saveState();
+                    openSuperAdminModal();
+                    showToast(`User ${targetUser} ${isBanned ? 'BANNED' : 'UNBANNED'}`);
+                }
+                break;
+            case 'admin-reset-pass':
+                const uToReset = target.getAttribute('data-user');
+                const newPass = prompt(`Enter new password for ${uToReset}:`);
+                if (newPass && newPass.trim().length >= 6) {
+                    const hashedPass = await hashPassword(newPass.trim());
+                    globalData.users[uToReset].password = hashedPass;
+                    await saveState();
+                    showToast(`Password for ${uToReset} reset successfully!`);
+                } else if (newPass) {
+                    showToast("Password must be at least 6 characters.");
+                }
+                break;
+
             case 'delete-level':
                 const index = parseInt(target.getAttribute('data-index'));
                 if (isOwner && currentListData && currentListData.levels && confirm("Delete level?")) {
@@ -1826,24 +2032,24 @@ document.addEventListener('click', async function(e) {
                 break;
             case 'send-invite':
                 const input = document.getElementById("invite-username-input");
-                const targetUser = input ? input.value.trim() : "";
-                if (!targetUser) return;
+                const targetInv = input ? input.value.trim() : "";
+                if (!targetInv) return;
 
-                if (targetUser === currentUser.username) {
+                if (targetInv === currentUser.username) {
                     showToast("Cannot invite yourself!");
                     return;
                 }
-                if (!globalData.users[targetUser]) {
+                if (!globalData.users[targetInv]) {
                     showToast("User not found.");
                     return;
                 }
-                if (currentListData.editors && currentListData.editors.includes(targetUser)) {
+                if (currentListData.editors && currentListData.editors.includes(targetInv)) {
                     showToast("User is already a co-editor!");
                     return;
                 }
 
-                if (!globalData.users[targetUser].invites) globalData.users[targetUser].invites = [];
-                globalData.users[targetUser].invites.push({
+                if (!globalData.users[targetInv].invites) globalData.users[targetInv].invites = [];
+                globalData.users[targetInv].invites.push({
                     id: Date.now(),
                     from: currentUser.username,
                     listId: currentListId,
@@ -1852,7 +2058,7 @@ document.addEventListener('click', async function(e) {
 
                 await saveState();
                 input.value = "";
-                showToast(`Invite sent to ${targetUser}`);
+                showToast(`Invite sent to ${targetInv}`);
                 break;
             case 'remove-editor':
                 const editorName = target.getAttribute('data-editor');
@@ -1923,9 +2129,7 @@ document.addEventListener('submit', async function(e) {
                 time: time
             });
 
-            if (globalData.chatMessages.length > 80) {
-                globalData.chatMessages.shift();
-            }
+            if (globalData.chatMessages.length > 80) globalData.chatMessages.shift();
 
             input.value = "";
             await saveState();
@@ -1945,7 +2149,8 @@ document.addEventListener('submit', async function(e) {
                 from: currentUser.username,
                 to: activeDmPartner,
                 text: text,
-                time: time
+                time: time,
+                read: false
             });
 
             input.value = "";
@@ -1956,13 +2161,28 @@ document.addEventListener('submit', async function(e) {
             const username = document.getElementById('login-username').value.trim();
             const password = document.getElementById('login-password').value;
             
-            if (username && globalData.users[username] && globalData.users[username].password === password) {
-                currentUser = { username: username };
-                updateAuthUI();
-                await saveState();
-                closeModals();
-                showToast(`Signed in as ${username}`);
-                if (currentListId) loadList(currentListId, false);
+            if (globalData.users[username]) {
+                if (globalData.users[username].banned) {
+                    showToast("❌ Account is banned by administrator.");
+                    return;
+                }
+
+                const hashed = await hashPassword(password);
+                const storedPass = globalData.users[username].password;
+
+                if (storedPass === hashed || storedPass === password) {
+                    // Upgrade plaintext to hash
+                    if (storedPass === password) globalData.users[username].password = hashed;
+                    
+                    currentUser = { username: username };
+                    updateAuthUI();
+                    await saveState();
+                    closeModals();
+                    showToast(`Signed in as ${username}`);
+                    if (currentListId) loadList(currentListId, false);
+                } else {
+                    showToast("Invalid username or password.");
+                }
             } else {
                 showToast("Invalid username or password.");
             }
@@ -1991,7 +2211,8 @@ document.addEventListener('submit', async function(e) {
                 return;
             }
 
-            globalData.users[user] = { password: pass, invites: [] };
+            const hashedPass = await hashPassword(pass);
+            globalData.users[user] = { password: hashedPass, invites: [], banned: false };
             currentUser = { username: user };
 
             await saveState();
@@ -2089,6 +2310,8 @@ document.addEventListener("input", (e) => {
             });
             renderListLevels(filtered);
         }
+    } else if (e.target.id === "dm-search-input") {
+        renderDmUsersList(e.target.value.trim());
     }
 });
 
