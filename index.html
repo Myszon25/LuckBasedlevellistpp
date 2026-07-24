@@ -768,6 +768,19 @@ h1, h2, h3, h4, .font-heading {
     <div id="tab-content-leaderboard" class="hidden"></div>
 
     <div id="tab-content-admin" class="hidden">
+        <!-- EDIT DISCORD LINK -->
+        <div style="background:var(--bg-card); padding:22px; border-radius:14px; border:1px solid var(--border); margin-bottom:20px;">
+            <h3 class="font-heading" style="font-size:16px; margin-bottom:4px;">🔗 Edit Discord Link</h3>
+            <p style="color:var(--text-muted); font-size:12px; margin-bottom:14px;">Update the Discord server link for this demonlist.</p>
+            <form id="edit-discord-form">
+                <div class="form-group">
+                    <label>Discord Server Link</label>
+                    <input type="text" id="edit-list-discord-input" class="form-control" placeholder="https://discord.gg/...">
+                </div>
+                <button type="submit" class="btn btn-accent btn-sm">Save Discord Link</button>
+            </form>
+        </div>
+
         <!-- CO-EDITORS MANAGEMENT -->
         <div style="background:var(--bg-card); padding:22px; border-radius:14px; border:1px solid var(--border); margin-bottom:20px;">
             <h3 class="font-heading" style="font-size:16px; margin-bottom:4px;">👥 Co-Editors & Permissions</h3>
@@ -1595,6 +1608,9 @@ function renderLeaderboard() {
 }
 
 function renderAdminPanel() {
+    if (document.getElementById("edit-list-discord-input") && currentListData) {
+        document.getElementById("edit-list-discord-input").value = currentListData.discord || "";
+    }
     renderEditorsList();
     renderManageLevelsList();
 }
@@ -2179,7 +2195,15 @@ document.addEventListener('submit', async function(e) {
     globalData = ensureDataStructure(globalData);
 
     try {
-        if (form.id === 'chat-form') {
+        if (form.id === 'edit-discord-form') {
+            if (!isOwner || !currentListData) return;
+            const newDiscord = document.getElementById("edit-list-discord-input").value.trim();
+            currentListData.discord = newDiscord;
+            document.getElementById("active-list-discord").href = newDiscord || "#";
+            await saveState();
+            showToast("Discord link updated!");
+        }
+        else if (form.id === 'chat-form') {
             if (!currentUser) {
                 showToast("Please sign in to send messages!");
                 document.getElementById('modal-auth').classList.add('active');
