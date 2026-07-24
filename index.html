@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Demonlist Central (Supabase Active)</title>
 
+<!-- Brak błędu 404 dla braku favicony -->
+<link rel="icon" href="data:,">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
@@ -631,7 +634,7 @@ if (window.supabase) {
                 persistSession: false,
                 autoRefreshToken: false,
                 detectSessionInUrl: false,
-                storage: dummyMemoryStorage // Zabezpieczenie przed błędem Tracking Protection
+                storage: dummyMemoryStorage
             }
         });
     } catch(e) {
@@ -640,7 +643,7 @@ if (window.supabase) {
 }
 
 /* ====================================================================
-   2. STAN DOMYŚLNY I OBSŁUGA DANYCH
+   2. OCHRONA STRUKTURY DANYCH I STAN APLIKACJI
    ==================================================================== */
 const DEFAULT_DATA = {
     users: {
@@ -662,14 +665,35 @@ const DEFAULT_DATA = {
     }
 };
 
+// Gwarantuje, że users i lists ZAWSZE są obiektami, zapobiegając błędom Cannot read/set properties of undefined
+function ensureDataStructure(data) {
+    if (!data || typeof data !== 'object') data = {};
+    if (!data.users || typeof data.users !== 'object') {
+        data.users = { "myszon": { password: "szyszkaqw", invites: [] } };
+    }
+    if (!data.lists || typeof data.lists !== 'object') {
+        data.lists = {};
+    }
+    return data;
+}
+
 function loadStoredData() {
-    const d = safeStorage.getItem("gd_app_data_v3");
-    return d ? JSON.parse(d) : DEFAULT_DATA;
+    try {
+        const d = safeStorage.getItem("gd_app_data_v3");
+        if (d) {
+            return ensureDataStructure(JSON.parse(d));
+        }
+    } catch(e) {}
+    return ensureDataStructure(JSON.parse(JSON.stringify(DEFAULT_DATA)));
 }
 
 function loadStoredUser() {
-    const u = safeStorage.getItem("gd_app_user_v3");
-    return u ? JSON.parse(u) : null;
+    try {
+        const u = safeStorage.getItem("gd_app_user_v3");
+        return u ? JSON.parse(u) : null;
+    } catch(e) {
+        return null;
+    }
 }
 
 let globalData = loadStoredData();
@@ -680,7 +704,9 @@ let isOwner = false;
 let currentCaptchaTarget = "";
 
 async function saveState() {
+    globalData = ensureDataStructure(globalData);
     safeStorage.setItem("gd_app_data_v3", JSON.stringify(globalData));
+    
     if (currentUser) {
         safeStorage.setItem("gd_app_user_v3", JSON.stringify(currentUser));
     } else {
@@ -707,7 +733,7 @@ async function fetchFromSupabase() {
         if (error) throw error;
 
         if (data && data.payload) {
-            globalData = data.payload;
+            globalData = ensureDataStructure(data.payload);
             safeStorage.setItem("gd_app_data_v3", JSON.stringify(globalData));
             updateStatusBadge(true);
             showMainMenu();
@@ -759,7 +785,8 @@ function showMainMenu() {
     popGrid.innerHTML = "";
     allGrid.innerHTML = "";
 
-    const listsArray = Object.keys(globalData.lists || {}).map(id => globalData.lists[id]);
+    globalData = ensureDataStructure(globalData);
+    const listsArray = Object.keys(globalData.lists).map(id => globalData.lists[id]).filter(Boolean);
     const popularLists = [...listsArray].sort((a,b) => (b.views || 0) - (a.views || 0));
 
     popularLists.slice(0, 3).forEach(item => popGrid.appendChild(createListCard(item)));
@@ -787,6 +814,7 @@ function createListCard(item) {
 }
 
 function loadList(listId) {
+    globalData = ensureDataStructure(globalData);
     currentListId = listId;
     currentListData = globalData.lists[listId];
 
@@ -1088,6 +1116,7 @@ function updateAuthUI() {
 }
 
 function checkNotificationsCount() {
+    globalData = ensureDataStructure(globalData);
     if (!currentUser || !globalData.users[currentUser.username]) return;
     const invites = globalData.users[currentUser.username].invites || [];
     const badge = document.getElementById("notif-badge-count");
@@ -1102,6 +1131,7 @@ function checkNotificationsCount() {
 }
 
 function openNotificationsModal() {
+    globalData = ensureDataStructure(globalData);
     const container = document.getElementById("notifications-list-container");
     if (!container) return;
     container.innerHTML = "";
@@ -1134,7 +1164,7 @@ function openNotificationsModal() {
 }
 
 /* ====================================================================
-   4. OBSŁUGA ZDARZEŃ I PRZYCISKÓW (ZABEZPIECZONA PrzeKIEROWANIAMI)
+   4. OBSŁUGA ZDARZEŃ I PRZYCISKÓW (ZABEZPIECZONA)
    ==================================================================== */
 document.addEventListener('click', function(e) {
     try {
@@ -1145,6 +1175,7 @@ document.addEventListener('click', function(e) {
         }
 
         const action = target.getAttribute('data-action');
+        globalData = ensureDataStructure(globalData);
 
         switch (action) {
             case 'show-main':
@@ -1303,12 +1334,16 @@ document.addEventListener('submit', function(e) {
     const form = e.target;
     e.preventDefault();
 
+    globalData = ensureDataStructure(globalData);
+
     try {
         if (form.id === 'form-login') {
-            const username = document.getElementById('login-username').value.trim();
-            const password = document.getElementById('login-password').value;
+            const usernameInput = document.getElementById('login-username');
+            const passwordInput = document.getElementById('login-password');
+            const username = usernameInput ? usernameInput.value.trim() : "";
+            const password = passwordInput ? passwordInput.value : "";
             
-            if (globalData.users[username] && globalData.users[username].password === password) {
+            if (username && globalData.users[username] && globalData.users[username].password === password) {
                 currentUser = { username: username };
                 updateAuthUI();
                 saveState();
@@ -1327,11 +1362,13 @@ document.addEventListener('submit', function(e) {
                 return;
             }
 
-            const user = document.getElementById("reg-username").value.trim();
-            const pass = document.getElementById("reg-password").value;
+            const userVal = document.getElementById("reg-username").value;
+            const passVal = document.getElementById("reg-password").value;
+            const user = (userVal || "").trim();
+            const pass = passVal || "";
 
             if (!/^[a-zA-Z0-9_]{3,16}$/.test(user)) {
-                showToast("❌ Nazwa użytkownika musi mieć 3-16 znaków.");
+                showToast("❌ Nazwa użytkownika musi mieć 3-16 znaków (litery, cyfry, _).");
                 return;
             }
 
@@ -1357,9 +1394,18 @@ document.addEventListener('submit', function(e) {
         else if (form.id === 'create-list-form') {
             if (!currentUser) return;
 
-            const id = document.getElementById("new-list-id").value.trim().toLowerCase().replace(/\s+/g, '-');
-            const title = document.getElementById("new-list-title").value.trim();
-            const discord = document.getElementById("new-list-discord").value.trim();
+            const rawId = document.getElementById("new-list-id").value;
+            const titleVal = document.getElementById("new-list-title").value;
+            const discordVal = document.getElementById("new-list-discord").value;
+
+            const id = (rawId || "").trim().toLowerCase().replace(/\s+/g, '-');
+            const title = (titleVal || "").trim();
+            const discord = (discordVal || "").trim();
+
+            if (!id || !title) {
+                showToast("❌ Wypełnij poprawne dane listy.");
+                return;
+            }
 
             globalData.lists[id] = { id, title, author: currentUser.username, editors: [], discord, views: 1, levels: [] };
             saveState();
@@ -1444,7 +1490,7 @@ document.addEventListener("input", (e) => {
     }
 });
 
-// INITIALIZATION
+// INICJALIZACJA
 document.addEventListener('DOMContentLoaded', () => {
     updateAuthUI();
     showMainMenu();
