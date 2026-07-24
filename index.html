@@ -1205,7 +1205,7 @@ function handleRouting() {
     const hash = window.location.hash.replace('#', '').trim();
     if (hash && globalData.lists && globalData.lists[hash]) {
         loadList(hash, false);
-    } else if (!hash) {
+    } else {
         showHome();
     }
 }
@@ -1942,7 +1942,7 @@ document.addEventListener('click', async function(e) {
             case 'show-home': showHome(); break;
             case 'copy-list-link':
                 if (currentListId) {
-                    const fullUrl = window.location.origin + window.location.pathname + '#' + currentListId;
+                    const fullUrl = window.location.href.split('#')[0] + '#' + currentListId;
                     navigator.clipboard.writeText(fullUrl);
                     showToast("🔗 Direct link copied to clipboard!");
                 }
@@ -2344,7 +2344,6 @@ document.addEventListener("input", (e) => {
 // INITIALIZE APP
 document.addEventListener('DOMContentLoaded', async () => {
     updateAuthUI();
-    showHome();
     await fetchFromSupabase();
     setupRealtimeListener();
     handleRouting(); // Sprawdza URL i otwiera odpowiednią listę z linku
