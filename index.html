@@ -771,6 +771,7 @@ h1, h2, h3, h4, .font-heading {
             <p id="active-list-desc" style="color:var(--text-muted); font-size:13px;">Owner: <strong id="active-list-author" style="color:#fff;">...</strong></p>
         </div>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <a href="#" target="_blank" id="active-list-submit" class="btn btn-sm btn-accent hidden">📥 Submit Record</a>
             <button type="button" class="btn btn-sm" data-action="copy-list-link">🔗 Kopiuj Link</button>
             <a href="#" target="_blank" id="active-list-discord" class="btn btn-sm">Discord</a>
             <button type="button" class="btn btn-sm btn-accent hidden" id="btn-admin-tab" data-action="switch-tab" data-tab="admin">⚙️ Admin Panel</button>
@@ -795,6 +796,23 @@ h1, h2, h3, h4, .font-heading {
     <div id="tab-content-leaderboard" class="hidden"></div>
 
     <div id="tab-content-admin" class="hidden">
+        <!-- EDIT SUBMIT RECORD SETTINGS -->
+        <div style="background:var(--bg-card); padding:22px; border-radius:14px; border:1px solid var(--border); margin-bottom:20px;">
+            <h3 class="font-heading" style="font-size:16px; margin-bottom:4px;">📥 Record Submission Settings</h3>
+            <p style="color:var(--text-muted); font-size:12px; margin-bottom:14px;">Enable record submissions button and set the redirection link (e.g. Google Form).</p>
+            <form id="edit-submit-settings-form">
+                <div class="form-group" style="flex-direction:row; align-items:center; gap:10px; margin-bottom:12px;">
+                    <input type="checkbox" id="edit-enable-submit" style="width:18px; height:18px; cursor:pointer;">
+                    <label for="edit-enable-submit" style="cursor:pointer; font-size:13px; text-transform:none; font-weight:600; color:#fff;">Enable "Submit Record" button</label>
+                </div>
+                <div class="form-group">
+                    <label>Submission Link (Google Form / Website URL)</label>
+                    <input type="text" id="edit-submit-url-input" class="form-control" placeholder="https://forms.google.com/...">
+                </div>
+                <button type="submit" class="btn btn-accent btn-sm">Save Submission Settings</button>
+            </form>
+        </div>
+
         <!-- EDIT DISCORD LINK -->
         <div style="background:var(--bg-card); padding:22px; border-radius:14px; border:1px solid var(--border); margin-bottom:20px;">
             <h3 class="font-heading" style="font-size:16px; margin-bottom:4px;">🔗 Edit Discord Link</h3>
@@ -1110,6 +1128,8 @@ const DEFAULT_DATA = {
             author: "myszon12",
             editors: [],
             discord: "https://discord.gg/3zvSrFnVz",
+            submitUrl: "https://forms.google.com",
+            enableSubmit: true,
             views: 28,
             levels: [
                 { pos: 1, name: "Acheron", levelId: "84930211", author: "Ryamu & More", verifier: "Zoink", pts: 100, yt: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", victors: [{ name: "Zoink", video: "https://youtube.com" }, { name: "Trick", video: "" }] },
@@ -1595,6 +1615,21 @@ function loadList(listId, incrementViews = true) {
     document.getElementById("active-list-views").innerText = `👁️ ${currentListData.views} views`;
     document.getElementById("active-list-discord").href = currentListData.discord || "#";
 
+    // Handle Submit Record Button
+    const submitBtn = document.getElementById("active-list-submit");
+    if (submitBtn) {
+        if (currentListData.enableSubmit && currentListData.submitUrl) {
+            let targetUrl = currentListData.submitUrl.trim();
+            if (!targetUrl.startsWith('http://') && !targetUrl.startsWith('https://')) {
+                targetUrl = 'https://' + targetUrl;
+            }
+            submitBtn.href = targetUrl;
+            submitBtn.classList.remove("hidden");
+        } else {
+            submitBtn.classList.add("hidden");
+        }
+    }
+
     document.getElementById("btn-admin-tab").classList.toggle("hidden", !isOwner);
     document.getElementById("tab-btn-admin").classList.toggle("hidden", !isOwner);
     document.getElementById("btn-delete-list").classList.toggle("hidden", !isOwner);
@@ -1698,6 +1733,10 @@ function renderLeaderboard() {
 function renderAdminPanel() {
     if (document.getElementById("edit-list-discord-input") && currentListData) {
         document.getElementById("edit-list-discord-input").value = currentListData.discord || "";
+    }
+    if (document.getElementById("edit-submit-url-input") && currentListData) {
+        document.getElementById("edit-enable-submit").checked = !!currentListData.enableSubmit;
+        document.getElementById("edit-submit-url-input").value = currentListData.submitUrl || "";
     }
     renderEditorsList();
     renderManageLevelsList();
@@ -2308,6 +2347,28 @@ document.addEventListener('submit', async function(e) {
             form.reset();
             showToast("Partnership added successfully!");
         }
+        else if (form.id === 'edit-submit-settings-form') {
+            if (!isOwner || !currentListData) return;
+            const enableSubmit = document.getElementById("edit-enable-submit").checked;
+            const submitUrl = document.getElementById("edit-submit-url-input").value.trim();
+            
+            currentListData.enableSubmit = enableSubmit;
+            currentListData.submitUrl = submitUrl;
+            
+            const submitBtn = document.getElementById("active-list-submit");
+            if (submitBtn) {
+                if (enableSubmit && submitUrl) {
+                    let url = submitUrl;
+                    if (!url.startsWith('http://') && !url.startsWith('https://')) url = 'https://' + url;
+                    submitBtn.href = url;
+                    submitBtn.classList.remove("hidden");
+                } else {
+                    submitBtn.classList.add("hidden");
+                }
+            }
+            await saveState();
+            showToast("Record submission settings saved!");
+        }
         else if (form.id === 'edit-discord-form') {
             if (!isOwner || !currentListData) return;
             const newDiscord = document.getElementById("edit-list-discord-input").value.trim();
@@ -2441,7 +2502,7 @@ document.addEventListener('submit', async function(e) {
 
             if (!id || !title) return;
 
-            globalData.lists[id] = { id, title, author: currentUser.username, editors: [], discord, views: 1, levels: [] };
+            globalData.lists[id] = { id, title, author: currentUser.username, editors: [], discord, submitUrl: "", enableSubmit: false, views: 1, levels: [] };
             await saveState();
             closeModals();
             loadList(id, false);
