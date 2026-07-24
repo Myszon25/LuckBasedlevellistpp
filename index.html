@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Demonlist Central (Supabase Active)</title>
+<title>Demonlist Central (Supabase Realtime Active)</title>
 
 <!-- Brak błędu 404 dla braku favicony -->
 <link rel="icon" href="data:,">
@@ -366,7 +366,7 @@ h1, h2, h3, .font-heading {
 <div id="view-main-menu" class="container">
     <div class="hero">
         <h1 class="font-heading">Geometry Dash Demonlists</h1>
-        <p>Twórz własne rankingi demonów, śledź punkty graczy i weryfikuj rekordy wideo.</p>
+        <p>Twórz własne rankingi demonów, śledź punkty graczy i weryfikuj rekordy wideo na żywo.</p>
     </div>
 
     <div class="section-title">🔥 Popularne Listy</div>
@@ -592,7 +592,7 @@ h1, h2, h3, .font-heading {
     <div class="footer-content">
         <div class="footer-left">
             <div class="footer-credits">Demonlist Central &bull; Stworzone przez <span>myszon12</span></div>
-            <div class="footer-sub">Synchronizacja z chmurą Supabase + Zapasowy LocalStorage</div>
+            <div class="footer-sub">Synchronizacja na żywo z chmurą Supabase Realtime</div>
         </div>
         <div class="footer-links">
             <a href="https://discord.gg/3zvSrFnVz" target="_blank" class="discord-btn">Dołącz do Discorda</a>
@@ -665,7 +665,6 @@ const DEFAULT_DATA = {
     }
 };
 
-// Gwarantuje, że users i lists ZAWSZE są obiektami, zapobiegając błędom Cannot read/set properties of undefined
 function ensureDataStructure(data) {
     if (!data || typeof data !== 'object') data = {};
     if (!data.users || typeof data.users !== 'object') {
@@ -736,7 +735,7 @@ async function fetchFromSupabase() {
             globalData = ensureDataStructure(data.payload);
             safeStorage.setItem("gd_app_data_v3", JSON.stringify(globalData));
             updateStatusBadge(true);
-            showMainMenu();
+            refreshCurrentUI();
         } else {
             updateStatusBadge(true);
         }
@@ -746,11 +745,38 @@ async function fetchFromSupabase() {
     }
 }
 
+// SUPABASE REALTIME SUBSCRIPTION (SLUCHACZ ZMIAN NA ZYWO)
+function setupRealtimeListener() {
+    if (!supabaseClient) return;
+
+    supabaseClient
+        .channel('public:app_store')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'app_store' }, (payload) => {
+            if (payload.new && payload.new.payload) {
+                globalData = ensureDataStructure(payload.new.payload);
+                safeStorage.setItem("gd_app_data_v3", JSON.stringify(globalData));
+                refreshCurrentUI();
+            }
+        })
+        .subscribe();
+}
+
+function refreshCurrentUI() {
+    if (currentListId && globalData.lists[currentListId]) {
+        currentListData = globalData.lists[currentListId];
+        renderListLevels();
+        renderLeaderboard();
+        if (isOwner) renderAdminPanel();
+    } else if (!currentListId) {
+        showMainMenu();
+    }
+}
+
 function updateStatusBadge(isOnline) {
     const badge = document.getElementById("db-status-badge");
     if (!badge) return;
     if (isOnline) {
-        badge.innerText = "Chmura Supabase: AKTYWNA";
+        badge.innerText = "Chmura Supabase (Live): AKTYWNA";
         badge.className = "status-badge status-online";
     } else {
         badge.innerText = "Lokalnie";
@@ -1164,9 +1190,9 @@ function openNotificationsModal() {
 }
 
 /* ====================================================================
-   4. OBSŁUGA ZDARZEŃ I PRZYCISKÓW (ZABEZPIECZONA)
+   4. OBSŁUGA ZDARZEŃ I PRZYCISKÓW
    ==================================================================== */
-document.addEventListener('click', function(e) {
+document.addEventListener('click', async function(e) {
     try {
         const target = e.target.closest('[data-action]');
         if (!target) {
@@ -1189,7 +1215,7 @@ document.addEventListener('click', function(e) {
             case 'logout':
                 currentUser = null;
                 updateAuthUI();
-                saveState();
+                await saveState();
                 showMainMenu();
                 showToast("Zostałeś wylogowany.");
                 break;
@@ -1247,7 +1273,7 @@ document.addEventListener('click', function(e) {
                 if (isOwner && currentListData && currentListData.levels && confirm("Czy na pewno chcesz usunąć ten poziom?")) {
                     currentListData.levels.splice(index, 1);
                     reorderLevelsArray(currentListData.levels);
-                    saveState();
+                    await saveState();
                     updateMaxPosLimits();
                     renderListLevels();
                     renderAdminPanel();
@@ -1259,7 +1285,7 @@ document.addEventListener('click', function(e) {
             case 'delete-current-list':
                 if (isOwner && confirm(`Czy na pewno chcesz usunąć całą listę "${currentListData.title}"?`)) {
                     delete globalData.lists[currentListId];
-                    saveState();
+                    await saveState();
                     showToast("Lista została usunięta.");
                     showMainMenu();
                 }
@@ -1291,7 +1317,7 @@ document.addEventListener('click', function(e) {
                     listTitle: currentListData.title
                 });
 
-                saveState();
+                await saveState();
                 input.value = "";
                 showToast(`Wysłano zaproszenie do ${targetUser}`);
                 break;
@@ -1316,7 +1342,7 @@ document.addEventListener('click', function(e) {
                             showToast("Zaproszenie odrzucone.");
                         }
                         invites.splice(foundIdx, 1);
-                        saveState();
+                        await saveState();
                         checkNotificationsCount();
                         openNotificationsModal();
                         if (currentListId === inv.listId) loadList(currentListId);
@@ -1330,7 +1356,7 @@ document.addEventListener('click', function(e) {
 });
 
 // SUBMIT FORMS
-document.addEventListener('submit', function(e) {
+document.addEventListener('submit', async function(e) {
     const form = e.target;
     e.preventDefault();
 
@@ -1346,7 +1372,7 @@ document.addEventListener('submit', function(e) {
             if (username && globalData.users[username] && globalData.users[username].password === password) {
                 currentUser = { username: username };
                 updateAuthUI();
-                saveState();
+                await saveState();
                 closeModals();
                 showToast(`Witaj z powrotem, ${username}!`);
                 if (currentListId) loadList(currentListId);
@@ -1385,7 +1411,7 @@ document.addEventListener('submit', function(e) {
             globalData.users[user] = { password: pass, invites: [] };
             currentUser = { username: user };
 
-            saveState();
+            await saveState();
             updateAuthUI();
             closeModals();
             showToast(`Konto stworzone! Zalogowano jako ${user}`);
@@ -1408,7 +1434,7 @@ document.addEventListener('submit', function(e) {
             }
 
             globalData.lists[id] = { id, title, author: currentUser.username, editors: [], discord, views: 1, levels: [] };
-            saveState();
+            await saveState();
             closeModals();
             loadList(id);
             showToast("Demonlista została pomyślnie utworzona!");
@@ -1432,7 +1458,7 @@ document.addEventListener('submit', function(e) {
             currentListData.levels.splice(pos - 1, 0, newLvl);
             reorderLevelsArray(currentListData.levels);
 
-            saveState();
+            await saveState();
             updateMaxPosLimits();
             renderListLevels();
             renderLeaderboard();
@@ -1461,7 +1487,7 @@ document.addEventListener('submit', function(e) {
             currentListData.levels.splice(pos - 1, 0, updatedLvl);
             reorderLevelsArray(currentListData.levels);
 
-            saveState();
+            await saveState();
             closeModals();
             renderListLevels();
             renderLeaderboard();
@@ -1491,10 +1517,11 @@ document.addEventListener("input", (e) => {
 });
 
 // INICJALIZACJA
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     updateAuthUI();
     showMainMenu();
-    fetchFromSupabase();
+    await fetchFromSupabase();
+    setupRealtimeListener();
 });
 </script>
 </body>
