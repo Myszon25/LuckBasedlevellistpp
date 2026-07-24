@@ -599,9 +599,9 @@ h1, h2, h3, .font-heading {
 
 <script>
 /* ====================================================================
-   1. AUTOMATYCZNA KONFIGURACJA SUPABASE (BEZ MIEJSCOWYCH BŁĘDÓW TRACKING)
+   1. AUTOMATYCZNA KONFIGURACJA SUPABASE (Z POPRAWIONYM ADRESEM I KLUCZEM)
    ==================================================================== */
-const SUPABASE_URL = "https://iigxupbrqpftynrhlwk.supabase.co";
+const SUPABASE_URL = "https://iigxupbrqpqftynrhlwk.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlpZ3h1cGJycXBxZnR5bnJobHdrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4MzAzNjEsImV4cCI6MjEwMDQwNjM2MX0.hK0GlMWVE7B3_n2mEzsUlz3qU6TSWt5w2S9Td20fl68";
 
 let supabaseClient = null;
@@ -689,10 +689,15 @@ async function saveState() {
 }
 
 async function fetchFromSupabase() {
-    if (!supabaseClient) return;
+    if (!supabaseClient) {
+        updateStatusBadge(false);
+        return;
+    }
 
     try {
         const { data, error } = await supabaseClient.from('app_store').select('payload').eq('id', 1).single();
+        if (error) throw error;
+
         if (data && data.payload) {
             globalData = data.payload;
             localStorage.setItem("gd_app_data_v3", JSON.stringify(globalData));
@@ -702,7 +707,7 @@ async function fetchFromSupabase() {
             updateStatusBadge(true);
         }
     } catch(err) {
-        console.warn("Offline/Lokalny tryb:", err);
+        console.warn("Tryb Offline / Błąd połączenia Supabase:", err);
         updateStatusBadge(false);
     }
 }
@@ -1406,16 +1411,18 @@ document.addEventListener('submit', function(e) {
     }
 });
 
-// WYSZUKIWANA
+// BEZPIECZNE WYSZUKIWANIE
 document.addEventListener("input", (e) => {
     if (e.target.id === "search-levels-input") {
-        const query = e.target.value.toLowerCase().trim();
+        const query = (e.target.value || "").toLowerCase().trim();
         if (!query) {
             renderListLevels();
         } else {
-            const filtered = (currentListData.levels || []).filter(l => 
-                l.name.toLowerCase().includes(query) || l.author.toLowerCase().includes(query)
-            );
+            const filtered = (currentListData?.levels || []).filter(l => {
+                const name = (l.name || "").toLowerCase();
+                const author = (l.author || "").toLowerCase();
+                return name.includes(query) || author.includes(query);
+            });
             renderListLevels(filtered);
         }
     }
