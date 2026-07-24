@@ -4,24 +4,27 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Demonlist Central</title>
+
+<!-- Fonts & Supabase SDK -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 :root {
-    --bg: #08090d;
-    --surface: #0f121a;
-    --surface-hover: #151924;
-    --panel: #121622;
-    --border: rgba(255, 255, 255, 0.07);
-    --border-strong: rgba(255, 255, 255, 0.15);
+    --bg: #090b10;
+    --surface: #11141d;
+    --surface-hover: #181d2a;
+    --panel: #141824;
+    --border: rgba(255, 255, 255, 0.08);
+    --border-strong: rgba(255, 255, 255, 0.18);
     
     --accent: #3b82f6;
     --accent-hover: #2563eb;
-    --accent-subtle: rgba(59, 130, 246, 0.1);
+    --accent-subtle: rgba(59, 130, 246, 0.12);
     
-    --gold: #f59e0b;
+    --gold: #fbbf24;
     --silver: #94a3b8;
     --bronze: #d97706;
     
@@ -30,7 +33,8 @@
     --text-muted: #6b7280;
     
     --danger: #ef4444;
-    --danger-subtle: rgba(239, 68, 68, 0.1);
+    --danger-subtle: rgba(239, 68, 68, 0.12);
+    --success: #10b981;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -40,6 +44,9 @@ body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     color: var(--text-primary);
     min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
 }
@@ -51,9 +58,9 @@ h1, h2, h3, .font-heading {
 
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 3px; }
 
-/* GLOBAL SYNC STATUS BAR */
+/* TOP SYNC BAR */
 #sync-status {
     position: fixed;
     top: 0;
@@ -65,7 +72,6 @@ h1, h2, h3, .font-heading {
     opacity: 0;
     transition: opacity 0.3s;
 }
-
 #sync-status.syncing { opacity: 1; }
 
 /* NAVBAR */
@@ -73,9 +79,9 @@ h1, h2, h3, .font-heading {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 14px 4vw;
-    background: rgba(8, 9, 13, 0.85);
-    backdrop-filter: blur(16px);
+    padding: 14px 5vw;
+    background: rgba(11, 14, 21, 0.9);
+    backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--border);
     position: sticky;
     top: 0;
@@ -85,14 +91,14 @@ h1, h2, h3, .font-heading {
 .brand {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     cursor: pointer;
 }
 
 .brand-logo {
-    width: 32px;
-    height: 32px;
-    background: #1e2433;
+    width: 34px;
+    height: 34px;
+    background: var(--surface);
     border: 1px solid var(--border-strong);
     border-radius: 8px;
     display: flex;
@@ -104,7 +110,7 @@ h1, h2, h3, .font-heading {
 }
 
 .brand-name {
-    font-size: 16px;
+    font-size: 17px;
     font-weight: 700;
     color: var(--text-primary);
 }
@@ -139,7 +145,7 @@ h1, h2, h3, .font-heading {
 .btn-danger:hover { background: var(--danger); color: #fff; }
 .btn-sm { padding: 5px 10px; font-size: 12px; border-radius: 6px; }
 
-/* NOTIFICATIONS BELL */
+/* NOTIFICATIONS */
 .notif-bell-btn {
     position: relative;
     background: var(--surface);
@@ -171,11 +177,11 @@ h1, h2, h3, .font-heading {
     border: 2px solid var(--bg);
 }
 
-/* TOAST NOTIFICATIONS */
+/* TOASTS */
 #toast-container {
     position: fixed;
-    bottom: 20px;
-    right: 20px;
+    bottom: 24px;
+    right: 24px;
     z-index: 9999;
     display: flex;
     flex-direction: column;
@@ -188,7 +194,7 @@ h1, h2, h3, .font-heading {
     color: var(--text-primary);
     padding: 12px 18px;
     border-radius: 10px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.6);
     font-size: 13px;
     font-weight: 500;
     animation: slideIn 0.2s ease-out forwards;
@@ -199,25 +205,25 @@ h1, h2, h3, .font-heading {
     to { transform: translateY(0); opacity: 1; }
 }
 
-.container { max-width: 1000px; margin: 0 auto; padding: 36px 20px; }
+.container { max-width: 1000px; margin: 0 auto; padding: 36px 20px; flex: 1; width: 100%; }
 .hidden { display: none !important; }
 
 .hero {
-    margin-bottom: 40px;
+    margin-bottom: 36px;
     border-bottom: 1px solid var(--border);
-    padding-bottom: 28px;
+    padding-bottom: 24px;
 }
 
 .hero h1 { font-size: 32px; font-weight: 700; margin-bottom: 8px; color: var(--text-primary); }
-.hero p { color: var(--text-secondary); font-size: 14px; max-width: 580px; line-height: 1.5; }
+.hero p { color: var(--text-secondary); font-size: 14px; max-width: 600px; line-height: 1.5; }
 
 .section-title {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: 16px;
+    letter-spacing: 0.08em;
+    margin-bottom: 14px;
 }
 
 .lists-grid {
@@ -239,7 +245,7 @@ h1, h2, h3, .font-heading {
     justify-content: space-between;
 }
 
-.list-card:hover { border-color: var(--border-strong); background: var(--surface-hover); }
+.list-card:hover { border-color: var(--border-strong); background: var(--surface-hover); transform: translateY(-2px); }
 
 .view-badge {
     background: var(--accent-subtle);
@@ -254,7 +260,7 @@ h1, h2, h3, .font-heading {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 14px;
-    padding: 24px 28px;
+    padding: 24px;
     margin-bottom: 24px;
     display: flex;
     justify-content: space-between;
@@ -265,7 +271,7 @@ h1, h2, h3, .font-heading {
 
 .tabs {
     display: flex;
-    gap: 4px;
+    gap: 6px;
     margin-bottom: 20px;
     border-bottom: 1px solid var(--border);
     padding-bottom: 8px;
@@ -284,7 +290,7 @@ h1, h2, h3, .font-heading {
 
 .tab-btn.active { background: var(--surface); color: var(--text-primary); border: 1px solid var(--border); }
 
-/* LEVEL CARD */
+/* LEVEL CARDS */
 .level-card {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -292,14 +298,14 @@ h1, h2, h3, .font-heading {
     margin-bottom: 10px;
     display: flex;
     overflow: hidden;
-    height: 110px;
+    height: 100px;
     transition: all 0.15s ease;
 }
 
 .level-card:hover { border-color: var(--border-strong); background: var(--surface-hover); }
 
 .level-rank {
-    width: 64px;
+    width: 60px;
     border-right: 1px solid var(--border);
     display: flex;
     align-items: center;
@@ -310,13 +316,13 @@ h1, h2, h3, .font-heading {
     color: var(--text-secondary);
 }
 
-.rank-1 { color: var(--gold); background: rgba(245, 158, 11, 0.05); }
+.rank-1 { color: var(--gold); background: rgba(251, 191, 36, 0.05); }
 .rank-2 { color: var(--silver); background: rgba(148, 163, 184, 0.05); }
 .rank-3 { color: var(--bronze); background: rgba(217, 119, 6, 0.05); }
 
 .level-details {
     flex: 1;
-    padding: 16px 20px;
+    padding: 14px 18px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -324,12 +330,12 @@ h1, h2, h3, .font-heading {
     cursor: pointer;
 }
 
-.level-title { font-size: 16px; font-weight: 700; color: var(--text-primary); }
+.level-title { font-size: 15px; font-weight: 700; color: var(--text-primary); }
 .level-author { font-size: 12px; color: var(--text-muted); }
 .level-points { font-size: 12px; font-weight: 600; color: var(--accent); margin-top: 2px; }
 
 .level-thumb {
-    width: 180px;
+    width: 160px;
     background: #000;
     position: relative;
     cursor: pointer;
@@ -343,8 +349,8 @@ h1, h2, h3, .font-heading {
 .modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(8px);
+    background: rgba(0, 0, 0, 0.82);
+    backdrop-filter: blur(6px);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -360,25 +366,24 @@ h1, h2, h3, .font-heading {
     background: var(--panel);
     border: 1px solid var(--border-strong);
     border-radius: 16px;
-    width: min(640px, 92vw);
+    width: min(620px, 92vw);
     max-height: 88vh;
     overflow-y: auto;
     padding: 24px;
     position: relative;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.7);
 }
 
-.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-.modal-close { background: transparent; border: none; color: var(--text-muted); width: 30px; height: 30px; border-radius: 6px; cursor: pointer; font-size: 16px; }
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+.modal-close { background: transparent; border: none; color: var(--text-muted); width: 28px; height: 28px; border-radius: 6px; cursor: pointer; font-size: 16px; }
 .modal-close:hover { background: var(--surface); color: var(--text-primary); }
 
-/* AUTH TABS */
 .auth-tabs { display: flex; background: var(--bg); padding: 3px; border-radius: 8px; margin-bottom: 16px; border: 1px solid var(--border); }
 .auth-tab-btn { flex: 1; padding: 8px; border: none; background: transparent; color: var(--text-secondary); font-weight: 600; font-size: 12px; cursor: pointer; border-radius: 6px; }
 .auth-tab-btn.active { background: var(--surface); color: var(--text-primary); }
 
 .form-group { margin-bottom: 14px; display: flex; flex-direction: column; gap: 5px; }
-.form-group label { font-size: 11px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.04em; }
+.form-group label { font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.04em; }
 .form-control { background: var(--bg); border: 1px solid var(--border); padding: 10px 12px; border-radius: 8px; color: var(--text-primary); font-family: inherit; font-size: 13px; outline: none; }
 .form-control:focus { border-color: var(--accent); }
 .form-row { display: flex; gap: 10px; }
@@ -392,10 +397,77 @@ h1, h2, h3, .font-heading {
 
 .admin-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 8px; }
 
-.captcha-box { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; }
+/* ENHANCED CAPTCHA BOX */
+.captcha-box {
+    background: var(--bg);
+    border: 1px solid var(--border-strong);
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 14px;
+}
+
+.captcha-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.captcha-badge {
+    background: rgba(16, 185, 129, 0.12);
+    color: var(--success);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    text-transform: uppercase;
+}
+
 .invite-card { background: var(--bg); border: 1px solid var(--border); padding: 14px; border-radius: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
 
-#detail-video-container { width: 100%; height: 360px; background: #000; border-radius: 10px; overflow: hidden; margin-bottom: 16px; border: 1px solid var(--border); }
+#detail-video-container { width: 100%; height: 320px; background: #000; border-radius: 10px; overflow: hidden; margin-bottom: 16px; border: 1px solid var(--border); }
+
+/* FOOTER / CREDITS */
+.footer {
+    background: rgba(11, 14, 21, 0.95);
+    border-top: 1px solid var(--border);
+    padding: 24px 5vw;
+    margin-top: 40px;
+}
+
+.footer-content {
+    max-width: 1000px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.footer-left { display: flex; flex-direction: column; gap: 4px; }
+.footer-credits { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.footer-credits span { color: var(--accent); }
+.footer-sub { font-size: 11px; color: var(--text-muted); }
+
+.footer-links { display: flex; items-center: center; gap: 12px; }
+.discord-btn {
+    background: #5865F2;
+    color: #fff;
+    font-weight: 600;
+    font-size: 12px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: opacity 0.15s;
+}
+.discord-btn:hover { opacity: 0.9; }
+
+/* Honeypot field - invisible to humans */
+.hp-field { display: none !important; opacity: 0; position: absolute; left: -9999px; }
 </style>
 </head>
 <body>
@@ -429,7 +501,7 @@ h1, h2, h3, .font-heading {
 <div id="view-main-menu" class="container">
     <div class="hero">
         <h1 class="font-heading">Geometry Dash Demonlists</h1>
-        <p>Host dynamic level rankings, track player points, verify video submissions, and collaborate with co-editors globally.</p>
+        <p>Host dynamic level rankings, track player points, verify video submissions, and collaborate with co-editors globally in real time.</p>
     </div>
 
     <div class="section-title">🔥 Popular Demonlists</div>
@@ -522,9 +594,9 @@ h1, h2, h3, .font-heading {
 
 <!-- MODALS -->
 
-<!-- AUTH MODAL -->
+<!-- AUTH MODAL WITH ADVANCED ANTI-BOT -->
 <div id="modal-auth" class="modal-overlay">
-    <div class="modal-content" style="max-width:400px;">
+    <div class="modal-content" style="max-width:420px;">
         <div class="modal-header">
             <h2 class="font-heading" style="font-size: 18px;">Account Access</h2>
             <button class="modal-close" onclick="closeModals()">✕</button>
@@ -542,18 +614,28 @@ h1, h2, h3, .font-heading {
         </form>
 
         <form id="form-register" class="hidden">
-            <div class="form-group"><label>Choose Username</label><input type="text" id="reg-username" class="form-control" required placeholder="Username"></div>
-            <div class="form-group"><label>Choose Password</label><input type="password" id="reg-password" class="form-control" required placeholder="Password"></div>
+            <!-- BOT TRAP HONEYPOT -->
+            <input type="text" id="website_url_hp" class="hp-field" tabindex="-1" autocomplete="off">
+
+            <div class="form-group">
+                <label>Choose Username</label>
+                <input type="text" id="reg-username" class="form-control" required placeholder="3-16 characters (a-z, 0-9, _)" maxlength="16">
+            </div>
+            <div class="form-group">
+                <label>Choose Password</label>
+                <input type="password" id="reg-password" class="form-control" required placeholder="Min. 6 characters">
+            </div>
             
             <div class="captcha-box">
-                <div>
-                    <span style="font-size:11px; color:var(--text-muted); display:block;">Anti-Bot Verification</span>
-                    <strong id="captcha-question" style="font-size:14px;">3 + 5 = ?</strong>
+                <div class="captcha-header">
+                    <span style="font-size:11px; font-weight:700; color:var(--text-secondary); text-transform:uppercase;">Anti-Bot Security</span>
+                    <span class="captcha-badge">Protected</span>
                 </div>
-                <input type="number" id="captcha-answer" class="form-control" style="width:80px; text-align:center;" required placeholder="Ans">
+                <p id="captcha-question" style="font-size:13px; font-weight:600; color:var(--text-primary); margin-bottom:8px;"></p>
+                <input type="text" id="captcha-answer" class="form-control" required placeholder="Type answer here..." autocomplete="off">
             </div>
 
-            <button type="submit" class="btn btn-accent" style="width:100%;">Create Account</button>
+            <button type="submit" id="reg-submit-btn" class="btn btn-accent" style="width:100%;">Create Account</button>
         </form>
     </div>
 </div>
@@ -650,14 +732,34 @@ h1, h2, h3, .font-heading {
     </div>
 </div>
 
+<!-- FOOTER WITH CREDITS AND DISCORD -->
+<footer class="footer">
+    <div class="footer-content">
+        <div class="footer-left">
+            <div class="footer-credits">Demonlist Central &bull; Made by <span>myszon12</span></div>
+            <div class="footer-sub">Real-time GD Demonlist platform powered by Supabase Cloud Engine</div>
+        </div>
+        <div class="footer-links">
+            <a href="https://discord.gg/3zvSrFnVz" target="_blank" class="discord-btn">
+                <svg width="18" height="18" viewBox="0 0 127.14 96.36" fill="currentColor">
+                    <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a74.57,74.57,0,0,0,64.3,0c.87.68,1.76,1.36,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1,105.25,105.25,0,0,0,32.19-16.14c2.64-27.38-4.51-51.11-18.91-72.15ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,45.92,53.87,53,48.8,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,45.92,96.1,53,91,65.69,84.69,65.69Z"/>
+                </svg>
+                Join Discord
+            </a>
+        </div>
+    </div>
+</footer>
+
 <script>
 // =========================================================================
-// GLOBAL CLOUD STORE (JSONBIN PUBLIC API BACKEND)
+// SUPABASE CLIENT & CONFIGURATION
 // =========================================================================
-const GLOBAL_BIN_ID = "65f0a0e2dc74654018b31a89"; 
-const API_URL = `https://api.jsonbin.io/v3/b/${GLOBAL_BIN_ID}`;
+const SUPABASE_URL = "https://iigxupbrqpqftynrhlwk.supabase.co";
+const SUPABASE_KEY = "sb_publishable_NwDSUBXKXJyVPxiZwAyocw_LIHaxvrR";
 
-let currentUser = JSON.parse(localStorage.getItem("gd_current_user_v6")) || null;
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let currentUser = JSON.parse(localStorage.getItem("gd_current_user_v7")) || null;
 
 let globalData = {
     users: {
@@ -669,12 +771,11 @@ let globalData = {
             title: "Main Demonlist",
             author: "myszon",
             editors: [],
-            discord: "https://discord.gg",
-            views: 1420,
+            discord: "https://discord.gg/3zvSrFnVz",
+            views: 1,
             levels: [
                 { pos: 1, name: "Acheron", author: "Ryamu & More", verifier: "Zoink", pts: 100, yt: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", victors: [{ name: "Zoink", video: "https://youtube.com" }, { name: "Trick", video: "" }] },
-                { pos: 2, name: "Avernus", author: "Pingu & More", verifier: "Zoink", pts: 95, yt: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", victors: [{ name: "Diamond", video: "" }] },
-                { pos: 3, name: "Silent Clubstep", author: "Nailok", verifier: "Paqtez", pts: 90, yt: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", victors: [] }
+                { pos: 2, name: "Avernus", author: "Pingu & More", verifier: "Zoink", pts: 95, yt: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", victors: [{ name: "Diamond", video: "" }] }
             ]
         }
     }
@@ -689,20 +790,23 @@ function setSyncing(isSyncing) {
 async function fetchGlobalData() {
     setSyncing(true);
     try {
-        const res = await fetch(API_URL + "/latest", {
-            headers: { "X-Bin-Meta": "false" }
-        });
-        if (res.ok) {
-            const data = await res.json();
-            if (data && data.users && data.lists) {
-                globalData = data;
-                if (!globalData.users["myszon"]) {
-                    globalData.users["myszon"] = { password: "szyszkaqw", invites: [] };
-                }
+        const { data, error } = await supabase
+            .from('demonlist_data')
+            .select('content')
+            .eq('id', 'main')
+            .single();
+
+        if (data && data.content) {
+            globalData = data.content;
+            if (!globalData.users) globalData.users = {};
+            if (!globalData.users["myszon"]) {
+                globalData.users["myszon"] = { password: "szyszkaqw", invites: [] };
             }
+        } else {
+            await saveGlobalData();
         }
     } catch (e) {
-        console.warn("Using default state due to network fetch delay", e);
+        console.warn("Supabase load fallback:", e);
     } finally {
         setSyncing(false);
     }
@@ -711,19 +815,17 @@ async function fetchGlobalData() {
 async function saveGlobalData() {
     setSyncing(true);
     if (currentUser) {
-        localStorage.setItem("gd_current_user_v6", JSON.stringify(currentUser));
+        localStorage.setItem("gd_current_user_v7", JSON.stringify(currentUser));
     } else {
-        localStorage.removeItem("gd_current_user_v6");
+        localStorage.removeItem("gd_current_user_v7");
     }
 
     try {
-        await fetch(API_URL, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(globalData)
-        });
+        await supabase
+            .from('demonlist_data')
+            .upsert({ id: 'main', content: globalData });
     } catch (e) {
-        console.error("Cloud sync failed", e);
+        console.error("Supabase sync failed:", e);
     } finally {
         setSyncing(false);
     }
@@ -735,20 +837,50 @@ function showToast(msg) {
     toast.className = "toast";
     toast.innerText = msg;
     container.appendChild(toast);
-    setTimeout(() => toast.remove(), 3000);
+    setTimeout(() => toast.remove(), 3200);
 }
 
 // =========================================================================
-// AUTHENTICATION & CAPTCHA
+// ADVANCED ANTI-BOT & SECURITY SYSTEM
 // =========================================================================
-let captchaTargetVal = 0;
+let currentCaptchaTarget = "";
 
 function generateCaptcha() {
-    const num1 = Math.floor(Math.random() * 9) + 1;
-    const num2 = Math.floor(Math.random() * 9) + 1;
-    captchaTargetVal = num1 + num2;
-    document.getElementById("captcha-question").innerText = `${num1} + ${num2} = ?`;
+    const captchaTypes = [
+        () => {
+            const a = Math.floor(Math.random() * 8) + 2;
+            const b = Math.floor(Math.random() * 8) + 2;
+            currentCaptchaTarget = (a + b).toString();
+            return `What is ${a} + ${b}?`;
+        },
+        () => {
+            const words = ["demon", "geometry", "acheron", "level", "vector"];
+            const chosen = words[Math.floor(Math.random() * words.length)];
+            currentCaptchaTarget = chosen;
+            return `Type the word "${chosen}" below:`;
+        },
+        () => {
+            const a = Math.floor(Math.random() * 10) + 5;
+            const b = Math.floor(Math.random() * 4) + 1;
+            currentCaptchaTarget = (a - b).toString();
+            return `What is ${a} minus ${b}?`;
+        }
+    ];
+
+    const fn = captchaTypes[Math.floor(Math.random() * captchaTypes.length)];
+    document.getElementById("captcha-question").innerText = fn();
     document.getElementById("captcha-answer").value = "";
+}
+
+function checkAccountCooldown() {
+    const lastCreated = localStorage.getItem("gd_last_account_created");
+    if (lastCreated) {
+        const diff = (Date.now() - Number(lastCreated)) / 1000;
+        if (diff < 60) {
+            return Math.ceil(60 - diff);
+        }
+    }
+    return 0;
 }
 
 function switchAuthTab(type) {
@@ -786,17 +918,45 @@ document.getElementById("form-login").addEventListener("submit", async (e) => {
 
 document.getElementById("form-register").addEventListener("submit", async (e) => {
     e.preventDefault();
-    await fetchGlobalData();
 
-    const user = document.getElementById("reg-username").value.trim();
-    const pass = document.getElementById("reg-password").value;
-    const captchaAns = Number(document.getElementById("captcha-answer").value);
+    // 1. HONEYPOT CHECK (BOT TRAP)
+    const honeypot = document.getElementById("website_url_hp").value;
+    if (honeypot) {
+        showToast("❌ Access Denied");
+        return;
+    }
 
-    if (captchaAns !== captchaTargetVal) {
-        showToast("❌ Incorrect captcha solution");
+    // 2. COOLDOWN RATE LIMITING
+    const cooldownLeft = checkAccountCooldown();
+    if (cooldownLeft > 0) {
+        showToast(`⏳ Please wait ${cooldownLeft}s before creating another account.`);
+        return;
+    }
+
+    // 3. CAPTCHA CHECK
+    const captchaAns = document.getElementById("captcha-answer").value.trim().toLowerCase();
+    if (captchaAns !== currentCaptchaTarget.toLowerCase()) {
+        showToast("❌ Incorrect captcha answer");
         generateCaptcha();
         return;
     }
+
+    const user = document.getElementById("reg-username").value.trim();
+    const pass = document.getElementById("reg-password").value;
+
+    // 4. USERNAME & PASSWORD VALIDATION
+    const userRegex = /^[a-zA-Z0-9_]{3,16}$/;
+    if (!userRegex.test(user)) {
+        showToast("❌ Username must be 3-16 alphanumeric characters or underscores.");
+        return;
+    }
+
+    if (pass.length < 6) {
+        showToast("❌ Password must be at least 6 characters.");
+        return;
+    }
+
+    await fetchGlobalData();
 
     if (globalData.users[user]) {
         showToast("❌ Username is already registered");
@@ -805,6 +965,9 @@ document.getElementById("form-register").addEventListener("submit", async (e) =>
 
     globalData.users[user] = { password: pass, invites: [] };
     currentUser = { username: user };
+
+    localStorage.setItem("gd_last_account_created", Date.now().toString());
+
     await saveGlobalData();
     updateAuthUI();
     closeModals();
@@ -952,7 +1115,7 @@ async function respondInvite(inviteId, accept) {
 }
 
 // =========================================================================
-// MAIN MENU & LIST NAVIGATION
+// NAVIGATION & LIST MANAGEMENT
 // =========================================================================
 let currentListId = null;
 let currentListData = null;
